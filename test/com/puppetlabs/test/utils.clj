@@ -337,3 +337,14 @@
       (is (= 6 (multitime! timers (+ 1 2 3))))
       (doseq [t timers]
         (is (= 1 (.count t)))))))
+
+#_(deftest test-post-order-edit
+  (let [nodes (atom [])
+        tree [[[1 2] 3] 4]]
+    (pre-order-edit (tree-zipper tree) (constantly true) (fn [node]
+                                                           (swap! nodes conj node)
+                                                           node))
+    (println @nodes)
+    (is (= [] @nodes)))
+
+  )

@@ -17,7 +17,8 @@
             [clojure.string :as string]
             [clojure.tools.cli :as cli]
             [digest]
-            [fs.core :as fs])
+            [fs.core :as fs]
+            [clojure.zip :as zip])
   (:use [clojure.java.io :only (reader)]
         [clojure.set :only (difference union)]
         [clojure.string :only (split)]
@@ -248,7 +249,7 @@
           nil
           keys))
 
-(defn sort-nested-maps
+#_(defn sort-nested-maps
   "For a data structure, recursively sort any nested maps descending into
   lists/vectors and sets as well."
   [data]
@@ -259,6 +260,98 @@
     (or (sequential? data) (set? data))
       (map sort-nested-maps data)
     :else data))
+
+(defn find-leaf [loc]
+  (if-let [left-child (and (zip/branch? loc) (zip/down loc))]
+    (recur left-child)
+    loc))
+
+(defn post-order-next
+  [loc]
+  (cond
+
+   (= :end (loc 1))
+   loc
+
+   (nil? (zip/up loc))
+   [(zip/node loc) :end]
+
+   :else
+   (let [right-loc (zip/right loc)]
+     (if-let [leaf (and right-loc (find-leaf right-loc))]
+       leaf
+       (zip/up loc)))))
+
+(defn pre-order-edit [zipper matches? update-node-fn]
+  (loop [loc zipper]
+    (if (zip/end? loc)
+      (zip/root loc)
+      (if (matches? (zip/node loc))
+        (recur (zip/next (zip/edit loc update-node-fn)))
+       (recur (zip/next loc))))))
+
+(defprotocol TreeTraversal
+  (branch? [x])
+  (children [x])
+  (make-node [orig-node children]))
+
+(extend-protocol TreeTraversal
+
+  clojure.lang.IPersistentMap
+  (branch? [_] true)
+  (children [x] (seq x))
+  (make-node [orig-map new-map-seq]
+    (into orig-map (seq new-map-seq)))
+
+  clojure.lang.IMapEntry
+  (branch? [_] true)
+  (children [x]
+    (list (val x)))
+  (make-node [orig-entry map-entry]
+    (clojure.lang.MapEntry. (key orig-entry) (first map-entry)))
+
+  clojure.lang.IPersistentVector
+  (branch? [_] true)
+  (children [x] x)
+  (make-node [orig-vec new-children]
+    (if (vector? new-children)
+      new-children
+      (vec new-children)))
+  
+  clojure.lang.IPersistentList
+  (branch? [_] true)
+  (children [x] x)
+  (make-node [_ new-children]
+    (apply list new-children))
+
+  clojure.lang.ISeq
+  (branch? [_] true)
+  (children [x] x)
+  (make-node [_ new-children]
+    (seq new-children))
+
+  Object
+  (branch? [_] false)
+  (children [_] nil)
+  (make-node [_ child]
+    child)
+
+  nil
+  (branch? [_] false)
+  (children [_] nil)
+  (make-node [_ _]
+    nil))
+
+(defn tree-zipper [node]
+  (zip/zipper branch? children make-node node))
+
+(defn sort-nested-maps
+  "For a data structure, recursively sort any nested maps descending into
+  lists/vectors and sets as well."
+  [data]
+  (pre-order-edit (tree-zipper data)
+                  (every-pred map? (complement sorted?))
+                  #(into (sorted-map) %)))
 
 ;; ## Date and Time
 
@@ -701,3 +794,207 @@
   timer objects"
   [timers & body]
   `(multitime!* ~timers (fn [] (do ~@body))))
+
+
+(def c '{0 27,
+ 32 33,
+ 1 15,
+ 2 29,
+ 5
+ {0 27,
+  32 33,
+  1 15,
+  2 29,
+  5 3,
+  6 37,
+  7
+  {0 27,
+   32 33,
+   1 15,
+   2 29,
+   5 3,
+   6 37,
+   7 17,
+   8 9,
+   40 21,
+   11 14,
+   12
+   {0 27,
+    32 33,
+    1 15,
+    2 29,
+    5 3,
+    6 37,
+    7 17,
+    8 9,
+    40 21,
+    11 14,
+    12 36,
+    13 22,
+    18
+    {0 27,
+     32 33,
+     1 15,
+     2 29,
+     5 3,
+     6 37,
+     7 17,
+     8 9,
+     40 21,
+     11 14,
+     12 36,
+     13 22,
+     18 23,
+     19 39,
+     24
+     {0 27,
+      32 33,
+      1 15,
+      2 29,
+      5 3,
+      6 37,
+      7 17,
+      8 9,
+      40 21,
+      11 14,
+      12 36,
+      13 22,
+      18 23,
+      19 39,
+      24 4,
+      25 34,
+      26
+      {0 27,
+       32 33,
+       1 15,
+       2 29,
+       5 3,
+       6 37,
+       7 17,
+       8 9,
+       40 21,
+       11 14,
+       12 36,
+       13 22,
+       18 23,
+       19 39,
+       24 4,
+       25 34,
+       26 35,
+       28
+       {0 27,
+        32 33,
+        1 15,
+        2 29,
+        5 3,
+        6 37,
+        7 17,
+        
+8 9,
+        40 21,
+        11 14,
+        12 36,
+        13 22,
+        18 23,
+        19 39,
+        24 4,
+        25 34,
+        26 35,
+        28 10,
+        30
+        {0 27,
+         32 33,
+         1 15,
+         2 29,
+         5 3,
+         6 37,
+         7 17,
+         8 9,
+         40 21,
+         11 14,
+         12 36,
+         13 22,
+         18 23,
+         19 39,
+         24 4,
+         25 34,
+         26 35,
+         28 10,
+         30 38,
+         31
+         {0 27,
+          32 33,
+          1 15,
+          2 29,
+          5 3,
+          6 37,
+          7 17,
+          8 9,
+          40 21,
+          11 14,
+          12 36,
+          13 22,
+          18 23,
+          19 39,
+          24 4,
+          25 34,
+          26 35,
+          28 10,
+          30 38,
+          31 16}},
+        31 16},
+       30 38,
+       31 16},
+      28 10,
+      30 38,
+      31 16},
+     25 34,
+     26 35,
+     28 10,
+     30 38,
+     31 16},
+    19 39,
+    24 4,
+    25 34,
+    26 35,
+    28 10,
+    30 38,
+    31 16}
+,
+   13 22,
+   18 23,
+   19 39,
+   24 4,
+   25 34,
+   26 35,
+   28 10,
+   30 38,
+   31 16},
+  8 9,
+  40 21,
+  11 14,
+  12 36,
+  13 22,
+  18 23,
+  19 39,
+  24 4,
+  25 34,
+  26 35,
+  28 10,
+  30 38,
+  31 16},
+ 6 37,
+ 7 17,
+ 8 9,
+ 40 21,
+ 11 14,
+ 12 36,
+ 13 22,
+ 18 23,
+ 19 39,
+ 24 4,
+ 25 34,
+ 26 35,
+ 28 10,
+ 30 38,
+ 31 16})
