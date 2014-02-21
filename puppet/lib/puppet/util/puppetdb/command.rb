@@ -19,11 +19,15 @@ class Puppet::Util::Puppetdb::Command
   # @param payload Object the payload of the command.  This object should be a
   #   primitive (numeric type, string, array, or hash) that is natively supported
   #   by JSON serialization / deserialization libraries.
-  def initialize(command, version, certname, payload)
+  def initialize(command, version, certname, payload, msg_idx = -1)
     @command = command
     @version = version
     @certname = certname
     @payload = self.class.format_payload(command, version, payload)
+    @msg_idx = msg_idx
+    
+    Puppet.info( "#{msg_idx} - Message payload length - #{@payload.length}")
+
   end
 
   attr_reader :command, :version, :certname, :payload
@@ -79,7 +83,8 @@ class Puppet::Util::Puppetdb::Command
       :payload => payload,
     }.to_pson
 
-    Puppet::Util::Puppetdb::CharEncoding.utf8_string(message)
+    Puppet::Util::Puppetdb.time_and_log("#{@msg_idx} - Converting to a UTF8 String: %s ms",
+                                        lambda { Puppet::Util::Puppetdb::CharEncoding.utf8_string(message) })
   end
 
   # @!group Private instance methods
