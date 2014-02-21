@@ -58,10 +58,18 @@ module Puppet::Util::Puppetdb
     end
   end
 
+  def self.time_and_log(msg, thunk)
+    before = Time.now
+    result = thunk.call
+    after = Time.now
+    Puppet.info( sprintf(msg, ((after - before) * 1000).round) )
+    result
+  end
+
   # @!group Public instance methods
 
-  def submit_command(certname, payload, command_name, version)
-    command = Puppet::Util::Puppetdb::Command.new(command_name, version, certname, payload)
+  def submit_command(certname, payload, command_name, version, msg_idx = -1)
+    command = Puppet::Util::Puppetdb::Command.new(command_name, version, certname, payload, msg_idx)
     command.submit
   end
 

@@ -19,28 +19,39 @@ class Puppet::Util::Puppetdb::Command
   # @param payload Object the payload of the command.  This object should be a
   #   primitive (numeric type, string, array, or hash) that is natively supported
   #   by JSON serialization / deserialization libraries.
-  def initialize(command, version, certname, payload)
+  def initialize(command, version, certname, payload, msg_idx = -1)
     @command = command
     @version = version
     @certname = certname
-    @payload = self.class.format_payload(command, version, payload)
+
+    @msg_idx = msg_idx
+    @payload = Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Creating payload: %s ms",
+                                        lambda { self.class.format_payload(command, version, payload, msg_idx) })
+    
+    Puppet.info( "#{msg_idx} - Message payload length - #{@payload.length}")
+
   end
 
   attr_reader :command, :version, :certname, :payload
 
   def submit
     checksum = Digest::SHA1.hexdigest(payload)
-    escaped_payload = CGI.escape(payload)
+
+    escaped_payload = Puppet::Util::Puppetdb.time_and_log("#{@msg_idx} - Escaping payload: %s ms",
+                                        lambda { CGI.escape(payload) } )
+    
     for_whom = " for #{certname}" if certname
 
     begin
       http = Puppet::Network::HttpPool.http_instance(config.server, config.port)
-      response = http.post(Url, "checksum=#{checksum}&payload=#{escaped_payload}", headers)
+      response = Puppet::Util::Puppetdb.time_and_log("#{@msg_idx} - POSTing payload: %s ms",
+                                                     lambda { http.post(Url, "checksum=#{checksum}&payload=#{escaped_payload}", headers) })
 
       Puppet::Util::Puppetdb.log_x_deprecation_header(response)
 
       if response.is_a? Net::HTTPSuccess
-        result = PSON.parse(response.body)
+        result = Puppet::Util::Puppetdb.time_and_log("#{@msg_idx} - Parsing response: %s ms",
+                                                     lambda { PSON.parse(response.body) })
         Puppet.info "'#{command}' command#{for_whom} submitted to PuppetDB with UUID #{result['uuid']}"
         result
       else
@@ -72,14 +83,15 @@ class Puppet::Util::Puppetdb::Command
   # @!group Private class methods
 
   # @api private
-  def self.format_payload(command, version, payload)
+  def self.format_payload(command, version, payload, msg_idx = 1)
     message = {
       :command => command,
       :version => version,
       :payload => payload,
     }.to_pson
 
-    Puppet::Util::Puppetdb::CharEncoding.utf8_string(message)
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Converting to a UTF8 String: %s ms",
+                                        lambda { Puppet::Util::Puppetdb::CharEncoding.utf8_string(message) })
   end
 
   # @!group Private instance methods

@@ -83,14 +83,7 @@ Puppet::Reports.register_report(:puppetdb) do
     # term fix is obviously to make the correct data available in puppet.
     # I've filed a ticket against puppet here:
     #  http://projects.puppetlabs.com/issues/16480
-    #
-    # NOTE: failed reports have an empty metrics hash. Just send 0 for run time,
-    #  since we don't have access to any better information.
-    if metrics["time"] and metrics["time"]["total"]
-      metrics["time"]["total"]
-    else
-      raise Puppet::Error, "Report from #{host} contained no metrics, which is often caused by a failed catalog compilation. Unable to process."
-    end
+    metrics["time"]["total"]
   end
 
   # Convert an instance of `Puppet::Transaction::Event` to a hash
