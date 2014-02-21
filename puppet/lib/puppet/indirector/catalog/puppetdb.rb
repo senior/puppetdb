@@ -7,9 +7,13 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
   include Puppet::Util::Puppetdb::CommandNames
 
   def save(request)
-    catalog = munge_catalog(request.instance, extract_extra_request_data(request))
+    msg_idx = rand(10000)
 
-    submit_command(request.key, catalog, CommandReplaceCatalog, 3)
+    catalog = Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Reformatting catalog for PuppetDB: %s ms",
+                                                  lambda{ munge_catalog(request.instance, extract_extra_request_data(request), msg_idx) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { submit_command(request.key, catalog, CommandReplaceCatalog, 3, msg_idx) })
   end
 
   def find(request)
@@ -23,19 +27,31 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
     }
   end
 
-  def munge_catalog(catalog, extra_request_data = {})
+  def munge_catalog(catalog, extra_request_data = {}, msg_idx = -1)
     hash = catalog.to_pson_data_hash
 
     data = hash['data']
+    
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Addming missing parameters: %s ms",
+                                        lambda { add_parameters_if_missing(data) })
 
-    add_parameters_if_missing(data)
-    add_namevar_aliases(data, catalog)
-    stringify_titles(data)
-    sort_unordered_metaparams(data)
-    munge_edges(data)
-    synthesize_edges(data, catalog)
-    filter_keys(hash)
-    add_transaction_uuid(data, extra_request_data[:transaction_uuid])
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Adding namevar aliases: %s ms",
+                                        lambda { add_namevar_aliases(data, catalog) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Stringifying titles: %s ms",
+                                        lambda { stringify_titles(data) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Sorting metaparams: %s ms",
+                                        lambda { sort_unordered_metaparams(data, msg_idx) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Munging edges: %s ms",
+                                        lambda { munge_edges(data, msg_idx) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Synthesizing edges: %s ms",
+                                        lambda { synthesize_edges(data, catalog) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Filtering keys: %s ms",
+                                        lambda { filter_keys(hash) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Adding transaction UUID: %s ms",
+                                        lambda { add_transaction_uuid(data, extra_request_data[:transaction_uuid]) })
 
     hash
   end
@@ -112,9 +128,14 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
     hash
   end
 
-  def sort_unordered_metaparams(hash)
+  def sort_unordered_metaparams(hash, msg_idx = -1)
+
+    num_params = 0
+    total_resources = hash['resources'].length
+    
     hash['resources'].each do |resource|
       params = resource['parameters']
+      num_params += params.length
       UnorderedMetaparams.each do |metaparam|
         if params[metaparam].kind_of? Array then
           values = params[metaparam].sort
@@ -122,10 +143,17 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
         end
       end
     end
+
+    avg_params = num_params / total_resources
+    Puppet.info("#{msg_idx} - Total number of resources: #{total_resources} - Average number of params: #{avg_params}")
     hash
   end
 
-  def munge_edges(hash)
+  def munge_edges(hash, msg_idx = -1)
+
+    
+    Puppet.info "#{msg_idx} - Number of edges: #{hash['edges'].length}"
+
     hash['edges'].each do |edge|
       %w[source target].each do |vertex|
         edge[vertex] = resource_ref_to_hash(edge[vertex]) if edge[vertex].is_a?(String)
