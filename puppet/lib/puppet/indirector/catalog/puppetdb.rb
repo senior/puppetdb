@@ -31,15 +31,27 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
     hash = catalog.to_pson_data_hash
 
     data = hash['data']
+    
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Addming missing parameters: %s ms",
+                                        lambda { add_parameters_if_missing(data) })
 
-    add_parameters_if_missing(data)
-    add_namevar_aliases(data, catalog)
-    stringify_titles(data)
-    sort_unordered_metaparams(data, msg_idx)
-    munge_edges(data, msg_idx)
-    synthesize_edges(data, catalog)
-    filter_keys(hash)
-    add_transaction_uuid(data, extra_request_data[:transaction_uuid])
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Adding namevar aliases: %s ms",
+                                        lambda { add_namevar_aliases(data, catalog) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Stringifying titles: %s ms",
+                                        lambda { stringify_titles(data) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { sort_unordered_metaparams(data, msg_idx) })
+
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { munge_edges(data, msg_idx) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { synthesize_edges(data, catalog) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { filter_keys(hash) })
+    Puppet::Util::Puppetdb.time_and_log("#{msg_idx} - Submitting catalog to PuppetDB: %s ms",
+                                        lambda { add_transaction_uuid(data, extra_request_data[:transaction_uuid]) })
 
     hash
   end
@@ -132,7 +144,7 @@ class Puppet::Resource::Catalog::Puppetdb < Puppet::Indirector::REST
       end
     end
 
-    avg_params = (num_params / total_resources).round
+    avg_params = num_params / total_resources
     Puppet.info("#{msg_idx} - Total number of resources: #{total_resources} - Average number of params: #{avg_params}")
     hash
   end
