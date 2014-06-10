@@ -45,12 +45,6 @@
                                 "ON rpc.resource = subquery1.resource")
                 subselect)
           paged-select (jdbc/paged-sql sql paging-options)
-          ;; This is a little more complex than I'd prefer; the general query paging
-          ;;  functions are built to work for SQL queries that return 1 row per
-          ;;  PuppetDB result.  Since that's not the case for resources right now,
-          ;;  we have to actually manage two separate SQL queries.  The introduction
-          ;;  of the new `resource-params-cache` table in the next release should
-          ;;  alleviate this problem and allow us to simplify this code.
           result               {:results-query (apply vector paged-select params)}]
       (if (:count? paging-options)
         (assoc result :count-query (apply vector (jdbc/count-sql subselect) params))

@@ -70,7 +70,10 @@
     (comp (f/facts-app version) (partial http-q/restrict-query-to-node node))
 
     [node "resources" &]
-    (comp (r/resources-app version) (partial http-q/restrict-query-to-node node))))
+    (comp (r/resources-app version) (partial http-q/restrict-query-to-node node))
+
+    ;;TODO: events and reports would be nice here
+    ))
 
 (defn node-app
   [version]
@@ -80,7 +83,7 @@
           verify-accepts-json
           (validate-query-params {:optional ["query"]}))
     (-> (routes version)
-        (verify-accepts-json)
+        verify-accepts-json
         (validate-query-params
          {:optional (cons "query" paging/query-params)})
-        (wrap-with-paging-options))))
+        wrap-with-paging-options)))
