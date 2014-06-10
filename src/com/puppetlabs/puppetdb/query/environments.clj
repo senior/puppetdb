@@ -1,9 +1,7 @@
 (ns com.puppetlabs.puppetdb.query.environments
   (:require [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
-            [com.puppetlabs.jdbc :refer [valid-jdbc-query?]]
-            [com.puppetlabs.puppetdb.query.paging :refer [validate-order-by!]]
-            [puppetlabs.kitchensink.core :as ks]
+            [com.puppetlabs.puppetdb.query.paging :as paging]
             [com.puppetlabs.puppetdb.query-eng :as qe]))
 
 (def environments-columns
@@ -22,7 +20,7 @@
               (not (:count? paging-options))
               (jdbc/valid-jdbc-query? (:count-query %)))]}
      ;; TODO: I thought the qe engine did this for us? Need to double check.
-     (validate-order-by! environments-columns paging-options)
+     (paging/validate-order-by! environments-columns paging-options)
      (qe/compile-user-query->sql qe/environments-query query paging-options)))
 
 (defn query-environments
@@ -40,6 +38,7 @@
       (assoc result :count (jdbc/get-result-count count-query))
       result)))
 
+;; TODO: nodes doesn't have anything like this, even though it has the ability to return a single item. Check facts as well
 (defn status
   "Given an environment's name, return the results for the single environment."
   [version environment]

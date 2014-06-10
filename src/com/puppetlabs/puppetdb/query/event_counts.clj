@@ -3,7 +3,7 @@
             [clojure.string :as string]
             [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
-            [com.puppetlabs.puppetdb.query.paging :refer [validate-order-by!]]
+            [com.puppetlabs.puppetdb.query.paging :as paging]
             [puppetlabs.kitchensink.core :refer [contains-some]]
             [clojure.core.match :refer [match]]
             [com.puppetlabs.puppetdb.query-eng :as qe]))
@@ -140,7 +140,7 @@
               (jdbc/valid-jdbc-query? (:count-query %)))]}
      (let [count-by                        (or count-by "resource")
            group-by                        (get-group-by summarize-by)
-           _                               (validate-order-by!
+           _                               (paging/validate-order-by!
                                             (map keyword (event-counts-columns group-by))
                                             paging-options)
            {counts-filter-where  :where

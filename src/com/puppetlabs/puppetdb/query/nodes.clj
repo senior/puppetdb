@@ -7,8 +7,9 @@
   (:require [puppetlabs.kitchensink.core :as kitchensink]
             [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
-            [com.puppetlabs.puppetdb.query.paging :refer [validate-order-by!]]))
+            [com.puppetlabs.puppetdb.query.paging :as paging]))
 
+;; TODO: should this be pushed into query.clj? I don't think the new query eng needs this
 (defn node-columns
   "Return node columns based on version"
   [version]
@@ -30,7 +31,7 @@
              (or
               (not (:count? paging-options))
               (jdbc/valid-jdbc-query? (:count-query %)))]}
-     (validate-order-by! (node-columns version) paging-options)
+     (paging/validate-order-by! (node-columns version) paging-options)
      (let [operators (query/node-operators version)
            [subselect & params] (query/node-query->sql version operators query)
            sql (case version
