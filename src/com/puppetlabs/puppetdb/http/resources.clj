@@ -78,4 +78,4 @@
       (-> (query-app version)
         (validate-query-params
           {:optional (cons "query" paging/query-params)})
-        (wrap-with-paging-options)))))
+        wrap-with-paging-options))))

@@ -21,6 +21,7 @@
              (or
               (not (:count? paging-options))
               (jdbc/valid-jdbc-query? (:count-query %)))]}
+     ;; TODO: I thought the qe engine did this for us? Need to double check.
      (validate-order-by! environments-columns paging-options)
      (qe/compile-user-query->sql qe/environments-query query paging-options)))
 

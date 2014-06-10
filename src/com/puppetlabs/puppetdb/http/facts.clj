@@ -23,20 +23,23 @@
       (case version
         :v1 (throw (IllegalArgumentException. "api v1 is retired"))
         :v2 nil
+        ;; TODO: I thought this validation was done downstream from here??
         (paging/validate-order-by! [:certname :name :value :environment] paging-options))
       (let [parsed-query (json/parse-strict-string query true)
             {[sql & params] :results-query
-             count-query :count-query}  (if (= :v4 version)
-                                          (qe/compile-user-query->sql qe/facts-query parsed-query paging-options)
-                                          (f/query->sql version parsed-query paging-options))
+             count-query :count-query}  (case version
+                                          (:v2 :v3)
+                                          (f/query->sql version parsed-query paging-options)
+
+                                          (qe/compile-user-query->sql
+                                           qe/facts-query parsed-query paging-options))
             resp (pl-http/stream-json-response
                   (fn [f]
                     (with-transacted-connection db
                       (query/streamed-query-result version sql params f))))]
 
         (if count-query
-          (add-headers resp {:count (with-transacted-connection db
-                                      (get-result-count count-query))})
+          (add-headers resp {:count (get-result-count count-query)})
           resp)))
 
     (catch com.fasterxml.jackson.core.JsonParseException e
