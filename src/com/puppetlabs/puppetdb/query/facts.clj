@@ -55,3 +55,5 @@
     (conj {:results-query (apply vector (sql/paged-sql sql paging-options) params)}
           (when (:count? paging-options)
             [:count-query (apply vector (sql/count-sql sql) params)]))))
+
+;; TODO: why is there no query-facts like the rest of the end-points?? What is testing using?
