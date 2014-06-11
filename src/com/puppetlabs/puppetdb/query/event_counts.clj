@@ -4,8 +4,7 @@
             [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
             [com.puppetlabs.puppetdb.query.paging :as paging]
-            [puppetlabs.kitchensink.core :refer [contains-some]]
-            [clojure.core.match :refer [match]]
+            [puppetlabs.kitchensink.core :as kitchensink]
             [com.puppetlabs.puppetdb.query-eng :as qe]))
 
 (defn- get-group-by
@@ -94,7 +93,7 @@
            (every? #(contains? result %) [:resource_type :resource_title])
            (contains? result :containing_class))]
    :post [(map? %)
-          (not (contains-some % [:certname :resource_type :resource_title :containing_class]))
+          (not (kitchensink/contains-some % [:certname :resource_type :resource_title :containing_class]))
           (map? (:subject %))
           (= summarize-by (:subject-type %))]}
   (condp = summarize-by

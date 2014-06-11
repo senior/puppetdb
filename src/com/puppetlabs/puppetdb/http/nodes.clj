@@ -70,10 +70,7 @@
     (comp (f/facts-app version) (partial http-q/restrict-query-to-node node))
 
     [node "resources" &]
-    (comp (r/resources-app version) (partial http-q/restrict-query-to-node node))
-
-    ;;TODO: events and reports would be nice here
-    ))
+    (comp (r/resources-app version) (partial http-q/restrict-query-to-node node))))
 
 (defn node-app
   [version]
