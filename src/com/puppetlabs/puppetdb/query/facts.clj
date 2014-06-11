@@ -62,4 +62,4 @@
     (qe/compile-user-query->sql
      qe/facts-query query paging-options)))
 
-;; TODO: why is there no query-facts like the rest of the end-points?? What is testing using?
+;; TODO: why is there no query-facts like the rest of the end-points?? What is testing using? Turns out there is no testing.

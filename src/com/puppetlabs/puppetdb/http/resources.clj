@@ -41,10 +41,10 @@
     [&]
     {:get (comp (fn [{:keys [params globals paging-options]}]
                   (produce-body
-                    version
-                    (params "query")
-                    paging-options
-                    (:scf-read-db globals)))
+                   version
+                   (params "query")
+                   paging-options
+                   (:scf-read-db globals)))
                 http-q/restrict-query-to-active-nodes)}))
 
 (defn build-resources-app
