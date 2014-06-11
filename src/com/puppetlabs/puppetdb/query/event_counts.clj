@@ -155,11 +155,10 @@
            event-count-sql                 (get-event-count-sql count-by-sql group-by)
            sql                             (get-filtered-sql event-count-sql counts-filter-where)
            params                          (concat event-params counts-filter-params)
-           paged-select                    (jdbc/paged-sql sql paging-options)
-           results                         {:results-query (apply vector paged-select params)}]
-       (if (:count? paging-options)
-         (assoc results :count-query (apply vector (jdbc/count-sql sql) params))
-         results))))
+           paged-select                    (jdbc/paged-sql sql paging-options)]
+       (conj {:results-query (apply vector paged-select params)}
+             (when (:count? paging-options)
+               [:count-query (apply vector (jdbc/count-sql sql) params)])))))
 
 (defn query-event-counts
   "Given a SQL query and its parameters, return a vector of matching results."
