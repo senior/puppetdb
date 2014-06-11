@@ -8,7 +8,8 @@
   (:require [com.puppetlabs.cheshire :as json]
             [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
-            [com.puppetlabs.puppetdb.query.paging :as paging]))
+            [com.puppetlabs.puppetdb.query.paging :as paging]
+            [com.puppetlabs.puppetdb.query-eng :as qe]))
 
 (defn query->sql
   "Compile a resource `query` and an optional `paging-options` map, using the
@@ -29,22 +30,25 @@
            (or
              (not (:count? paging-options))
              (jdbc/valid-jdbc-query? (:count-query %)))]}
-    (paging/validate-order-by! (map keyword (keys query/resource-columns)) paging-options)
-    (let [operators (query/resource-operators version)
-          [subselect & params] (query/resource-query->sql operators query)
-          sql (format (str "SELECT subquery1.certname, subquery1.resource, "
-                                  "subquery1.type, subquery1.title, subquery1.tags, "
-                                  "subquery1.exported, subquery1.file, "
-                                  "subquery1.line, rpc.parameters, subquery1.environment "
+   (paging/validate-order-by! (map keyword (keys query/resource-columns)) paging-options)
+   (case version
+     (:v2 :v3)
+     (let [operators (query/resource-operators version)
+           [subselect & params] (query/resource-query->sql operators query)
+           sql (format (str "SELECT subquery1.certname, subquery1.resource, "
+                            "subquery1.type, subquery1.title, subquery1.tags, "
+                            "subquery1.exported, subquery1.file, "
+                            "subquery1.line, rpc.parameters, subquery1.environment "
                             "FROM (%s) subquery1 "
                             "LEFT OUTER JOIN resource_params_cache rpc "
-                                "ON rpc.resource = subquery1.resource")
-                subselect)
-          paged-select (jdbc/paged-sql sql paging-options)
-          result               {:results-query (apply vector paged-select params)}]
-      (if (:count? paging-options)
-        (assoc result :count-query (apply vector (jdbc/count-sql subselect) params))
-        result))))
+                            "ON rpc.resource = subquery1.resource")
+                       subselect)]
+       (conj {:results-query (apply vector (jdbc/paged-sql sql paging-options) params)}
+             (when (:count? paging-options)
+               [:count-query (apply vector (jdbc/count-sql subselect) params)])))
+
+     (qe/compile-user-query->sql
+      qe/resources-query query paging-options))))
 
 (defn deserialize-params
   [resources]

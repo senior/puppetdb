@@ -22,13 +22,6 @@
   [version query]
   (:result (s/query-resources version query)))
 
-(defn query->sql
-  "Converts the given user query `input` to SQL"
-  [version input]
-  (case version
-    (:v2 :v3) (s/query->sql version input)
-    (qe/compile-user-query->sql qe/resources-query input)))
-
 (deftest test-query-resources
   (sql/insert-records
    :resource_params_cache
@@ -197,7 +190,7 @@
     ;; ...and, finally, ready for testing.
 
     (doseq [version [:v3 :v4]]
-      (testing "queries against SQL data"
+      (testing (str "version " version " queries against SQL data")
         (doseq [[input expect]
                 (partition
                  2 [ ;; no match
@@ -261,8 +254,9 @@
                      ["=" "tag" "vivid"]]
                     [foo4]
                     ])]
-          (is (= (set (query-resources (query->sql version input))) (set expect))
-              (str "  " input " =>\n  " expect)))))
+         (is (= (set (query-resources version (s/query->sql version input)))
+                 (set (query/remove-all-environments version expect)))
+             (str "  " input " =>\n  " expect)))))
 
     (testing "v2 vs v3"
       (testing "file/line in v2"
@@ -279,48 +273,52 @@
           (is (= (set (query-resources :v2 (s/query->sql :v2 input)))
                  (set (map #(clojure.set/rename-keys % {:file :sourcefile :line :sourceline})
                            (query/remove-all-environments :v2 expect))))
-            (str "  " input " =>\n  " expect)))))))
+              (str "  " input " =>\n  " expect)))))))
 
 (deftest query-resources-not-operator
-  (doseq [version [:v2 :v3 :v4]]
+  ;; These are tests that belong in query_eng for :v4
+  (doseq [version [:v2 :v3]]
     (testing "'not' term without arguments in later version"
       (doseq [op ["not" "NOT" "NoT"]]
         (is (thrown-with-msg? IllegalArgumentException #"'not' takes exactly one argument, but 0 were supplied"
               (query-resources version (s/query->sql version [op]))))))))
 
 (deftest query-resources-with-extra-FAIL
-  (doseq [version [:v2 :v3 :v4]]
-    (testing "combine terms without arguments"
-      (doseq [op ["and" "AND" "or" "OR" "AnD" "Or"]]
-        (is (thrown-with-msg? IllegalArgumentException #"requires at least one term"
-              (query-resources version (s/query->sql version [op]))))
-        (is (thrown-with-msg? IllegalArgumentException (re-pattern (str "(?i)" op))
-              (query-resources version (s/query->sql version [op]))))))
+  ;; These are tests that belong in query_eng for :v4
+  (doseq [version [:v2 :v3]]
+    (testing (str "version " version)
+      (testing "combine terms without arguments"
+        (doseq [op ["and" "AND" "or" "OR" "AnD" "Or"]]
+          (is (thrown-with-msg? IllegalArgumentException #"requires at least one term"
+                                (query-resources version (s/query->sql version [op]))))
+          (is (thrown-with-msg? IllegalArgumentException (re-pattern (str "(?i)" op))
+                                (query-resources version (s/query->sql version [op]))))))
 
-    (testing "bad query operators"
-      (doseq [in [["if"] ["-"] [{}] [["="]]]]
-        (is (thrown-with-msg? IllegalArgumentException #"query operator .* is unknown"
-              (query-resources version (s/query->sql version in))))))
+      (testing "bad query operators"
+        (doseq [in [["if"] ["-"] [{}] [["="]]]]
+          (is (thrown-with-msg? IllegalArgumentException #"query operator .* is unknown"
+                                (query-resources version (s/query->sql version in))))))
 
-    (testing "wrong number of arguments to ="
-      (doseq [in [["="] ["=" "one"] ["=" "three" "three" "three"]]]
-        (is (thrown-with-msg? IllegalArgumentException
-              (re-pattern (format "= requires exactly two arguments, but %d were supplied"
-                               (dec (count in))))
-              (query-resources version (s/query->sql version in))))))
-
-    (testing "invalid columns"
-      (is (thrown-with-msg? IllegalArgumentException #"is not a queryable object"
-            (query-resources (s/query->sql version ["=" "foobar" "anything"])))))
-
-    (testing "bad types in input"
-      (doseq [path (list [] {} [{}] 12 true false 0.12)]
-        (doseq [input (list ["=" path "foo"]
-                            ["=" [path] "foo"]
-                            ["=" ["bar" path] "foo"])]
+      (testing "wrong number of arguments to ="
+        (doseq [in [["="] ["=" "one"] ["=" "three" "three" "three"]]]
           (is (thrown-with-msg? IllegalArgumentException
-                #"is not a queryable object"
-                (query-resources version (s/query->sql version input)))))))))
+                                (re-pattern (format "= requires exactly two arguments"
+                                                    (dec (count in))))
+                                (query-resources version (s/query->sql version in))))))
+
+      (testing "invalid columns"
+        (is (thrown-with-msg? IllegalArgumentException #"is not a queryable object"
+                              (query-resources version (s/query->sql version ["=" "foobar" "anything"])))))
+
+      (testing "bad types in input"
+        (doseq [path (list [] {} [{}] 12 true false 0.12)]
+          (doseq [input (list ["=" path "foo"]
+                              ["=" [path] "foo"]
+                              ["=" ["bar" path] "foo"])]
+            (is (thrown-with-msg? IllegalArgumentException
+                                  #"is not a queryable object"
+                                  (query-resources version (s/query->sql version input)))
+                (str "Input was " input))))))))
 
 (deftest paging-results
   (sql/insert-records
