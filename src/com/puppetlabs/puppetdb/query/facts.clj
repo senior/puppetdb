@@ -3,8 +3,10 @@
 (ns com.puppetlabs.puppetdb.query.facts
   (:require [com.puppetlabs.jdbc :as jdbc]
             [com.puppetlabs.puppetdb.query :as query]
-            [com.puppetlabs.puppetdb.query.paging :as paging]))
+            [com.puppetlabs.puppetdb.query.paging :as paging]
+            [com.puppetlabs.puppetdb.query-eng :as qe]))
 
+;; TODO: what uses this?
 (defn flat-facts-by-node
   "Similar to `facts-for-node`, but returns facts in the form:
 
@@ -48,12 +50,16 @@
    :post [(map? %)
           (string? (first (:results-query %)))
           (every? (complement coll?) (rest (:results-query %)))]}
-  ;; TODO: where is the validate-order-by! like other end-points?
-  ;; TODO: where is the new query engine stuff??
-  (let [operators (query/fact-operators version)
-        [sql & params] (facts-sql operators query paging-options)]
-    (conj {:results-query (apply vector (jdbc/paged-sql sql paging-options) params)}
-          (when (:count? paging-options)
-            [:count-query (apply vector (jdbc/count-sql sql) params)]))))
+  (paging/validate-order-by! (map keyword (keys query/fact-columns)) paging-options)
+  (case version
+    (:v2 :v3)
+    (let [operators (query/fact-operators version)
+          [sql & params] (facts-sql operators query paging-options)]
+      (conj {:results-query (apply vector (jdbc/paged-sql sql paging-options) params)}
+            (when (:count? paging-options)
+              [:count-query (apply vector (jdbc/count-sql sql) params)])))
+
+    (qe/compile-user-query->sql
+     qe/facts-query query paging-options)))
 
 ;; TODO: why is there no query-facts like the rest of the end-points?? What is testing using?
