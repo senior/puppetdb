@@ -59,7 +59,8 @@
           (partial http-q/restrict-resource-query-to-title title))
 
     [type &]
-    (comp query-app (partial http-q/restrict-resource-query-to-type type))))
+    (comp query-app
+          (partial http-q/restrict-resource-query-to-type type))))
 
 (defn resources-app
   [version]
