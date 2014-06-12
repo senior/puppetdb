@@ -158,7 +158,7 @@
                :queryable-fields ["message" "old-value" "report-receive-time" "run-end-time" "containment-path"
                                   "certname" "run-start-time" "timestamp" "configuration-version" "new-value"
                                   "resource-title" "status" "property" "resource-type" "line" "environment"
-                                  "containing-class" "file" "report"]
+                                  "containing-class" "file" "report" "latest-report?"]
                :alias "events"
                :subquery? false
                :source-table "resource_events"
@@ -345,7 +345,7 @@
                 ["=" "name" fact-name]
                 [op "value" fact-value]]]]]
 
-            [["=" "latest-report?" value]]
+            [["=" "latest_report?" value]]
             (let [expanded-latest ["in" "report"
                                    ["extract" "latest_report_hash"
                                     ["select-latest-report"
