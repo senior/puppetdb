@@ -41,8 +41,8 @@
                          "facts_timestamp" :timestamp
                          "report_timestamp" :timestamp
                          "catalog_timestamp" :timestamp}
-               :queryable-fields ["certname" "deactivated" "facts_environment" "report_environment" "catalog_environment""facts_timestamp"
-                                  "report_timestamp" "catalog_timestamp"]
+               :queryable-fields ["certname" "deactivated" "facts-environment" "report-environment" "catalog-environment" "facts-timestamp"
+                                  "report-timestamp" "catalog-timestamp"]
                :source-table "certnames"
                :alias "nodes"
                :subquery? false
