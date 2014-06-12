@@ -327,7 +327,7 @@
             ["in" "certname"
              ["extract" "certname"
               ["select-nodes"
-               ["nil?" "deactivated" (not value)]]]]
+               ["nil?" "deactivated" value]]]]
 
             [["=" ["parameter" param-name] param-value]]
             ["in" "resource"
@@ -355,6 +355,9 @@
               (if value
                 expanded-latest
                 ["not" expanded-latest]))
+
+            [[op (field :guard #{"new_value" "old_value"}) value]]
+            [op field (db-serialize value)]
 
             [["=" field nil]]
             ["nil?" (jdbc/dashes->underscores field) true]
@@ -477,7 +480,7 @@
 
             [["nil?" column value]]
             (map->NullExpression {:column column
-                                  :null? (not value)})
+                                  :null? value})
 
             [["~" column value]]
             (let [col-type (get-in query-rec [:project column])]
