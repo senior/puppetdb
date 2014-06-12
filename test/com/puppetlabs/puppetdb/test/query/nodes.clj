@@ -32,12 +32,12 @@
           size (range 1 (inc (count test-cases)))
           terms (combinations test-cases size)
           :let [exprs      (map first terms)
-                results    (map (comp set last) terms)
-                and-expr   (cons "and" exprs)
+                results    (mapv (comp set last) terms)
+                and-expr   (vec (cons "and" exprs))
                 and-result (apply set/intersection results)
-                or-expr    (cons "or" exprs)
+                or-expr    (vec (cons "or" exprs))
                 or-result  (apply set/union results)
-                not-expr   ["not" (cons "or" exprs)]
+                not-expr   ["not" (vec (cons "or" exprs))]
                 not-result (apply set/difference names results)]]
     (testing (str "for version " version)
       (is (= (set (retrieve-node-names version and-expr))
