@@ -46,7 +46,7 @@
                    (:scf-read-db globals)))
             http-q/restrict-query-to-active-nodes)}))
 
-(defn build-facts-app
+(defn build-factset-app
   [query-app]
   (app
     []
@@ -61,7 +61,7 @@
     (comp query-app
           (partial http-q/restrict-fact-query-to-name fact))))
 
-(defn facts-app
+(defn factset-app
   [version]
   (case version
     :v1 (throw (IllegalArgumentException. "No support for v1 for facts end-point"))
