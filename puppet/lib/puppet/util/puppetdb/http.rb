@@ -5,6 +5,9 @@ require 'timeout'
 
 module Puppet::Util::Puppetdb
   class Http
+
+    SERVER_URL_FAIL_MSG = "Failing over to the next PuppetDB url in the 'server_urls' list"
+
     # Concat two url snippets, taking into account a trailing/leading slash to
     # ensure a correct url is constructed
     #
@@ -33,6 +36,7 @@ module Puppet::Util::Puppetdb
     def self.action(path_suffix, &http_callback)
 
       response = nil
+      server_url_config = Puppet::Util::Puppetdb.config.server_url_config?
 
       for url in Puppet::Util::Puppetdb.config.server_urls
         begin
@@ -45,22 +49,28 @@ module Puppet::Util::Puppetdb
           end
 
           if response.is_a? Net::HTTPServerError
-            Puppet.warning("Error connecting to #{url.host} on #{url.port} at route #{route}, error message received was '#{e.message}'. Failing over to the next PuppetDB url in the 'server_urls' list")
+            Puppet.warning("Error connecting to #{url.host} on #{url.port} at route #{route}, error message received was '#{response.message}'. #{SERVER_URL_FAIL_MSG if server_url_config}")
             response = nil
           else
             break
           end
         rescue Timeout::Error => e
-          Puppet.warning("Request to #{url.host} on #{url.port} at route #{route} timed out after #{request_timeout} seconds. Failing over to the next PuppetDB url in the 'server_urls' list")
+          Puppet.warning("Request to #{url.host} on #{url.port} at route #{route} timed out after #{request_timeout} seconds. #{SERVER_URL_FAIL_MSG if server_url_config}")
 
         rescue SystemCallError, Net::ProtocolError, IOError => e
-          Puppet.warning("Error connecting to #{url.host} on #{url.port} at route #{route}, error message received was '#{e.message}'. Failing over to the next PuppetDB url in the 'server_urls' list")
+          Puppet.warning("Error connecting to #{url.host} on #{url.port} at route #{route}, error message received was '#{e.message}'. #{SERVER_URL_FAIL_MSG if server_url_config}")
         end
       end
 
       if response.nil?
-        server_url_strings = Puppet::Util::Puppetdb.config.server_urls.map {|url| url.to_s}.join(',')
-        raise Puppet::Error, "Failed to execute '#{path_suffix}' on any of the following 'server_urls' #{server_url_strings}"
+
+        if server_url_config
+          server_url_strings = Puppet::Util::Puppetdb.config.server_urls.map {|url| url.to_s}.join(',')
+          raise Puppet::Error, "Failed to execute '#{path_suffix}' on any of the following 'server_urls' #{server_url_strings}"
+        else
+          uri = Puppet::Util::Puppetdb.config.server_urls.first
+          raise Puppet::Error, "Failed to execute '#{path_suffix}' on server: '#{uri.host}' and port: '#{uri.port}'"
+        end
       end
 
       response

@@ -59,8 +59,10 @@ class Config
     end
 
     if config_hash[:server_urls]
+      uses_server_urls = true
       config_hash[:server_urls] = convert_and_validate_urls(config_hash[:server_urls].split(",").map {|s| s.strip})
     else
+      uses_server_urls = false
       config_hash[:server_urls] = [URI("https://" + config_hash[:server].strip + ':' + config_hash[:port].to_s + normalize_url_prefix(config_hash[:url_prefix].strip))]
     end
 
@@ -71,7 +73,7 @@ class Config
     config_hash[:soft_write_failure] =
       Puppet::Util::Puppetdb.to_bool(config_hash[:soft_write_failure])
 
-    self.new(config_hash)
+    self.new(config_hash, uses_server_urls)
   rescue => detail
     puts detail.backtrace if Puppet[:trace]
     Puppet.warning "Could not configure PuppetDB terminuses: #{detail}"
@@ -80,9 +82,20 @@ class Config
 
   # @!group Public instance methods
 
-  def initialize(config_hash = {})
+  def initialize(config_hash = {}, uses_server_urls)
     @config = config_hash
     initialize_blacklisted_events()
+
+    # To provide accurate error messages to users about HTTP failures, we
+    # need to know whether they initially defined their config via the old
+    # server/port combo or the new server_urls. This boolean keeps track
+    # of how the user defined that config so that we can give them a
+    # better error message
+    @server_url_config = uses_server_urls
+  end
+
+  def server_url_config?
+    @server_url_config
   end
 
   def server_urls
