@@ -1,7 +1,8 @@
 (ns puppetlabs.puppetdb.query-lang
   (:require [instaparse.core :as insta]
             [puppetlabs.puppetdb.zip :as zip]
-            [puppetlabs.puppetdb.query-eng.engine :as eng]))
+            [puppetlabs.puppetdb.query-eng.engine :as eng]
+            [clojure.core.match :as cm]))
 
 
 ;; root :query
@@ -81,49 +82,22 @@
        node])))
 
 (defn transform-statement [ast state]
-  (when (and (coll? ast)
-             (= :statement (first ast)))
-    (let [[[_ [_ obj] [_ attr]] [_ op] [_ [literal-type literal]]] (rest ast)]
-      {:node (with-meta [op attr literal]
-               {:context obj})
-       :state (when (empty? state) obj)})))
+  (cm/match [ast]
+            [[:statement
+              [:object-attributes [:object obj] [:attribute attr]]
+              [:operator op]
+              [:literal [t literal]]]]
+            {:node (with-meta [op attr literal]
+                     {:context obj})
+             :state (when (empty? state) obj)}
 
-(defn transform-conjunction [ast state]
-  (when (and (coll? ast)
-             (= :compound-statement (first ast)))
-    (let [[left [_ conjunction] right] (rest ast)]
-      [conjunction left right])))
+            [[:compound-statement left [:join "and"] right]]
+            {:node ["and" left right] :state state}
+
+            :else nil))
 
 (def object->query {"nodes" eng/nodes-query})
 
 (defn convert [ast]
-  (let [{:keys [node state]} (zip/pre-order-visit (zip/tree-zipper ast) nil [transform-statement transform-conjunction])]
-    (eng/compile-user-query->sql (object->query state) node)))
-
-#_(def grammar
-  (insta/parser
-   "join = { ('and' | 'AND') | ('or' | 'OR') }
-    literal = { boolean | resource | string | float | integer | value }
-    resource = { identifier >> lbracket >> identifier >> rbracket }
-    integer = { (str('+') | str('-')).maybe >> match('[0-9]').repeat(1) }
-    float = { integer >> ( dot >> match('[0-9]').repeat(1) | str('e') >> match('[0-9]').repeat(1)) }
-    "))
-
-;;    float = num (  '.'? num | 'e' num )
-;;     num = #'[0-9]'
-;; rule(:string)         { quote >> (escape | nonquote).repeat(1) >>
-;;     quote }
-
-
-
-
-
-
-#_(def grammar2
-  (insta/parser
-   "query = ( compound-statement | nested-statement | statement )+ whitespace*
-    compound-statement = ( nested-statement | statement ) whitespace+ join whitespace+ query
-    nested-statement = (
-    whitespace = #'\\s'
-
-"))
+  (let [{:keys [node state]} (zip/pre-order-visit (zip/tree-zipper ast) nil [transform-statement])]
+    (eng/compile-user-query->sql (object->query state) #spy/d (first node))))
