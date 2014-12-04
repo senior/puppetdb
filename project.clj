@@ -4,7 +4,7 @@
 
 (defn deploy-info
   "Generate deployment information from the URL supplied and the username and
-   password for Nexus supplied as environment variables."
+  password for Nexus supplied as environment variables."
   [url]
   {:url url
    :username :env/nexus_jenkins_username
@@ -105,7 +105,8 @@
                                   [puppetlabs/kitchensink ~ks-version :classifier "test"]
                                   [puppetlabs/trapperkeeper-webserver-jetty9 ~tk-jetty9-version :classifier "test"]
                                   [org.flatland/ordered "1.5.2"]
-                                  [org.clojure/test.check "0.5.8"]]}
+                                  [org.clojure/test.check "0.6.1"]
+                                  [schema-gen "0.1.2"]]}
              :ci {:plugins [[lein-pprint "1.1.1"]]}}
 
   :jar-exclusions [#"leiningen/"]
