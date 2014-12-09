@@ -1,57 +1,57 @@
 (ns puppetlabs.puppetdb.command
   "PuppetDB command handling
 
-   Commands are the mechanism by which changes are made to PuppetDB's
-   model of a population. Commands are represented by `command
-   objects`, which have the following JSON wire format:
+  Commands are the mechanism by which changes are made to PuppetDB's
+  model of a population. Commands are represented by `command
+  objects`, which have the following JSON wire format:
 
-       {\"command\": \"...\",
-        \"version\": 123,
-        \"payload\": <json object>}
+  {\"command\": \"...\",
+  \"version\": 123,
+  \"payload\": <json object>}
 
-   `payload` must be a valid JSON string of any sort. It's up to an
-   individual handler function how to interpret that object.
+  `payload` must be a valid JSON string of any sort. It's up to an
+  individual handler function how to interpret that object.
 
-   More details can be found in [the spec](../spec/commands.md).
+  More details can be found in [the spec](../spec/commands.md).
 
-   The command object may also contain an `annotations` attribute
-   containing a map with arbitrary keys and values which may have
-   command-specific meaning or may be used by the message processing
-   framework itself.
+  The command object may also contain an `annotations` attribute
+  containing a map with arbitrary keys and values which may have
+  command-specific meaning or may be used by the message processing
+  framework itself.
 
-   Commands should include a `received` annotation containing a
-   timestamp of when the message was first seen by the system. If this
-   is omitted, it will be added when the message is first parsed, but
-   may then be somewhat inaccurate.
+  Commands should include a `received` annotation containing a
+  timestamp of when the message was first seen by the system. If this
+  is omitted, it will be added when the message is first parsed, but
+  may then be somewhat inaccurate.
 
-   Commands should include an `id` annotation containing a unique,
-   string identifier for the command. If this is omitted, it will be
-   added when the message is first parsed.
+  Commands should include an `id` annotation containing a unique,
+  string identifier for the command. If this is omitted, it will be
+  added when the message is first parsed.
 
-   Failed messages will have an `attempts` annotation containing an
-   array of maps of the form:
+  Failed messages will have an `attempts` annotation containing an
+  array of maps of the form:
 
-       {:timestamp <timestamp>
-        :error     \"some error message\"
-        :trace     <stack trace from :exception>}
+  {:timestamp <timestamp>
+  :error     \"some error message\"
+  :trace     <stack trace from :exception>}
 
-   Each entry corresponds to a single failed attempt at handling the
-   message, containing the error message, stack trace, and timestamp
-   for each failure. PuppetDB may discard messages which have been
-   attempted and failed too many times, or which have experienced
-   fatal errors (including unparseable messages).
+  Each entry corresponds to a single failed attempt at handling the
+  message, containing the error message, stack trace, and timestamp
+  for each failure. PuppetDB may discard messages which have been
+  attempted and failed too many times, or which have experienced
+  fatal errors (including unparseable messages).
 
-   Failed messages will be stored in files in the \"dead letter
-   office\", located under the MQ data directory, in
-   `/discarded/<command>`. These files contain the annotated message,
-   along with each exception that occured while trying to handle the
-   message.
+  Failed messages will be stored in files in the \"dead letter
+  office\", located under the MQ data directory, in
+  `/discarded/<command>`. These files contain the annotated message,
+  along with each exception that occured while trying to handle the
+  message.
 
-   We currently support the following wire formats for commands:
+  We currently support the following wire formats for commands:
 
-   1. Java Strings
+  1. Java Strings
 
-   2. UTF-8 encoded byte-array
+  2. UTF-8 encoded byte-array
 
    In either case, the command itself, once string-ified, must be a
    JSON-formatted string with the aforementioned structure."
@@ -253,18 +253,25 @@
 
 (defmethod process-command! [(command-names :replace-facts) 3]
   [{:keys [payload annotations]} {:keys [db]}]
-  (let [{:keys [name values] :as fact-data} payload
-        id        (:id annotations)
-        timestamp (:received annotations)
-        fact-data (-> fact-data
-                      (update-in [:values] utils/stringify-keys)
-                      (update-in [:producer-timestamp] to-timestamp)
-                      (assoc :timestamp timestamp)
-                      upon-error-throw-fatality)]
-    (jdbc/with-transacted-connection' db :repeatable-read
-      (scf-storage/maybe-activate-node! name timestamp)
-      (scf-storage/replace-facts! fact-data))
-    (log/info (format "[%s] [%s] %s" id (command-names :replace-facts) name))))
+  (println "payload: " payload)
+  #spy/d payload
+  (try
+    (let [{:keys [name values] :as fact-data} payload
+          id        (:id annotations)
+          timestamp (:received annotations)
+          fact-data (-> fact-data
+                        (update-in [:values] utils/stringify-keys)
+                        (update-in [:producer-timestamp] to-timestamp)
+                        (assoc :timestamp timestamp)
+                        upon-error-throw-fatality)]
+      (jdbc/with-transacted-connection' db :repeatable-read
+        (scf-storage/maybe-activate-node! name timestamp)
+        (scf-storage/replace-facts! fact-data))
+      (log/info (format "[%s] [%s] %s" id (command-names :replace-facts) name)))
+    (catch Exception e
+      (println "error.......")
+      (.printStackTrace e)
+      (throw e))))
 
 ;; Node deactivation
 

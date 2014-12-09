@@ -29,10 +29,10 @@
 
 ;; here is a sample test-db-config function for use with postgres
 #_(defn test-db-config
-    "Return a map of connection attrs for the test database"
-    []
-    {:classname   "org.postgresql.Driver"
-     :subprotocol "postgresql"
-     :subname     "//localhost:5432/puppetdb_test"
-     :user        "puppetdb"
-     :password    "puppet"})
+  "Return a map of connection attrs for the test database"
+  []
+  {:classname   "org.postgresql.Driver"
+   :subprotocol "postgresql"
+   :subname     "//localhost:5432/puppetdb_test"
+   :user        "puppetdb"
+   :password    "puppet"})

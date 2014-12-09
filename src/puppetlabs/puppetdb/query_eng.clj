@@ -19,9 +19,9 @@
 
 (defn ignore-engine-params
   "Query engine munge functions should take two arguments, a version
-   and a list of columns to project. Some of the munge funcitons don't
-   currently adhere to that contract, so this function will wrap the
-   given function `f` and ignore those arguments"
+  and a list of columns to project. Some of the munge funcitons don't
+  currently adhere to that contract, so this function will wrap the
+  given function `f` and ignore those arguments"
   [f]
   (fn [_ _]
     f))
@@ -60,7 +60,7 @@
 
 (defn produce-streaming-body
   "Given a query, and database connection, return a Ring response with the query
-  results.
+  Results.
   If the query can't be parsed, a 400 is returned."
   [entity version query paging-options db]
   (try

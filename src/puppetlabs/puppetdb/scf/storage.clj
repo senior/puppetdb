@@ -1,23 +1,23 @@
 (ns puppetlabs.puppetdb.scf.storage
   "Catalog persistence
 
-   Catalogs are persisted in a relational database. Roughly speaking,
-   the schema looks like this:
+  Catalogs are persisted in a relational database. Roughly speaking,
+  the schema looks like this:
 
-   * resource_parameters are associated 0 to N catalog_resources (they are
-   deduped across catalogs). It's possible for a resource_param to exist in the
-   database, yet not be associated with a catalog. This is done as a
-   performance optimization.
+  * resource_parameters are associated 0 to N catalog_resources (they are
+  deduped across catalogs). It's possible for a resource_param to exist in the
+  database, yet not be associated with a catalog. This is done as a
+  performance optimization.
 
-   * edges are associated with a single catalog
+  * edges are associated with a single catalog
 
-   * catalogs are associated with a single certname
+  * catalogs are associated with a single certname
 
-   * facts are associated with a single certname
+  * facts are associated with a single certname
 
-   The standard set of operations on information in the database will
-   likely result in dangling resources and catalogs; to clean these
-   up, it's important to run `garbage-collect!`."
+  The standard set of operations on information in the database will
+  likely result in dangling resources and catalogs; to clean these
+  up, it's important to run `garbage-collect!`."
   (:require [puppetlabs.puppetdb.catalogs :as cat]
             [puppetlabs.puppetdb.reports :as report]
             [puppetlabs.puppetdb.facts :as facts]
@@ -74,9 +74,9 @@
 
 (def catalog-schema
   "This is a bit of a hack to make a more restrictive schema in the storage layer.
-   Moving the more restrictive resource/edge schemas into puppetdb.catalogs is TODO. Upstream
-   code needs to assume a map of resources (not a vector) and tests need to be update to adhere
-   to the new format."
+  Moving the more restrictive resource/edge schemas into puppetdb.catalogs is TODO. Upstream
+  code needs to assume a map of resources (not a vector) and tests need to be update to adhere
+  to the new format."
   (assoc (cat/catalog-wireformat :all)
     :resources resource-ref->resource-schema
     :edges #{edge-schema}))
@@ -692,32 +692,32 @@
    similarity hash. `catalog-hash-debug-dir` is an optional path that
    indicates where catalog debugging information should be stored."
   ([catalog :- catalog-schema]
-     (add-catalog! catalog nil (now)))
+   (add-catalog! catalog nil (now)))
   ([{:keys [api_version resources edges name] :as catalog} :- catalog-schema
     catalog-hash-debug-dir :- (s/maybe s/Str)
     timestamp :- pls/Timestamp]
 
-     (let [refs-to-hashes (time! (:resource-hashes metrics)
-                                 (reduce-kv (fn [acc k v]
-                                              (assoc acc k (shash/resource-identity-hash v)))
-                                            {} resources))
-           hash           (time! (:catalog-hash metrics)
-                                 (shash/catalog-similarity-hash catalog))
-           {id :id
-            stored-hash :hash} (catalog-metadata name)]
+   (let [refs-to-hashes (time! (:resource-hashes metrics)
+                               (reduce-kv (fn [acc k v]
+                                            (assoc acc k (shash/resource-identity-hash v)))
+                                          {} resources))
+         hash           (time! (:catalog-hash metrics)
+                               (shash/catalog-similarity-hash catalog))
+         {id :id
+          stored-hash :hash} (catalog-metadata name)]
 
-       (sql/transaction
-        (cond
-         (nil? id)
-         (add-new-catalog hash catalog refs-to-hashes timestamp)
+     (sql/transaction
+      (cond
+       (nil? id)
+       (add-new-catalog hash catalog refs-to-hashes timestamp)
 
-         (= stored-hash hash)
-         (update-catalog-hash-match id hash catalog timestamp)
+       (= stored-hash hash)
+       (update-catalog-hash-match id hash catalog timestamp)
 
-         :else
-         (update-catalog-hash-miss id hash catalog refs-to-hashes catalog-hash-debug-dir timestamp)))
+       :else
+       (update-catalog-hash-miss id hash catalog refs-to-hashes catalog-hash-debug-dir timestamp)))
 
-       hash)))
+     hash)))
 
 (defn delete-catalog!
   "Remove the catalog identified by the following hash"
@@ -966,38 +966,38 @@
   "Given a certname and a map of fact names to values, store records for those
    facts associated with the certname."
   ([fact-data]
-     (add-facts! fact-data true))
+   (add-facts! fact-data true))
   ([{:keys [name values environment timestamp producer-timestamp] :as fact-data} :- facts-schema
     include-hash? :- s/Bool]
-     (let [factset {:certname name
-                    :timestamp (to-timestamp timestamp)
-                    :environment_id (ensure-environment environment)
-                    :producer_timestamp (to-timestamp producer-timestamp)}
-           fact-data-hash (shash/generic-identity-hash fact-data)]
-       (sql/insert-record :factsets
-                          (if include-hash?
-                            (assoc factset :hash fact-data-hash) factset))
-       (insert-facts!
-        (certname-to-factset-id name)
-        (set (new-fact-value-ids values))))))
+   (let [factset {:certname name
+                  :timestamp (to-timestamp timestamp)
+                  :environment_id (ensure-environment environment)
+                  :producer_timestamp (to-timestamp producer-timestamp)}
+         fact-data-hash (shash/generic-identity-hash fact-data)]
+     (sql/insert-record :factsets
+                        (if include-hash?
+                          (assoc factset :hash fact-data-hash) factset))
+     (insert-facts!
+      (certname-to-factset-id name)
+      (set (new-fact-value-ids values))))))
 
 (pls/defn-validated delete-facts!
   "Delete all the facts (1 arg) or just the fact-ids (2 args) for the given certname."
   ([certname :- String]
-     (let [factset-value-ids (query-to-vec ["select id, fact_value_id from factsets fs inner join facts f on fs.id = f.factset_id where fs.certname = ?" certname])
-           factset-id (:id (first factset-value-ids))]
-       (delete-facts! factset-id (set (map :fact_value_id factset-value-ids)))
-       (sql/delete-rows :factsets ["id=?" factset-id])))
+   (let [factset-value-ids (query-to-vec ["select id, fact_value_id from factsets fs inner join facts f on fs.id = f.factset_id where fs.certname = ?" certname])
+         factset-id (:id (first factset-value-ids))]
+     (delete-facts! factset-id (set (map :fact_value_id factset-value-ids)))
+     (sql/delete-rows :factsets ["id=?" factset-id])))
   ([factset :- s/Int
     fact-ids :- #{s/Int}]
-     (when (seq fact-ids)
-       (let [in-list (jdbc/in-clause fact-ids)]
-         (sql/transaction
+   (when (seq fact-ids)
+     (let [in-list (jdbc/in-clause fact-ids)]
+       (sql/transaction
 
-          (when (sutils/postgres?)
-            (sql/do-commands "SET CONSTRAINTS ALL DEFERRED")
+        (when (sutils/postgres?)
+          (sql/do-commands "SET CONSTRAINTS ALL DEFERRED")
 
-            (sql/do-prepared (format "DELETE FROM fact_paths fp
+          (sql/do-prepared (format "DELETE FROM fact_paths fp
                                       WHERE fp.id in ( SELECT fp.id
                                                        FROM fact_paths fp
                                                             inner join fact_values fv on fp.id = fv.path_id
@@ -1005,32 +1005,32 @@
                                                        WHERE fp.id in ( select fv.path_id from fact_values fv where fv.id %s )
                                                        GROUP BY fp.id
                                                        HAVING COUNT(fv.id) = 1)" in-list)
-                             fact-ids)
+                           fact-ids)
 
-            (sql/do-prepared (format "DELETE FROM fact_values WHERE id in (
+          (sql/do-prepared (format "DELETE FROM fact_values WHERE id in (
                                           SELECT fact_value_id FROM facts where factset_id = ? and fact_value_id %s
                                           EXCEPT
                                           SELECT fact_value_id FROM facts where factset_id <> ? and fact_value_id %s)" in-list in-list)
-                             (concat (cons factset fact-ids)
-                                     (cons factset fact-ids))))
+                           (concat (cons factset fact-ids)
+                                   (cons factset fact-ids))))
 
-          (sql/delete-rows :facts
-                           (into [(str "factset_id=? and fact_value_id "
-                                       in-list) factset]
-                                 fact-ids))
+        (sql/delete-rows :facts
+                         (into [(str "factset_id=? and fact_value_id "
+                                     in-list) factset]
+                               fact-ids))
 
-          ;; HSQLDB doesn't support delayed constraints. This query
-          ;; achieves the same goals as the DELETE FROM fact_values
-          ;; above, but does so in a less efficient manner. Having
-          ;; these two separated allows Postgres queries to execute
-          ;; faster, but still support HSQLDB
-          (when-not (sutils/postgres?)
-            (sql/do-prepared (format "DELETE FROM fact_values WHERE id in (
+        ;; HSQLDB doesn't support delayed constraints. This query
+        ;; achieves the same goals as the DELETE FROM fact_values
+        ;; above, but does so in a less efficient manner. Having
+        ;; these two separated allows Postgres queries to execute
+        ;; faster, but still support HSQLDB
+        (when-not (sutils/postgres?)
+          (sql/do-prepared (format "DELETE FROM fact_values WHERE id in (
                                         SELECT fv.id
                                         FROM fact_values fv left join facts f on fv.id = f.fact_value_id
                                         WHERE f.fact_value_id is NULL and fv.id %s )" in-list)
-                             fact-ids)
-            (sql/do-prepared (format "DELETE FROM fact_paths fp
+                           fact-ids)
+          (sql/do-prepared (format "DELETE FROM fact_paths fp
                                       WHERE fp.id in ( SELECT fp.id
                                                        FROM fact_paths fp left join fact_values fv on fp.id = fv.path_id
                                                        WHERE fv.path_id is NULL )"))))))))
@@ -1226,13 +1226,13 @@
   should be stored."
   ([catalog :- catalog-schema
     timestamp :- pls/Timestamp]
-     (replace-catalog! catalog timestamp nil))
+   (replace-catalog! catalog timestamp nil))
   ([{:keys [name] :as catalog} :- catalog-schema
     timestamp :- pls/Timestamp
     catalog-hash-debug-dir :- (s/maybe s/Str)]
-     (time! (:replace-catalog metrics)
-            (sql/transaction
-             (add-catalog! catalog catalog-hash-debug-dir timestamp)))))
+   (time! (:replace-catalog metrics)
+          (sql/transaction
+           (add-catalog! catalog catalog-hash-debug-dir timestamp)))))
 
 (pls/defn-validated replace-facts!
   "Updates the facts of an existing node, if the facts are newer than the current set of facts.

@@ -38,12 +38,12 @@
 
 (defn without-db-var
   "Binds the java.jdbc dtabase connection to nil. When running a unit
-   test using `with-test-db`, jint/*db* will be bound. If the routes
-   being tested don't explicitly bind the db connection, it will use
-   one bound in with-test-db. This causes a problem at runtime that
-   won't show up in the unit tests. This fixture can be used around
-   route testing code to ensure that the route has it's own db
-   connection."
+  test using `with-test-db`, jint/*db* will be bound. If the routes
+  being tested don't explicitly bind the db connection, it will use
+  one bound in with-test-db. This causes a problem at runtime that
+  won't show up in the unit tests. This fixture can be used around
+  route testing code to ensure that the route has it's own db
+  connection."
   [f]
   (binding [jint/*db* nil]
     (f)))
@@ -64,27 +64,27 @@
   are available. Note this means this fixture should be nested _within_
   `with-test-db` or `with-test-mq`."
   ([f]
-     (with-http-app {} f))
+   (with-http-app {} f))
   ([globals-overrides f]
-     (binding [*app* (server/build-app
-                      :globals (merge
-                                {:scf-read-db          *db*
-                                 :scf-write-db         *db*
-                                 :command-mq           *mq*
-                                 :product-name         "puppetdb"
-                                 :url-prefix           ""}
-                                globals-overrides))]
-       (f))))
+   (binding [*app* (server/build-app
+                    :globals (merge
+                              {:scf-read-db          *db*
+                               :scf-write-db         *db*
+                               :command-mq           *mq*
+                               :product-name         "puppetdb"
+                               :url-prefix           ""}
+                              globals-overrides))]
+     (f))))
 
 (defn defaulted-write-db-config
   "Defaults and converts `db-config` from the write database INI format to the internal
-   write database format"
+  write database format"
   [db-config]
   (pls/transform-data cfg/write-database-config-in cfg/write-database-config-out db-config))
 
 (defn defaulted-read-db-config
   "Defaults and converts `db-config` from the read-database INI format to the internal
-   read database format"
+  read database format"
   [db-config]
   (pls/transform-data cfg/database-config-in cfg/database-config-out db-config))
 
@@ -109,58 +109,58 @@
 
 (defn internal-request
   "Create a ring request as it would look after passing through all of the
-   application middlewares, suitable for invoking one of the api functions
-   (where it assumes the middleware have already assoc'd in various attributes)."
+  application middlewares, suitable for invoking one of the api functions
+  (where it assumes the middleware have already assoc'd in various attributes)."
   ([]
-     (internal-request {}))
+   (internal-request {}))
   ([params]
-     (internal-request {} params))
+   (internal-request {} params))
   ([global-overrides params]
-     {:params params
-      :headers {"accept" "application/json"
-                "content-type" "application/x-www-form-urlencoded"}
-      :content-type "application/x-www-form-urlencoded"
-      :globals (merge {:update-server "FOO"
-                       :scf-read-db          *db*
-                       :scf-write-db         *db*
-                       :command-mq           *mq*
-                       :product-name         "puppetdb"}
-                      global-overrides)}))
+   {:params params
+    :headers {"accept" "application/json"
+              "content-type" "application/x-www-form-urlencoded"}
+    :content-type "application/x-www-form-urlencoded"
+    :globals (merge {:update-server "FOO"
+                     :scf-read-db          *db*
+                     :scf-write-db         *db*
+                     :command-mq           *mq*
+                     :product-name         "puppetdb"}
+                    global-overrides)}))
 
 (defn internal-request-post
   "A variant of internal-request designed to submit application/json requests
   instead."
   ([body]
-     (internal-request-post body {}))
+   (internal-request-post body {}))
   ([body params]
-     {:params params
-      :headers {"accept" "application/json"
-                "content-type" "application/json"}
-      :content-type "application/json"
-      :globals (merge {:update-server "FOO"
-                       :scf-read-db          *db*
-                       :scf-write-db         *db*
-                       :command-mq           *mq*
-                       :product-name         "puppetdb"})
-      :body (ByteArrayInputStream. (.getBytes body "utf8"))}))
+   {:params params
+    :headers {"accept" "application/json"
+              "content-type" "application/json"}
+    :content-type "application/json"
+    :globals (merge {:update-server "FOO"
+                     :scf-read-db          *db*
+                     :scf-write-db         *db*
+                     :command-mq           *mq*
+                     :product-name         "puppetdb"})
+    :body (ByteArrayInputStream. (.getBytes body "utf8"))}))
 
 (defmacro defixture
   "Defs a var `name` that is the composed fixtures for the ns and then uses those fixtures.
 
-   Example:
+  Example:
 
-     (fixt/defixture super-fixture :each fixt/with-test-db fixt/with-http-app)
+  (fixt/defixture super-fixture :each fixt/with-test-db fixt/with-http-app)
 
-     Which is equivalent to:
+  Which is equivalent to:
 
-     (use-fixtures :each fixt/with-test-db fixt/with-http-app)
+  (use-fixtures :each fixt/with-test-db fixt/with-http-app)
 
-     but is also usable individually:
+  but is also usable individually:
 
-     (super-fixture
-       (fn []
-         ;; --> Do stuff, the drop the database at the end
-       ))"
+  (super-fixture
+  (fn []
+  ;; --> Do stuff, the drop the database at the end
+  ))"
   [name & args]
   (let [[name [each-or-once & fixtures]] (tmacro/name-with-attributes name args)]
     `(do

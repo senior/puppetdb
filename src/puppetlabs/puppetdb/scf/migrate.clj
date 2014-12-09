@@ -1,52 +1,52 @@
 (ns puppetlabs.puppetdb.scf.migrate
   "Schema migrations
 
-   The `migrate!` function can be used to apply all the pending migrations to
-   the database, in ascending order of schema version. Pending is defined as
-   having a schema version greater than the current version in the database.
+  The `migrate!` function can be used to apply all the pending migrations to
+  the database, in ascending order of schema version. Pending is defined as
+  having a schema version greater than the current version in the database.
 
-   A migration is specified by defining a function of arity 0 and adding it to
-   the `migrations` map, along with its schema version. To apply the migration,
-   the migration function will be invoked, and the schema version and current
-   time will be recorded in the schema_migrations table.
+  A migration is specified by defining a function of arity 0 and adding it to
+  the `migrations` map, along with its schema version. To apply the migration,
+  the migration function will be invoked, and the schema version and current
+  time will be recorded in the schema_migrations table.
 
-   NOTE: in order to support bug-fix schema changes to older branches without
-   breaking the ability to upgrade, it is possible to define a sequence of
-   migrations with non-sequential integers.  e.g., if the 1.0.x branch
-   contains migrations 1-5, and the 2.0.x branch contains schema migrations
-   1-10, and then a bugfix schema change (such as creating or adding an index)
-   is identified, this migration can be defined as #11 in both branches.  Code
-   in the 1.0.x branch should happily apply #11 even though it does not have
-   a definition for 6-10.  Then when a 1.0.x user upgrades to 2.0.x, migrations
-   6-10 will be applied, and 11 will be skipped because it's already been run.
-   Because of this, it is crucial to be extremely careful about numbering new
-   migrations if they are going into multiple branches.  It's also crucial to
-   be absolutely certain that the schema change in question is compatible
-   with both branches and that the migrations missing from the earlier branch
-   can reasonably and safely be applied *after* the bugfix migration, because
-   that is what will happen for upgrading users.
+  NOTE: in order to support bug-fix schema changes to older branches without
+  breaking the ability to upgrade, it is possible to define a sequence of
+  migrations with non-sequential integers.  e.g., if the 1.0.x branch
+  contains migrations 1-5, and the 2.0.x branch contains schema migrations
+  1-10, and then a bugfix schema change (such as creating or adding an index)
+  is identified, this migration can be defined as #11 in both branches.  Code
+  in the 1.0.x branch should happily apply #11 even though it does not have
+  a definition for 6-10.  Then when a 1.0.x user upgrades to 2.0.x, migrations
+  6-10 will be applied, and 11 will be skipped because it's already been run.
+  Because of this, it is crucial to be extremely careful about numbering new
+  migrations if they are going into multiple branches.  It's also crucial to
+  be absolutely certain that the schema change in question is compatible
+  with both branches and that the migrations missing from the earlier branch
+  can reasonably and safely be applied *after* the bugfix migration, because
+  that is what will happen for upgrading users.
 
-   In short, here are some guidelines re: applying schema changes to multiple
-   branches:
+  In short, here are some guidelines re: applying schema changes to multiple
+  branches:
 
-   1. If at all possible, avoid it.
-   2. Seriously, are you sure you need to do this? :)
-   3. OK, if you really must do it, make sure that the schema change in question
-      is as independent as humanly possible.  For example, things like creating
-      or dropping an index on a table should be fairly self-contained.  You should
-      think long and hard about any change more complex than that.
-   4. Determine what the latest version of the schema is in each of the two branches.
-   5. Examine every migration that exists in the newer branch but not the older
-      branch, and make sure that your new schema change will not conflict with
-      *any* of those migrations.  Your change must be able to execute successfully
-      regardless of whether it is applied BEFORE all of those migrations or AFTER
-      them.
-   6. If you're certain you've met the conditions described above, choose the next
-      available integer from the *newer* branch and add your migration to both
-      branches using this integer.  This will result in a gap between the integers
-      in the migrations array in the old branch, but that is not a problem.
+  1. If at all possible, avoid it.
+  2. Seriously, are you sure you need to do this? :)
+  3. OK, if you really must do it, make sure that the schema change in question
+  is as independent as humanly possible.  For example, things like creating
+  or dropping an index on a table should be fairly self-contained.  You should
+  think long and hard about any change more complex than that.
+  4. Determine what the latest version of the schema is in each of the two branches.
+  5. Examine every migration that exists in the newer branch but not the older
+  branch, and make sure that your new schema change will not conflict with
+  *any* of those migrations.  Your change must be able to execute successfully
+  regardless of whether it is applied BEFORE all of those migrations or AFTER
+  them.
+  6. If you're certain you've met the conditions described above, choose the next
+  available integer from the *newer* branch and add your migration to both
+  branches using this integer.  This will result in a gap between the integers
+  in the migrations array in the old branch, but that is not a problem.
 
-   _TODO: consider using multimethods for migration funcs_"
+  _TODO: consider using multimethods for migration funcs_"
   (:require [clojure.java.jdbc :as sql]
             [clojure.tools.logging :as log]
             [clojure.string :as string]
@@ -205,9 +205,9 @@
 
 (defn add-missing-indexes
   "Add several new indexes:
-    * catalog_resources USING (catalog)
-    * catalog_resources USING (type,title)
-    * catalog_resources USING gin(tags) [only when using postgres]"
+  * catalog_resources USING (catalog)
+  * catalog_resources USING (type,title)
+  * catalog_resources USING gin(tags) [only when using postgres]"
   []
   (log/warn "Adding additional indexes; this may take several minutes, depending on the size of your database. Trust us, it will all be worth it in the end.")
   (sql/do-commands
@@ -353,12 +353,12 @@
 (defn burgundy-schema-changes
   "Schema changes for the initial release of Burgundy. These include:
 
-    - Add 'file' and 'line' columns to the event table
-    - A column for the resource's containment path in the resource_events table
-    - A column for the transaction uuid in the reports & catalogs tables
-    - Renames the `sourcefile` and `sourceline` columns on the `catalog_resources`
-      table to `file` and `line` for consistency.
-    - Add index to 'property' column in resource_events table"
+  - Add 'file' and 'line' columns to the event table
+  - A column for the resource's containment path in the resource_events table
+  - A column for the transaction uuid in the reports & catalogs tables
+  - Renames the `sourcefile` and `sourceline` columns on the `catalog_resources`
+  table to `file` and `line` for consistency.
+  - Add index to 'property' column in resource_events table"
   []
   (sql/do-commands
    "ALTER TABLE resource_events ADD COLUMN file VARCHAR(1024) DEFAULT NULL"
@@ -724,12 +724,12 @@
             include-hash? false]
         (when-not (empty? facts)
           (scf-store/add-facts!
-            {:name (str certname)
-             :values facts
-             :timestamp timestamp
-             :environment environment
-             :producer-timestamp nil}
-            include-hash?))))))
+           {:name (str certname)
+            :values facts
+            :timestamp timestamp
+            :environment environment
+            :producer-timestamp nil}
+           include-hash?))))))
 
 (defn structured-facts []
   ;; -----------
@@ -888,8 +888,8 @@
   "Insert a column in factsets to be populated by a hash."
   []
   (sql/do-commands
-    "ALTER TABLE factsets ADD hash VARCHAR(40)"
-    "ALTER TABLE factsets ADD CONSTRAINT factsets_hash_key UNIQUE (hash)"))
+   "ALTER TABLE factsets ADD hash VARCHAR(40)"
+   "ALTER TABLE factsets ADD CONSTRAINT factsets_hash_key UNIQUE (hash)"))
 
 (def migrations
   "The available migrations, as a map from migration version to migration function."
@@ -975,9 +975,11 @@
          (migration)
          (record-migration! version)
          (catch java.sql.SQLException e
+           (clojure.repl/pst e)
            (log/error e "Caught SQLException during migration")
            (let [next (.getNextException e)]
              (when-not (nil? next)
+               (clojure.repl/pst next)
                (log/error next "Unravelled exception")))
            (System/exit 1)))))
     (log/info "There are no pending migrations")))

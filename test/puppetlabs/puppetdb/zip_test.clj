@@ -49,7 +49,7 @@
 
 (def with-maps
   "Generates sequential? values, along with hash-maps and
-   defrecords (instances of Foo)"
+  defrecords (instances of Foo)"
   (-> sequential-gen
       (conj #(gen/map (gen/one-of [gen/keyword gen/string]) %))
       (conj foo-gen)))

@@ -1,12 +1,12 @@
 (ns puppetlabs.puppetdb.cli.export
   "Export utility
 
-   This is a command-line tool for exporting data from PuppetDB.  It currently
-   only supports exporting catalog data.
+  This is a command-line tool for exporting data from PuppetDB.  It currently
+  only supports exporting catalog data.
 
-   The command will produce a tarball that can then be used with the companion
-   `import` PuppetDB command-line tool to import data into another PuppetDB
-   database."
+  The command will produce a tarball that can then be used with the companion
+  `import` PuppetDB command-line tool to import data into another PuppetDB
+  database."
   (:require [puppetlabs.kitchensink.core :as kitchensink]
             [puppetlabs.puppetdb.cheshire :as json]
             [fs.core :as fs]
@@ -44,16 +44,16 @@
   "Given a node name, retrieve the catalog for the node."
   ([host port node] (catalog-for-node host port :v4 node))
   ([host port version node]
-     {:pre  [(string? host)
-             (integer? port)
-             (string? node)]
-      :post [((some-fn string? nil?) %)]}
-     (let [{:keys [status body]} (client/get
-                                  (format
-                                   "http://%s:%s/%s/catalogs/%s"
-                                   host port (name version) node)
-                                  {:accept :json})]
-       (when (= status 200) body))))
+   {:pre  [(string? host)
+           (integer? port)
+           (string? node)]
+    :post [((some-fn string? nil?) %)]}
+   (let [{:keys [status body]} (client/get
+                                (format
+                                 "http://%s:%s/%s/catalogs/%s"
+                                 host port (name version) node)
+                                {:accept :json})]
+     (when (= status 200) body))))
 
 (pls/defn-validated catalog->tar :- utils/tar-item
   "Create a tar-item map for the `catalog`"
@@ -70,32 +70,32 @@
   "The parsed JSON response body"
   [{:keys [status body]}]
   (when (= status 200)
-    (seq (json/parse-string body true))))
+    (seq (json/parse-string body))))
 
 (pls/defn-validated facts-for-node
-  :- {s/Keyword s/Any}
+  :- (s/maybe {s/Keyword s/Any})
   "Supplying host, port, and optionally version,
    retrieve the factset for a given certname `node`"
   ([host :- String
     port :- s/Int
     node :- String]
-     (facts-for-node host port :v4 node))
+   (facts-for-node host port :v4 node))
   ([host :- String
     port :- s/Int
     version :- s/Keyword
     node :- String]
-     (when-let [facts (first (parse-response
-                              (client/get
-                               (format
-                                "http://%s:%s/%s/factsets?query=%s"
-                                host port (name version)
-                                (url-encode
-                                 (format "[\"=\",\"certname\",\"%s\"]" node)))
-                               {:accept :json})))]
-       {:name node
-        :values (:facts facts)
-        :environment (:environment facts)
-        :producer-timestamp (:producer-timestamp facts)})))
+   (when-let [facts (first (parse-response
+                            (client/get
+                             (format
+                              "http://%s:%s/%s/factsets?query=%s"
+                              host port (name version)
+                              (url-encode
+                               (format "[\"=\",\"certname\",\"%s\"]" node)))
+                             {:accept :json})))]
+     {:name node
+      :values (get facts "facts")
+      :environment (get facts "environment")
+      :producer-timestamp (get facts "producer-timestamp")})))
 
 (pls/defn-validated facts->tar :- utils/tar-item
   "Creates a tar-item map for the collection of facts"
@@ -112,42 +112,42 @@
   "Given a report hash, returns all events as a vector of maps."
   ([host port report-hash] (events-for-report-hash host port :v4 report-hash))
   ([host port version report-hash]
-     {:pre [(string? host)
-            (integer? port)
-            (string? report-hash)]
-      :post [(seq? %)]}
-     (let [body (parse-response
-                 (client/get
-                  (format
-                   "http://%s:%s/%s/events?query=%s"
-                   host port (name version)
-                   (url-encode (format "[\"=\",\"report\",\"%s\"]" report-hash)))))]
-       (sort-by
-        #(mapv % [:timestamp :resource-type :resource-title :property])
-        (map
-         #(dissoc % :report :certname :configuration-version :containing-class
-                  :run-start-time :run-end-time :report-receive-time :environment)
-         body)))))
+   {:pre [(string? host)
+          (integer? port)
+          (string? report-hash)]
+    :post [(seq? %)]}
+   (let [body (parse-response
+               (client/get
+                (format
+                 "http://%s:%s/%s/events?query=%s"
+                 host port (name version)
+                 (url-encode (format "[\"=\",\"report\",\"%s\"]" report-hash)))))]
+     (sort-by
+      #(mapv % [:timestamp :resource-type :resource-title :property])
+      (map
+       #(dissoc % :report :certname :configuration-version :containing-class
+                :run-start-time :run-end-time :report-receive-time :environment)
+       body)))))
 
 (defn reports-for-node
   "Given a node name, retrieves the reports for the node."
   ([host port node] (reports-for-node host port :v4 node))
   ([host port version node]
-     {:pre  [(string? host)
-             (integer? port)
-             (string? node)]
-      :post [(or (nil? %) (seq? %))]}
-     (when-let [body (parse-response
-                      (client/get
-                       (format
-                        "http://%s:%s/%s/reports?query=%s"
-                        host port (name version) (url-encode (format "[\"=\",\"certname\",\"%s\"]" node)))
-                       {:accept :json}))]
-       (map
-        #(dissoc % :receive-time)
-        (map
-         #(merge % {:resource-events (events-for-report-hash host port version (get % :hash))})
-         body)))))
+   {:pre  [(string? host)
+           (integer? port)
+           (string? node)]
+    :post [(or (nil? %) (seq? %))]}
+   (when-let [body (parse-response
+                    (client/get
+                     (format
+                      "http://%s:%s/%s/reports?query=%s"
+                      host port (name version) (url-encode (format "[\"=\",\"certname\",\"%s\"]" node)))
+                     {:accept :json}))]
+     (map
+      #(dissoc % :receive-time)
+      (map
+       #(merge % {:resource-events (events-for-report-hash host port version (get % :hash))})
+       body)))))
 
 (pls/defn-validated report->tar :- [utils/tar-item]
   "Create a tar-item map for the `report`"

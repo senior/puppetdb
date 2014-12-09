@@ -15,23 +15,23 @@
   submission. Alternately accepts a command-map object (such as those
   returned by `parse-command`). Returns the server response."
   ([host port command version payload]
-     {:pre [(string? command)
-            (integer? version)]}
-     (->> payload
-          (command/assemble-command command version)
-          (submit-command-via-http! host port)))
+   {:pre [(string? command)
+          (integer? version)]}
+   (->> payload
+        (command/assemble-command command version)
+        (submit-command-via-http! host port)))
   ([host port command-map]
-     {:pre [(string? host)
-            (integer? port)
-            (map? command-map)]}
-     (let [message (json/generate-string command-map)
-           checksum (kitchensink/utf8-string->sha1 message)
-           url (format "http://%s:%s/v4/commands?checksum=%s" host port checksum)]
-       (http-client/post url {:body               message
-                              :throw-exceptions   false
-                              :content-type       :json
-                              :character-encoding "UTF-8"
-                              :accept             :json}))))
+   {:pre [(string? host)
+          (integer? port)
+          (map? command-map)]}
+   (let [message (json/generate-string command-map)
+         checksum (kitchensink/utf8-string->sha1 message)
+         url (format "http://%s:%s/v4/commands?checksum=%s" host port checksum)]
+     (http-client/post url {:body               message
+                            :throw-exceptions   false
+                            :content-type       :json
+                            :character-encoding "UTF-8"
+                            :accept             :json}))))
 
 (defn submit-catalog
   "Send the given wire-format `catalog` (associated with `host`) to a
