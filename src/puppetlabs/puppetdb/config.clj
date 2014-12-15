@@ -1,9 +1,9 @@
 (ns puppetlabs.puppetdb.config
   "Centralized place for reading a user-defined config INI file, validating,
-   defaulting and converting into a format that can startup a PuppetDB instance.
+  defaulting and converting into a format that can startup a PuppetDB instance.
 
-   The schemas in this file define what is expected to be present in the INI file
-   and the format expected by the rest of the application."
+  The schemas in this file define what is expected to be present in the INI file
+  and the format expected by the rest of the application."
   (:import [java.security KeyStore]
            [org.joda.time Minutes Days Period])
   (:require [clojure.tools.logging :as log]
@@ -377,32 +377,32 @@
 
 (defn default-ssl-protocols
   "Provide a default for ssl-protocols (that does NOT include sslv3). If sslv3
-   is present in the user provided config, warn the user."
+  is present in the user provided config, warn the user."
   [config-data]
   (if (get-in config-data [:jetty :ssl-protocols])
     (warn-if-sslv3 config-data)
     (assoc-in config-data [:jetty :ssl-protocols] ["TLSv1" "TLSv1.1" "TLSv1.2"])))
 
-(defn add-web-routing-config
-  [config-data]
-  (let [prefix (get-in config-data [:global :url-prefix] "/")]
-    (assoc-in config-data [:web-router-service
-                           :puppetlabs.puppetdb.cli.services/puppetdb-service] prefix)))
+#_(defn add-web-routing-config
+    [config-data]
+    (let [prefix (get-in config-data [:global :url-prefix] "/")]
+      (assoc-in config-data [:web-router-service
+                             :puppetlabs.puppetdb.cli.services/puppetdb-service] prefix)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
 (defn hook-tk-parse-config-data
   "This is a robert.hooke compatible hook that is designed to intercept
-   trapperkeeper configuration before it is used, so that we may munge &
-   customize it."
+  trapperkeeper configuration before it is used, so that we may munge &
+  customize it."
   [f args]
   (let [config (f args)]
     (-> config
         fix-certificate-whitelist
         warn-repl-retirement
         default-ssl-protocols
-        add-web-routing-config)))
+        #_add-web-routing-config)))
 
 (defn process-config!
   "Accepts a map containing all of the user-provided configuration values

@@ -418,6 +418,11 @@
   (register-listener [this pred listener-fn]
                      (conj-handler (:listeners (service-context this)) pred listener-fn))
   (process-message [this message]
-                   (if-let [handler-fn (matching-handler @(:listeners (service-context this)) message)]
-                     (handler-fn message)
-                     (log/warn (format "No message handler found for %s" message)))))
+                   #spy/d message
+                   (println)
+                   (if-let [handler-fn #spy/d (matching-handler @(:listeners (service-context this)) message)]
+
+                     (do #spy/d (handler-fn  message)
+                         (println))
+
+                     (do (println) (log/warn (format "No message handler found for %s" message))))))

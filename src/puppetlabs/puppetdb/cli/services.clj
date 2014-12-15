@@ -1,47 +1,47 @@
 (ns puppetlabs.puppetdb.cli.services
   "Main entrypoint
 
-   PuppetDB consists of several, cooperating components:
+  PuppetDB consists of several, cooperating components:
 
-   * Command processing
+  * Command processing
 
-     PuppetDB uses a CQRS pattern for making changes to its domain
-     objects (facts, catalogs, etc). Instead of simply submitting data
-     to PuppetDB and having it figure out the intent, the intent
-     needs to explicitly be codified as part of the operation. This is
-     known as a \"command\" (e.g. \"replace the current facts for node
-     X\").
+  PuppetDB uses a CQRS pattern for making changes to its domain
+  objects (facts, catalogs, etc). Instead of simply submitting data
+  to PuppetDB and having it figure out the intent, the intent
+  needs to explicitly be codified as part of the operation. This is
+  known as a \"command\" (e.g. \"replace the current facts for node
+  X\").
 
-     Commands are processed asynchronously, however we try to do our
-     best to ensure that once a command has been accepted, it will
-     eventually be executed. Ordering is also preserved. To do this,
-     all incoming commands are placed in a message queue which the
-     command processing subsystem reads from in FIFO order.
+  Commands are processed asynchronously, however we try to do our
+  best to ensure that once a command has been accepted, it will
+  eventually be executed. Ordering is also preserved. To do this,
+  all incoming commands are placed in a message queue which the
+  command processing subsystem reads from in FIFO order.
 
-     Refer to `puppetlabs.puppetdb.command` for more details.
+  Refer to `puppetlabs.puppetdb.command` for more details.
 
-   * Message queue
+  * Message queue
 
-     We use an embedded instance of AciveMQ to handle queueing duties
-     for the command processing subsystem. The message queue is
-     persistent, and it only allows connections from within the same
-     VM.
+  We use an embedded instance of AciveMQ to handle queueing duties
+  for the command processing subsystem. The message queue is
+  persistent, and it only allows connections from within the same
+  VM.
 
-     Refer to `puppetlabs.puppetdb.mq` for more details.
+  Refer to `puppetlabs.puppetdb.mq` for more details.
 
-   * REST interface
+  * REST interface
 
-     All interaction with PuppetDB is conducted via its REST API. We
-     embed an instance of Jetty to handle web server duties. Commands
-     that come in via REST are relayed to the message queue. Read-only
-     requests are serviced synchronously.
+  All interaction with PuppetDB is conducted via its REST API. We
+  embed an instance of Jetty to handle web server duties. Commands
+  that come in via REST are relayed to the message queue. Read-only
+  requests are serviced synchronously.
 
-   * Database sweeper
+  * Database sweeper
 
-     As catalogs are modified, unused records may accumulate and stale
-     data may linger in the database. We periodically sweep the
-     database, compacting it and performing regular cleanup so we can
-     maintain acceptable performance."
+  As catalogs are modified, unused records may accumulate and stale
+  data may linger in the database. We periodically sweep the
+  database, compacting it and performing regular cleanup so we can
+  maintain acceptable performance."
   (:require [puppetlabs.puppetdb.scf.storage :as scf-store]
             [puppetlabs.puppetdb.command :as command]
             [puppetlabs.puppetdb.command.dlo :as dlo]
@@ -303,7 +303,7 @@
                                       (constantly true))
                         app (server/build-app :globals globals :authorized? authorized?)]
                     (log/info "Starting query server")
-                    (add-ring-handler service (compojure/context url-prefix [] app)))
+                    (add-ring-handler service (compojure/context (or (get-in config [:web-router-service ::puppetdb-service]) url-prefix) [] app)))
           job-pool (mk-pool)]
 
       ;; Pretty much this helper just knows our job-pool and gc-interval
@@ -357,8 +357,8 @@
 (defn -main
   "Calls the trapperkeeper main argument to initialize tk.
 
-   For configuration customization, we intercept the call to parse-config-data
-   within TK."
+  For configuration customization, we intercept the call to parse-config-data
+  within TK."
   [& args]
   (rh/add-hook #'puppetlabs.trapperkeeper.config/parse-config-data #'conf/hook-tk-parse-config-data)
   (apply main args))

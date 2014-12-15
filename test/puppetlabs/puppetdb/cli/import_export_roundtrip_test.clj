@@ -42,8 +42,8 @@
 
 (defn block-until-results-fn
   "Executes `f`, if results are found, return them, otherwise
-   wait and try again. Will throw an exception if results aren't found
-   after 100 tries"
+  wait and try again. Will throw an exception if results aren't found
+  after 100 tries"
   [n f]
   (loop [count 0
          results (f)]
@@ -61,8 +61,8 @@
 
 (defmacro block-until-results
   "Body is some expression that will be executed in a future. All
-   errors from the body of the macro are ignored. Will block until
-   results are returned from the body of the macro"
+  errors from the body of the macro are ignored. Will block until
+  results are returned from the body of the macro"
   [n & body]
   `(future
      (block-until-results-fn
@@ -76,7 +76,7 @@
 
 (defn block-on-node
   "Waits for the queue to be empty, then blocks until the catalog, facts and reports are all
-   found for `node-name`. Ensures that the commands have been stored before proceeding in a test."
+  found for `node-name`. Ensures that the commands have been stored before proceeding in a test."
   [node-name]
   (block-until-queue-empty)
   (let [catalog-fut (block-until-results 100  (export/catalog-for-node "localhost" jutils/*port* node-name))
@@ -129,7 +129,7 @@
     (jutils/with-puppetdb-instance
 
       (is (empty? (export/get-nodes "localhost" jutils/*port*)))
-        (import/-main "--infile" export-out-file "--host" "localhost" "--port" jutils/*port*)
+      (import/-main "--infile" export-out-file "--host" "localhost" "--port" jutils/*port*)
 
       (block-on-node (:name facts))
 
@@ -150,7 +150,7 @@
 
 (defn spit-v3-export-tar
   "Takes mtadata, catalog, facts, report for a node and spits a tarball (with v3 metadata)
-   to `tar-path`."
+  to `tar-path`."
   [tar-path metadata node-catalog node-facts node-report]
   (with-open [tar-writer (archive/tarball-writer tar-path)]
     (utils/add-tar-entry tar-writer {:msg (str "Exporting PuppetDB metadata")
@@ -193,9 +193,9 @@
 
       (is (= (tuc/munge-catalog-for-comparison :v3 catalog)
              (tuc/munge-catalog-for-comparison :v3
-               (catalogs/canonical-catalog :v3 (-> (export/catalog-for-node "localhost" jutils/*port* :v4 (get-in catalog [:data :name]) )
-                                                   (json/parse-string true)
-                                                   (assoc :api_version 1))))))
+                                               (catalogs/canonical-catalog :v3 (-> (export/catalog-for-node "localhost" jutils/*port* :v4 (get-in catalog [:data :name]) )
+                                                                                   (json/parse-string true)
+                                                                                   (assoc :api_version 1))))))
       (is (= (tur/munge-report-for-comparison (-> report
                                                   (dissoc :environment :status)
                                                   tur/munge-example-report-for-storage))
