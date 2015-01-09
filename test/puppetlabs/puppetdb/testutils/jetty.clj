@@ -15,7 +15,7 @@
 
 (defn create-config
   "Creates a default config, populated with a temporary vardir and
-   a fresh hypersql instance"
+  a fresh hypersql instance"
   []
   {:nrepl {}
    :global {:vardir (temp-dir)}
@@ -26,15 +26,15 @@
 
 (defn current-url
   "Uses the dynamically bound port to create a v4 URL to the
-   currently running PuppetDB instance"
+  currently running PuppetDB instance"
   ([] (current-url "/v4/"))
   ([suffix]
-     (format "http://localhost:%s%s" *port* suffix)))
+   (format "http://localhost:%s%s" *port* suffix)))
 
 (defn current-port
   "Given a trapperkeeper server, return the port of the running jetty instance.
-   Note there can be more than one port (i.e. SSL + non-SSL connector). This only
-   returns the first one."
+  Note there can be more than one port (i.e. SSL + non-SSL connector). This only
+  returns the first one."
   [server]
   (-> @(tka/app-context server)
       (get-in [:WebserverService :jetty9-servers :default :server])
@@ -46,12 +46,14 @@
 
 (defn puppetdb-instance
   "Stands up a puppetdb instance with `config`, tears down once `f` returns.
-   If the port is assigned by Jetty, use *port* to get the currently running port."
+  If the port is assigned by Jetty, use *port* to get the currently running port."
   ([f] (puppetdb-instance (create-config) f))
-  ([config f]
+  ([config f] (puppetdb-instance config [] f))
+  ([config services f]
    (let [config (conf/adjust-tk-config config)]
      (tkbs/with-app-with-config server
-       [jetty9-service puppetdb-service message-listener-service command-service webrouting-service]
+       (concat [jetty9-service puppetdb-service message-listener-service command-service webrouting-service]
+               services)
        config
        (binding [*port* (current-port server)
                  *server* server]
