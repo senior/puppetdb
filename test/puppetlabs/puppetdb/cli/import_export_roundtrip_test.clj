@@ -30,11 +30,18 @@
 
 (defn block-until-queue-empty
   "Blocks the current thread until all messages from the queue have been processed."
-  []
-  (loop [depth (jutils/current-queue-depth)]
+  [prev-dlo-count]
+  (loop [depth (jutils/current-queue-depth)
+         dlo-count (jutils/dlo-count)]
+    (when (< prev-dlo-count dlo-count)
+      (throw (RuntimeException. (format "Found %s messages in the DLO" (- dlo-count prev-dlo-count)))))
     (when (< 0 depth)
       (Thread/sleep 10)
-      (recur (jutils/current-queue-depth)))))
+      (recur (jutils/current-queue-depth) (jutils/dlo-count)))))
+
+(defn sync-command-put [base-url command version payload]
+  (pdb-client/submit-command-via-http! base-url (command-names command) version payload)
+  (block-until-queue-empty (jutils/dlo-count)))
 
 (defn submit-command
   "Submits a command to the running PuppetDB, launched by `puppetdb-instance`."
@@ -44,8 +51,8 @@
 
 (defn block-until-results-fn
   "Executes `f`, if results are found, return them, otherwise
-   wait and try again. Will throw an exception if results aren't found
-   after 100 tries"
+  wait and try again. Will throw an exception if results aren't found
+  after 100 tries"
   [n f]
   (loop [count 0
          results (f)]
@@ -63,8 +70,8 @@
 
 (defmacro block-until-results
   "Body is some expression that will be executed in a future. All
-   errors from the body of the macro are ignored. Will block until
-   results are returned from the body of the macro"
+  errors from the body of the macro are ignored. Will block until
+  results are returned from the body of the macro"
   [n & body]
   `(future
      (block-until-results-fn
@@ -78,9 +85,9 @@
 
 (defn block-on-node
   "Waits for the queue to be empty, then blocks until the catalog, facts and reports are all
-   found for `node-name`. Ensures that the commands have been stored before proceeding in a test."
+  found for `node-name`. Ensures that the commands have been stored before proceeding in a test."
   [base-url node-name]
-  (block-until-queue-empty)
+  (block-until-queue-empty (jutils/dlo-count))
   (let [catalog-fut (block-until-results 100 (export/catalog-for-node base-url node-name))
         report-fut (block-until-results 100 (export/reports-for-node base-url node-name))
         facts-fut (block-until-results 100 (export/facts-for-node base-url node-name))]
@@ -102,36 +109,35 @@
                     (assoc :name "foo.local"))
         report (:basic reports)
         with-server #(jutils/puppetdb-instance
-                       (assoc-in (jutils/create-config)
-                                 [:web-router-service :puppetlabs.puppetdb.cli.services/puppetdb-service] url-prefix)
+                      (assoc-in (jutils/create-config)
+                                [:web-router-service :puppetlabs.puppetdb.cli.services/puppetdb-service] url-prefix)
                       %)]
 
     (with-server
       (fn []
         (is (empty? (export/get-nodes *base-url*)))
-        (submit-command *base-url* :replace-catalog 5 catalog)
-        (submit-command *base-url* :store-report 3
-                        (tur/munge-example-report-for-storage report))
-        (submit-command *base-url* :replace-facts 3 facts)
 
-        (block-on-node *base-url* (:name facts))
+        (sync-command-put *base-url* :replace-catalog 5 catalog)
+        (sync-command-put *base-url* :store-report 3
+                          (tur/munge-example-report-for-storage report))
+        (sync-command-put *base-url* :replace-facts 3 facts)
 
         (is (= (map (partial tuc/munge-catalog-for-comparison :v5)
                     (-> catalog
-                      (dissoc :hash)
-                      utils/vector-maybe))
+                        (dissoc :hash)
+                        utils/vector-maybe))
                (map (partial tuc/munge-catalog-for-comparison :v5)
                     (-> (export/catalog-for-node *base-url* (:name catalog))
-                      (json/parse-string true)
-                      (dissoc :hash)
-                      utils/vector-maybe))))
+                        (json/parse-string true)
+                        (dissoc :hash)
+                        utils/vector-maybe))))
 
         (is (= (tur/munge-report-for-comparison
                 (tur/munge-example-report-for-storage report))
                (tur/munge-report-for-comparison
                 (-> (export/reports-for-node *base-url* (:certname report))
-                  first
-                  tur/munge-example-report-for-storage))))
+                    first
+                    tur/munge-example-report-for-storage))))
         (is (= facts (export/facts-for-node *base-url* "foo.local")))
 
         (apply #'export/main
@@ -151,19 +157,19 @@
 
         (is (= (map (partial tuc/munge-catalog-for-comparison :v5)
                     (-> catalog
-                      (dissoc :hash)
-                      utils/vector-maybe))
+                        (dissoc :hash)
+                        utils/vector-maybe))
                (map (partial tuc/munge-catalog-for-comparison :v5)
                     (-> (export/catalog-for-node *base-url* (:name catalog))
-                      (json/parse-string true)
-                      (dissoc :hash)
-                      utils/vector-maybe))))
+                        (json/parse-string true)
+                        (dissoc :hash)
+                        utils/vector-maybe))))
         (is (= (tur/munge-report-for-comparison
                 (tur/munge-example-report-for-storage report))
                (tur/munge-report-for-comparison
                 (-> (export/reports-for-node *base-url* (:certname report))
-                  first
-                  tur/munge-example-report-for-storage))))
+                    first
+                    tur/munge-example-report-for-storage))))
         (is (= facts (export/facts-for-node *base-url* "foo.local")))))))
 
 (deftest basic-roundtrip
@@ -179,7 +185,7 @@
      (assoc-in (jutils/create-config) [:command-processing :max-frame-size] "1024")
      (fn []
        (is (empty? (export/get-nodes *base-url*)))
-       (submit-command *base-url* :replace-catalog 5 catalog)
+       (sync-command-put *base-url* :replace-catalog 5 catalog)
        (is (thrown-with-msg?
             java.util.concurrent.ExecutionException #"Results not found"
             @(block-until-results 5
