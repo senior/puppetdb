@@ -883,6 +883,72 @@
     (sql/do-commands
      "DROP INDEX fact_values_string_trgm")))
 
+(defn- lift-fact-paths-into-facts
+  "Pairs paths and values directly in facts, i.e. change facts from (id
+  value) to (id path value)."
+  []
+  (sql/do-commands
+   "SET CONSTRAINTS ALL DEFERRED" ;; In case it allows additional optimization
+
+   "CREATE TABLE facts_transform
+      (factset_id bigint NOT NULL,
+       fact_path_id bigint NOT NULL,
+       fact_value_id bigint NOT NULL)"
+
+   ;; Needed for the insert if nothing else.
+   "CREATE INDEX fact_paths_path_idx on fact_paths(path)"
+   "CREATE INDEX fact_values_value_hash_idx on fact_values(value_hash)"
+
+   "INSERT INTO facts_transform (factset_id, fact_path_id, fact_value_id)
+      SELECT f.factset_id,
+             (SELECT MIN(id) FROM fact_paths fp2 WHERE fp2.path = fp.path),
+             (SELECT MIN(id) FROM fact_values fv2
+                WHERE fv2.value_hash = fv.value_hash)
+        FROM facts f
+          INNER JOIN fact_values fv on f.fact_value_id = fv.id
+          INNER JOIN fact_paths fp on fv.path_id = fp.id"
+
+   "ALTER TABLE facts_transform
+      ADD CONSTRAINT facts_factset_id_fact_path_id_fact_value_id_key
+        UNIQUE (factset_id, fact_path_id, fact_value_id)"
+   "ALTER TABLE facts_transform
+      ADD CONSTRAINT factset_id_fk
+        FOREIGN KEY (factset_id) REFERENCES factsets(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE"
+   ;; CHECK: Do we still want/need these to be deferrable, after the GC changes?
+   "ALTER TABLE facts_transform
+      ADD CONSTRAINT fact_path_id_fk
+        FOREIGN KEY (fact_path_id) REFERENCES fact_paths(id)
+        DEFERRABLE"
+   "ALTER TABLE facts_transform
+      ADD CONSTRAINT fact_value_id_fk
+        FOREIGN KEY (fact_value_id) REFERENCES fact_values(id)
+        DEFERRABLE"
+
+   "DROP TABLE facts"
+   "ALTER TABLE facts_transform RENAME TO facts"
+   ;; FIXME: do we want any alternate/additional indexes?
+   "CREATE INDEX fact_value_id_idx ON facts(fact_value_id)"
+
+   "ALTER TABLE fact_paths DROP COLUMN value_type_id"
+   "ALTER TABLE fact_values DROP COLUMN path_id"
+
+   ;; Remove all the orphaned duplicates (all but the row in each set
+   ;; with min-id).
+   "DELETE FROM fact_paths AS t1 USING fact_paths t2
+      WHERE t1.path = t2.path AND t1.id > t2.id"
+   "DELETE FROM fact_values AS t1 USING fact_values t2
+      WHERE t1.value_hash = t2.value_hash AND t1.id > t2.id"
+
+   "SET CONSTRAINTS ALL IMMEDIATE"
+   "ALTER TABLE fact_paths
+      ADD CONSTRAINT fact_paths_path_key UNIQUE (path)
+        DEFERRABLE"
+   "ALTER TABLE fact_values
+      ADD CONSTRAINT fact_values_value_hash_key UNIQUE (value_hash)
+        DEFERRABLE"))
+
 ;; The available migrations, as a map from migration version to migration function.
 (def migrations
   {1 initialize-store
@@ -911,7 +977,10 @@
    24 add-producer-timestamps
    25 structured-facts
    26 structured-facts-deferrable-constraints
-   27 switch-value-string-index-to-gin})
+   27 switch-value-string-index-to-gin
+   30 #(log/info
+        (str "lift:"
+             (with-out-str (time (apply lift-fact-paths-into-facts %&)))))})
 
 (def desired-schema-version (apply max (keys migrations)))
 
