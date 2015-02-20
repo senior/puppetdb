@@ -12,7 +12,8 @@
             [puppetlabs.puppetdb.cheshire :as json]
             [clj-time.coerce :refer [to-timestamp]]
             [puppetlabs.kitchensink.core :as ks]
-            [puppetlabs.puppetdb.query.paging :as paging]))
+            [puppetlabs.puppetdb.query.paging :as paging]
+            [puppetlabs.puppetdb.query-eng.honey :as h]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Plan - functions/transformations of the internal query plan
@@ -111,27 +112,7 @@
                :entity :facts
                :subquery? false
                :supports-extract? false
-               :source
-               "SELECT fs.certname,
-                       fp.path as path,
-                       fp.name as name,
-                       fp.depth as depth,
-                       fv.value_integer as value_integer,
-                       fv.value_float as value_float,
-                       fv.value_hash,
-                       fv.value_string,
-                       COALESCE(fv.value_string,
-                                fv.value_json,
-                                cast(fv.value_boolean as text)) as value,
-                       vt.type as type,
-                       env.name as environment
-                FROM factsets fs
-                  INNER JOIN facts as f on fs.id = f.factset_id
-                  INNER JOIN fact_values as fv on f.fact_value_id = fv.id
-                  INNER JOIN fact_paths as fp on fv.path_id = fp.id
-                  INNER JOIN value_types as vt on vt.id=fv.value_type_id
-                  LEFT OUTER JOIN environments as env on fs.environment_id = env.id
-                WHERE depth = 0"}))
+               :source h/facts-query}))
 
 (def fact-contents-query
   "Query for fact nodes"
@@ -148,25 +129,7 @@
                :source-table "facts"
                :subquery? false
                :supports-extract? false
-               :source
-               "SELECT fs.certname,
-                       fp.path,
-                       fp.name as name,
-                       COALESCE(fv.value_string,
-                                CAST(fv.value_boolean as text)) as value,
-                       fv.value_string,
-                       fv.value_hash,
-                       fv.value_integer as value_integer,
-                       fv.value_float as value_float,
-                       env.name as environment,
-                       vt.type
-                FROM factsets fs
-                  INNER JOIN facts as f on fs.id = f.factset_id
-                  INNER JOIN fact_values as fv on f.fact_value_id = fv.id
-                  INNER JOIN fact_paths as fp on fv.path_id = fp.id
-                  INNER JOIN value_types as vt on fp.value_type_id = vt.id
-                  LEFT OUTER JOIN environments as env on fs.environment_id = env.id
-                WHERE fp.value_type_id != 5"}))
+               :source h/fact-contents}))
 
 (def reports-query
   "Query for the resource-events entity"
@@ -430,25 +393,7 @@
                :source-table "factsets"
                :subquery? false
                :supports-extract? false
-               :source "SELECT fact_paths.path, timestamp,
-                               COALESCE(fact_values.value_string,
-                                        fact_values.value_json,
-                                        CAST(fact_values.value_boolean as text)) as value,
-                               fact_values.value_integer as value_integer,
-                               fact_values.value_float as value_float,
-                               factsets.certname,
-                               factsets.hash,
-                               factsets.producer_timestamp,
-                               environments.name as environment,
-                               value_types.type
-                        FROM factsets
-                             INNER JOIN facts on factsets.id = facts.factset_id
-                             INNER JOIN fact_values on facts.fact_value_id = fact_values.id
-                             INNER JOIN fact_paths on fact_values.path_id = fact_paths.id
-                             INNER JOIN value_types on fact_paths.value_type_id = value_types.id
-                             LEFT OUTER JOIN environments on factsets.environment_id = environments.id
-                        WHERE depth = 0
-                        ORDER BY factsets.certname"}))
+               :source h/factset}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Conversion from plan to SQL
