@@ -94,25 +94,43 @@
                         INNER JOIN value_types vt ON fp.value_type_id=vt.id
                         WHERE fp.value_type_id != 5"}))
 
+(defn honey->Query [{:keys [select] :as sql-map}]
+  (map->Query {:project (reduce (fn [acc col]
+                                  (assoc acc (name (:alias col)) (:col-type col))) {} select)
+               :alias "facts"
+               :queryable-fields (for [{:keys [alias queryable?]} select
+                                       :when queryable?]
+                                   (name alias))
+               :source-table "facts"
+               :entity :facts
+               :subquery? false
+               :supports-extract? false
+               :source (h/to-sql-str sql-map)}))
+
 (def facts-query
   "Query structured facts."
+  (update-in (honey->Query h/facts-query) [:project] dissoc "value_hash" "value_string"))
 
-  (map->Query {:project {"path" :string
-                         "value" :multi
-                         "depth" :integer
-                         "certname" :string
-                         "environment" :string
-                         "value_integer" :number
-                         "value_float" :number
-                         "name" :string
-                         "type" :string}
+#_(def facts-query
+  "Query structured facts."
+  (map->Query {:project
+               {"path" :string
+                "value" :multi
+                "depth" :integer
+                "certname" :string
+                "environment" :string
+                "value_integer" :number
+                "value_float" :number
+                "name" :string
+                "type" :string}
+
                :alias "facts"
                :queryable-fields ["name" "certname" "environment" "value"]
                :source-table "facts"
                :entity :facts
                :subquery? false
                :supports-extract? false
-               :source h/facts-query}))
+               :source (h/to-sql-str h/facts-query)}))
 
 (def fact-contents-query
   "Query for fact nodes"
@@ -880,16 +898,16 @@
                                             (:alias query-context)
                                             (json/generate-string queryable-fields)))}))
 
-            ; This validation is only for top-level extract operator
-            ; For in-extract operator validation, please see annotate-with-context function
+                                        ; This validation is only for top-level extract operator
+                                        ; For in-extract operator validation, please see annotate-with-context function
             [["extract" field & _]]
             (let [query-context (:query-context (meta node))
                   queryable-fields (:queryable-fields query-context)
                   column-validation-message (validate-query-operation-fields
-                                              field
-                                              queryable-fields
-                                              (:alias query-context)
-                                              "Can't extract" "")]
+                                             field
+                                             queryable-fields
+                                             (:alias query-context)
+                                             "Can't extract" "")]
               (when column-validation-message
                 {:node node
                  :state (conj state column-validation-message)}))

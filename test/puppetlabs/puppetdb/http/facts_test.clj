@@ -203,7 +203,7 @@
    "/v4/facts" (omap/ordered-map
                 ;; Extract using invalid fields should throw an error
                 ["in" "certname" ["extract" "nothing" ["select_resources"
-                                                        ["=" "type" "Class"]]]]
+                                                       ["=" "type" "Class"]]]]
                 "Can't extract unknown 'resources' field 'nothing'. Acceptable fields are: [\"certname\",\"environment\",\"resource\",\"type\",\"title\",\"tag\",\"exported\",\"file\",\"line\",\"parameters\"]"
 
                 ["in" "certname" ["extract" ["nothing" "nothing2" "certname"] ["select_resources"
@@ -212,11 +212,11 @@
 
                 ;; In-query for invalid fields should throw an error
                 ["in" "nothing" ["extract" "certname" ["select_resources"
-                                                        ["=" "type" "Class"]]]]
+                                                       ["=" "type" "Class"]]]]
                 "Can't match on unknown 'facts' field 'nothing' for 'in'. Acceptable fields are: [\"name\",\"certname\",\"environment\",\"value\"]"
 
                 ["in" ["name" "nothing" "nothing2"] ["extract" "certname" ["select_resources"
-                                                                            ["=" "type" "Class"]]]]
+                                                                           ["=" "type" "Class"]]]]
                 "Can't match on unknown 'facts' fields: 'nothing', 'nothing2' for 'in'. Acceptable fields are: [\"name\",\"certname\",\"environment\",\"value\"]")))
 
 (def versioned-invalid-projections
@@ -240,12 +240,12 @@
 
 (def pg-versioned-invalid-regexps
   (omap/ordered-map
-    "/v4/facts" (omap/ordered-map
-                  ["~" "certname" "*abc"]
-                  #".*invalid regular expression: quantifier operand invalid"
+   "/v4/facts" (omap/ordered-map
+                ["~" "certname" "*abc"]
+                #".*invalid regular expression: quantifier operand invalid"
 
-                  ["~" "certname" "[]"]
-                  #".*invalid regular expression: brackets.*not balanced")))
+                ["~" "certname" "[]"]
+                #".*invalid regular expression: brackets.*not balanced")))
 
 (deftestseq ^{:hsqldb false} pg-invalid-regexps
   [[version endpoint] facts-endpoints]
