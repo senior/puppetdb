@@ -73,16 +73,16 @@
   present).  If a subtree of metrics already exists, this function is
   a no-op."
   ([command]
-     (create-metrics-for-command! command nil))
+   (create-metrics-for-command! command nil))
   ([command version]
-     (let [prefix     (if (nil? version) [command] [command version])
-           prefix-str (clojure.string/join "." prefix)]
-       (when-not (get-in @metrics prefix)
-         (swap! metrics assoc-in (conj prefix :processing-time) (timer [ns-str prefix-str "processing-time"]))
-         (swap! metrics assoc-in (conj prefix :retry-counts) (histogram [ns-str prefix-str "retry-counts"]))
-         (doseq [metric [:seen :processed :fatal :retried :discarded]
-                 :let [metric-str (name metric)]]
-           (swap! metrics assoc-in (conj prefix metric) (meter [ns-str prefix-str metric-str] "msgs/s")))))))
+   (let [prefix     (if (nil? version) [command] [command version])
+         prefix-str (clojure.string/join "." prefix)]
+     (when-not (get-in @metrics prefix)
+       (swap! metrics assoc-in (conj prefix :processing-time) (timer [ns-str prefix-str "processing-time"]))
+       (swap! metrics assoc-in (conj prefix :retry-counts) (histogram [ns-str prefix-str "retry-counts"]))
+       (doseq [metric [:seen :processed :fatal :retried :discarded]
+               :let [metric-str (name metric)]]
+         (swap! metrics assoc-in (conj prefix metric) (meter [ns-str prefix-str metric-str] "msgs/s")))))))
 
 ;; Create metrics for aggregate operations
 (create-metrics-for-command! "global")
