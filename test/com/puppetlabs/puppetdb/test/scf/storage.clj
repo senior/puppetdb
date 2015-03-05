@@ -1,5 +1,7 @@
 (ns com.puppetlabs.puppetdb.test.scf.storage
   (:require [com.puppetlabs.puppetdb.catalog.utils :as catutils]
+            [com.puppetlabs.puppetdb.facts :as facts
+             :refer [path->pathmap string-to-factpath value->valuemap]]
             [com.puppetlabs.random :as random]
             [com.puppetlabs.puppetdb.report.utils :as reputils]
             [com.puppetlabs.puppetdb.reports :as report-val]
@@ -337,7 +339,42 @@
       (let [facts {"a" "1" "b" "1"}]
         (add-certname! "c-x")
         (replace-facts! (facts-now "c-x" facts))
-        (replace-facts! (facts-now "c-x" (assoc facts "b" "2")))))))
+        (replace-facts! (facts-now "c-x" (assoc facts "b" "2")))))
+    (testing "paths - globally, incrementally"
+      (letfn [(str->pathmap [s] (-> s string-to-factpath path->pathmap))]
+        (reset-db!)
+        (sql/insert-records :fact_paths (str->pathmap "foo"))
+        (delete-orphaned-paths! 0)
+        (is (= (map #(dissoc % :id) (db-paths)) [(str->pathmap "foo")]))
+        (delete-orphaned-paths! 1)
+        (is (empty? (map #(dissoc % :id) (db-paths))))
+        (sql/insert-records :fact_paths (str->pathmap "foo"))
+        (delete-orphaned-paths! 11)
+        (is (empty? (map #(dissoc % :id) (db-paths))))
+        (apply
+         sql/insert-records :fact_paths
+         (for [x (range 10)] (str->pathmap (str "foo-" x))))
+        (delete-orphaned-paths! 3)
+        (is (= 7 (:c (first
+                      (query-to-vec
+                       "select count(id) as c from fact_paths")))))))
+    (testing "values - globally, incrementally"
+      (reset-db!)
+      (sql/insert-records :fact_values (value->valuemap "foo"))
+      (delete-orphaned-values! 0)
+      (is (= (db-vals) #{"foo"}))
+      (delete-orphaned-values! 1)
+      (is (empty? (db-vals)))
+      (sql/insert-records :fact_values (value->valuemap "foo"))
+      (delete-orphaned-values! 11)
+      (is (empty? (db-vals)))
+      (apply
+       sql/insert-records :fact_values
+       (for [x (range 10)] (value->valuemap (str "foo-" x))))
+      (delete-orphaned-values! 3)
+      (is (= 7 (:c (first
+                    (query-to-vec
+                     "select count(id) as c from fact_values"))))))))
 
 (def catalog (:basic catalogs))
 (def certname (:name catalog))
@@ -629,7 +666,7 @@
            [{:c 3}])))
 
   (testing "when GC'ed, should leave no dangling params"
-    (garbage-collect!)
+    (garbage-collect! *db*)
 
     ;; And now they are gone
     (is (= (query-to-vec ["SELECT * FROM resource_params"])
@@ -673,7 +710,7 @@
            [{:c 3}])))
 
   (testing "when GC should leave no dangling environments"
-    (garbage-collect!)
+    (garbage-collect! *db*)
 
     (is (= (query-to-vec ["SELECT * FROM environments"])
            []))))
@@ -691,7 +728,7 @@
     (delete-reports-older-than! (ago (days 2)))
 
     (is (= [{:c 1}] (query-to-vec ["SELECT COUNT(*) as c FROM report_statuses"])))
-    (garbage-collect!)
+    (garbage-collect! *db*)
     (is (= [{:c 0}] (query-to-vec ["SELECT COUNT(*) as c FROM report_statuses"])))))
 
 (deftest catalog-bad-input

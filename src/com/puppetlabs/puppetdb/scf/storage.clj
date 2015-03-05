@@ -15,8 +15,8 @@
 ;; * facts are associated with a single certname
 ;;
 ;; The standard set of operations on information in the database will
-;; likely result in dangling resources and catalogs; to clean these
-;; up, it's important to run `garbage-collect!`.
+;; likely result in dangling resources, catalogs, paths, and values;
+;; to clean these up, it's important to run `garbage-collect!`.
 
 (ns com.puppetlabs.puppetdb.scf.storage
   (:require [com.puppetlabs.puppetdb.catalogs :as cat]
@@ -738,17 +738,6 @@
          (sql/delete-rows :report_statuses
            ["ID NOT IN (SELECT status_id FROM reports)"])))
 
-(defn garbage-collect!
-  "Delete any lingering, unassociated data in the database"
-  []
-  (time! (:gc metrics)
-         (sql/transaction
-          (delete-unassociated-params!))
-         (sql/transaction
-          (delete-unassociated-environments!))
-         (sql/transaction
-          (delete-unassociated-statuses!))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Facts
 
@@ -811,6 +800,52 @@
                                  AND (f.factset_id, f.fact_path_id) NOT %s)"
         in-vids in-vids in-fp-id-pairs)
        (flatten [vids vids fp-id-pairs])))))
+
+(defn-validated delete-orphaned-paths! :- s/Int
+  "Deletes up to n paths that are no longer mentioned by any factsets,
+  and returns the number actually deleted.  These orphans can be
+  created by races between parallel updates since (for performance) we
+  don't serialize those transactions.  Via repeatable read, an update
+  transaction may decide not to delete paths that are only referred to
+  by other facts that are being changed in parallel transactions to
+  also not refer to the paths."
+  [n :- (s/both s/Int (s/pred (complement neg?) 'nonnegative?))]
+  (if (zero? n)
+    0
+    (first
+     (sql/transaction
+      (sql/do-prepared
+       "DELETE FROM fact_paths
+          WHERE id IN (SELECT fp.id
+                         FROM fact_paths fp
+                         WHERE NOT EXISTS (SELECT 1
+                                             FROM facts f
+                                             WHERE fp.id = f.fact_path_id)
+                         LIMIT ?)"
+       [n])))))
+
+(defn-validated delete-orphaned-values! :- s/Int
+  "Deletes up to n values that are no longer mentioned by any
+  factsets, and returns the number actually deleted.  These orphans
+  can be created by races between parallel updates since (for
+  performance) we don't serialize those transactions.  Via repeatable
+  read, an update transaction may decide not to delete values that are
+  only referred to by other facts that are being changed in parallel
+  transactions to also not refer to the values."
+  [n :- (s/both s/Int (s/pred (complement neg?) 'nonnegative?))]
+  (if (zero? n)
+    0
+    (first
+     (sql/transaction
+      (sql/do-prepared
+       "DELETE FROM fact_values
+          WHERE id in (SELECT fv.id
+                         FROM fact_values fv
+                         WHERE NOT EXISTS (SELECT 1
+                                             FROM facts f
+                                             WHERE fv.id = f.fact_value_id)
+                         LIMIT ?)"
+       [n])))))
 
 ;; NOTE: now only used in tests.
 (defn-validated delete-certname-facts!
@@ -1208,3 +1243,21 @@
   [action-for-unsupported-fn]
   (fail-on-unsupported action-for-unsupported-fn)
   (warn-on-db-deprecation))
+
+(def ^:dynamic *orphaned-path-gc-limit* 200)
+(def ^:dynamic *orphaned-value-gc-limit* 200)
+
+(defn garbage-collect!
+  "Delete any lingering, unassociated data in the database"
+  [db]
+  (time!
+   (:gc metrics)
+   (jdbc/with-transacted-connection db
+     (sql/transaction (delete-unassociated-params!))
+     (sql/transaction (delete-unassociated-environments!))
+     (sql/transaction (delete-unassociated-statuses!)))
+   ;; These require serializable because they make the decision to
+   ;; delete based on row counts in another table.
+   (jdbc/with-transacted-connection' db :serializable
+     (sql/transaction (delete-orphaned-paths! *orphaned-path-gc-limit*))
+     (sql/transaction (delete-orphaned-values! *orphaned-value-gc-limit*)))))
