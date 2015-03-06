@@ -213,11 +213,19 @@
     ;; Stop the mq the old-fashioned way
     (mq/stop-broker! broker)))
 
+(pls/defn-validated close
+  "Nil-safe call to .close"
+  [closeable :- Closeable]
+  (when closeable
+    (.close closeable)))
+
 (defn stop-puppetdb
   "Callback to execute any necessary cleanup during a normal shutdown."
   [context]
   (log/info "Shutdown request received; puppetdb exiting.")
   (shutdown-mq-broker context)
+  (close (get-in context [:shared-globals :scf-read-db :datasource]))
+  (close (get-in context [:shared-globals :scf-write-db :datasource]))
   context)
 
 (defn error-shutdown!
