@@ -901,7 +901,7 @@
 
    ;; Needed for the insert if nothing else.
    "CREATE INDEX fact_paths_path_idx on fact_paths(path)"
-   "CREATE INDEX fact_values_value_hash_idx on fact_values(value_hash)"
+;;   "CREATE INDEX fact_values_value_hash_idx on fact_values(value_hash)"
 
    ;; Patch up facts refrences to refer to the min id path/value
    ;; wherever there's more than one option.
@@ -939,6 +939,10 @@
    "ALTER TABLE facts_transform RENAME TO facts"
    ;; FIXME: do we want any alternate/additional indexes?
    "CREATE INDEX fact_value_id_idx ON facts(fact_value_id)"
+   "CREATE INDEX fact_path_id_idx ON facts(fact_path_id)"
+   "DROP INDEX fact_values_value_integer_idx"
+   "DROP INDEX fact_values_value_float_idx"
+
    (if (scf-utils/postgres?) "ANALYZE facts" "SELECT 1")
 
    ;; These are for the more pedantic HSQLDB.

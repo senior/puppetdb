@@ -629,8 +629,11 @@
         error-msg (format "[%s] [%s] Retrying after attempt %d, due to: %s"
                           id command attempt e)]
     (if (> n (/ maximum-allowable-retries 4))
-      (log/error e error-msg)
-      (log/debug e error-msg))
+      (do (log/error e error-msg)
+          (log/error (.getNextException e) "Next exception is..."))
+      (do (log/warn e error-msg)
+          (when (instance? java.sql.BatchUpdateException e)
+            (log/warn (.getNextException e) "Next exception is..."))))
 
     (publish-fn (json/generate-string msg) (mq/delay-property delay :seconds))))
 
