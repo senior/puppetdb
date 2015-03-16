@@ -894,30 +894,62 @@
      "SELECT 1")
 
    ;; Build complete facts table as of migration 28.
+
+   "CREATE TABLE facts_unique_transform
+        (factset_id bigint NOT NULL,
+         fact_path text NOT NULL,
+         fact_value_hash varchar(40) NOT NULL)"
+
+   "INSERT INTO facts_unique_transform (factset_id, fact_path, fact_value_hash)
+    SELECT f.factset_id, fp.path, fv.value_hash
+    FROM facts f
+         INNER JOIN fact_values fv on f.fact_value_id = fv.id
+         INNER JOIN fact_paths fp on fv.path_id = fp.id"
+
+   "DROP TABLE facts"
+
+   ;; Remove all the orphaned duplicates (all but the row in each set
+   ;; with min-id).
+   (if (scf-utils/postgres?)
+     "DELETE FROM fact_paths t1 USING fact_paths t2
+          WHERE t1.path = t2.path AND t1.id > t2.id"
+     "DELETE FROM fact_paths t1
+          WHERE t1.id <> (SELECT MIN(t2.id) FROM fact_paths t2
+                            WHERE t1.path = t2.path)")
+   (if (scf-utils/postgres?)
+     "DELETE FROM fact_values t1 USING fact_values t2
+          WHERE t1.value_hash = t2.value_hash AND t1.id > t2.id"
+     "DELETE FROM fact_values t1
+          WHERE t1.id <> (SELECT MIN(t2.id) FROM fact_values t2
+                            WHERE t1.value_hash = t2.value_hash)")
+
+   (let [opt-deferrable (if (and (scf-utils/postgres?)
+                                 (scf-utils/db-version-newer-than? [9 0]))
+                          "DEFERRABLE" "")]
+     (format "ALTER TABLE fact_paths
+                  ADD CONSTRAINT fact_paths_path_key UNIQUE (path)
+                    %s" opt-deferrable)
+     (format "ALTER TABLE fact_values
+                  ADD CONSTRAINT fact_values_value_hash_key UNIQUE (value_hash)
+                    %s" opt-deferrable))
+
    "CREATE TABLE facts_transform
         (factset_id bigint NOT NULL,
          fact_path_id bigint NOT NULL,
          fact_value_id bigint NOT NULL)"
 
-   ;; Needed for the insert if nothing else.
-   "CREATE INDEX fact_paths_path_idx on fact_paths(path)"
-;;   "CREATE INDEX fact_values_value_hash_idx on fact_values(value_hash)"
-
-   ;; Patch up facts refrences to refer to the min id path/value
-   ;; wherever there's more than one option.
    "INSERT INTO facts_transform (factset_id, fact_path_id, fact_value_id)
-        SELECT f.factset_id,
-               (SELECT MIN(id) FROM fact_paths fp2 WHERE fp2.path = fp.path),
-               (SELECT MIN(id) FROM fact_values fv2
-                  WHERE fv2.value_hash = fv.value_hash)
-          FROM facts f
-            INNER JOIN fact_values fv on f.fact_value_id = fv.id
-            INNER JOIN fact_paths fp on fv.path_id = fp.id"
-   "DROP TABLE facts"
+    SELECT f.factset_id, fp.id, fv.id
+    FROM facts_unique_transform f
+         INNER JOIN fact_paths fp on f.fact_path = fp.path
+         INNER JOIN fact_values fv on f.fact_value_hash = fv.value_hash;"
+
+   "DROP TABLE facts_unique_transform"
 
    "ALTER TABLE facts_transform
         ADD CONSTRAINT facts_factset_id_fact_path_id_fact_key
           UNIQUE (factset_id, fact_path_id)"
+
    "ALTER TABLE facts_transform
         ADD CONSTRAINT factset_id_fk
           FOREIGN KEY (factset_id) REFERENCES factsets(id)
@@ -953,40 +985,7 @@
    "ALTER TABLE fact_values DROP CONSTRAINT fact_values_path_id_fk"
 
    "ALTER TABLE fact_paths DROP COLUMN value_type_id"
-   "ALTER TABLE fact_values DROP COLUMN path_id"
-
-   ;; Remove all the orphaned duplicates (all but the row in each set
-   ;; with min-id).
-   (if (scf-utils/postgres?)
-     "DELETE FROM fact_paths t1 USING fact_paths t2
-          WHERE t1.path = t2.path AND t1.id > t2.id"
-     "DELETE FROM fact_paths t1
-          WHERE t1.id <> (SELECT MIN(t2.id) FROM fact_paths t2
-                            WHERE t1.path = t2.path)")
-   (if (scf-utils/postgres?)
-     "DELETE FROM fact_values t1 USING fact_values t2
-          WHERE t1.value_hash = t2.value_hash AND t1.id > t2.id"
-     "DELETE FROM fact_values t1
-          WHERE t1.id <> (SELECT MIN(t2.id) FROM fact_values t2
-                            WHERE t1.value_hash = t2.value_hash)")
-
-   (if (scf-utils/postgres?)
-     "SET CONSTRAINTS ALL IMMEDIATE"
-     "SELECT 1")
-   ;; FIXME: should these be deferrable -- perf only, if that, since
-   ;; some versions don't support it?  Can deferrable actual help perf?
-   ;; And [9 0] may be too aggressive, but at least 8.4 didn't appear
-   ;; to support this.  Have not determined exactly when support was
-   ;; introduced yet.
-   (let [opt-deferrable (if (and (scf-utils/postgres?)
-                                 (scf-utils/db-version-newer-than? [9 0]))
-                          "DEFERRABLE" "")]
-     (format "ALTER TABLE fact_paths
-                  ADD CONSTRAINT fact_paths_path_key UNIQUE (path)
-                    %s" opt-deferrable)
-     (format "ALTER TABLE fact_values
-                  ADD CONSTRAINT fact_values_value_hash_key UNIQUE (value_hash)
-                    %s" opt-deferrable))))
+   "ALTER TABLE fact_values DROP COLUMN path_id"))
 
 ;; The available migrations, as a map from migration version to migration function.
 (def migrations
