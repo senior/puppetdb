@@ -4,6 +4,7 @@
             [puppetlabs.puppetdb.fixtures :as fixt]
             [clojure.test :refer :all]
             [puppetlabs.puppetdb.testutils :refer [test-db]]
+            [clojure.java.jdbc :as sql]
             [puppetlabs.puppetdb.testutils.db :refer [antonym-data with-antonym-test-database insert-map *db-spec*]]))
 
 (use-fixtures :each with-antonym-test-database)
@@ -112,3 +113,67 @@
          java.sql.Connection/TRANSACTION_REPEATABLE_READ :repeatable-read
          java.sql.Connection/TRANSACTION_SERIALIZABLE :serializable
          java.sql.Connection/TRANSACTION_READ_COMMITTED :read-committed)))
+
+
+#_(defn with-query-results-cursor*
+  "Executes the given parameterized query within a transaction,
+  producing a lazy sequence of rows. The callback `func` is executed
+  on the entire sequence.
+
+  The lazy sequence is backed by an active database cursor, and is thus
+  useful for streaming very large resultsets.
+
+  The cursor is closed when `func` returns. If an exception is thrown,
+  the query is cancelled."
+  [func sql params]
+  (sql/transaction
+   (with-open [stmt (.prepareStatement (sql/connection) sql)]
+     (doseq [[index value] (map vector (iterate inc 1) params)]
+       (.setObject stmt index value))
+     (.setFetchSize stmt 500)
+     (with-open [rset (.executeQuery stmt)]
+       (try
+         (-> rset
+             (sql/resultset-seq)
+             (convert-result-arrays)
+             (func))
+         (catch Exception e
+           ;; Cancel the current query
+           (.cancel stmt)
+           (throw e)))))))
+
+(defn resultset-transducer [db-conn stmt result-set]
+  (fn [xf]
+    (fn
+      ([] (xf))
+      ([result]
+       (.close db-conn)
+       (.close stmt)
+       (.close result-set)
+       (xf result))
+      ([result input]
+       (xf result input)))))
+
+(defn resultarific [db-conn query-string]
+  (let [stmt (.prepareStatement db-conn query-string)]
+    (.setFetchSize stmt 500)
+    (let [rset (.executeQuery stmt)]
+      (eduction (resultset-transducer db-conn stmt rset) (sql/resultset-seq rset)))))
+
+(deftest test-lazy-transducer
+
+  (is (= 4913 (count (subject/query-to-vec "SELECT key, value FROM test t1, test t2, test t3"))))
+
+
+  (let [conn (clojure.java.jdbc.internal/get-connection *db-spec*)]
+
+    (is (false? (.isClosed conn)))
+    (let [rs (resultarific conn "SELECT key, value FROM test t1, test t2, test t3")]
+
+      (is (false? (.isClosed conn)))
+      (let [the-big-seq (sequence (map #(assoc % :random "stuff")) rs)
+            some-rows (take 100 the-big-seq)]
+        (is (= 100 (count some-rows)))
+        (is (false? (.isClosed conn)))
+        (into [] the-big-seq)
+        (is (true? (.isClosed conn)))))))
