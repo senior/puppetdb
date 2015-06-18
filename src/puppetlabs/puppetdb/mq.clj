@@ -257,6 +257,21 @@
     (vec (repeatedly n #(commit-or-rollback s
                           (convert-jms-message (.receive consumer)))))))
 
+(defn-validated transfer-messages!
+  "Transfers all of the messages currently available in the named
+  source queue (according to recieveNoWait) to the destination.  Each
+  message successfully transferred will be committed."
+  [connection :- connection-schema
+   source :- s/Str
+   destination :- s/Str]
+  (with-open [s (.createSession connection true Session/SESSION_TRANSACTED)
+              in (.createConsumer s (.createQueue s source))
+              out (.createProducer s (.createQueue s destination))]
+    (loop [msg (.receiveNoWait in)]
+      (when msg
+        (do (commit-or-rollback s (.send out msg))
+            (recur (.receiveNoWait in)))))))
+
 (defn delay-property
   "Returns an ActiveMQ property map indicating a message should be
   published only after a delay. The following invokations are

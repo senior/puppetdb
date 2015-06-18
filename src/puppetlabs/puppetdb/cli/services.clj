@@ -302,6 +302,9 @@
                              (service-id service)
                              #(maybe-check-for-updates product-name update-server read-db)
                              #(stop-puppetdb % true))))]
+      (mq/transfer-messages! mq-connection
+                             "com.puppetlabs.puppetdb.commands"
+                             "puppetlabs.puppetdb.commands")
       (let [app (->> (server/build-app globals)
                      (compojure/context url-prefix []))]
         (log/info "Starting query server")
