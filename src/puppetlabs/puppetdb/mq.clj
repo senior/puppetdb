@@ -7,7 +7,8 @@
            [org.apache.activemq.pool PooledConnectionFactory])
   (:require [puppetlabs.puppetdb.schema :refer [defn-validated]]
             [clojure.tools.logging :as log]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [clojure.java.jmx :as jmx]))
 
 (defn- set-usage!*
   "Internal helper function for setting `SystemUsage` values on a `BrokerService`
@@ -264,7 +265,10 @@
   [connection :- connection-schema
    source :- s/Str
    destination :- s/Str]
-  (with-open [s (.createSession connection true Session/SESSION_TRANSACTED)
+  (log/error (str "moving all messages: "
+                  (jmx/invoke (format "org.apache.activemq:Type=Queue,Destination=%s,BrokerName=localhost" source)
+                              "moveMessagesTo" "LIKE '%'" destination)))
+  #_(with-open [s (.createSession connection true Session/SESSION_TRANSACTED)
               in (.createConsumer s (.createQueue s source))
               out (.createProducer s (.createQueue s destination))]
     (loop [msg (.receiveNoWait in)]
