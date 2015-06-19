@@ -265,16 +265,19 @@
   [connection :- connection-schema
    source :- s/Str
    destination :- s/Str]
-  (log/error (str "moving all messages: "
-                  (jmx/invoke (format "org.apache.activemq:Type=Queue,Destination=%s,BrokerName=localhost" source)
-                              "moveMessagesTo" "LIKE '%'" destination)))
-  #_(with-open [s (.createSession connection true Session/SESSION_TRANSACTED)
-              in (.createConsumer s (.createQueue s source))
-              out (.createProducer s (.createQueue s destination))]
-    (loop [msg (.receiveNoWait in)]
-      (when msg
-        (do (commit-or-rollback s (.send out msg))
-            (recur (.receiveNoWait in)))))))
+  (let [messages-moved (jmx/invoke-signature
+                        (format "org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=%s" source)
+                        :moveMatchingMessagesTo
+                        ["java.lang.String" "java.lang.String"]
+                        "JMSMessageID is NOT NULL"
+                        destination)]
+    (log/warnf "Deleting stuff: %s"
+               (jmx/invoke-signature
+                "org.apache.activemq:type=Broker,brokerName=localhost"
+                :removeQueue
+                ["java.lang.String"]
+                source))
+    (log/warnf "Checked %s for messages and moved %s to %s" source messages-moved destination)))
 
 (defn delay-property
   "Returns an ActiveMQ property map indicating a message should be
