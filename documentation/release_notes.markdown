@@ -18,18 +18,22 @@ with some breaking changes.
 
 ### Contributors
 
-Andrew Roetker, Andrii Nikitiuk, Chris Price, Eric Sorenson, John Duarte,
-Jarie Tappa, Ken Barber, Brian LaMattery, Lars Windolf, Mathieu Parent,
-Matthaus Owens, Nick Fagerlund, Rob Braden, Rob Browning, Russell Mull,
-Ryan Senior, Scott Garman, Wayne Warren, Wyatt Alt, Jean Bond and
-Darin Perusich.
+Andrew Roetker, Andrii Nikitiuk, Brian LaMattery, Chris Price, Darin
+Perusich, Eric Sorenson, Jean Bond, John Duarte, Jorie Tappa, Ken
+Barber, Lars Windolf, Mathieu Parent, Matthaus Owens, Nick Fagerlund,
+Rob Braden, Rob Browning, Russell Mull, Ryan Senior, Scott Garman,
+Wayne Warren and Wyatt Alt.
 
 ### Upgrading
 
-* This version of PuppetDB adopts the AIO layout to be consistent with other
-  Puppet Labs layouts, such as Puppet Server.
+* This version of PuppetDB adopts the AIO layout to be consistent with
+  other Puppet Labs layouts, such as Puppet Server. We recommend the
+  using the [PuppetDB Puppet Module][puppetdb-module] version 5, as
+  it will automate a lot of this kind of management and has been
+  modified specifically for PuppetDB 3 support by default.
 
-    This means the following paths have changed:
+  For those that don't use the PuppetDB module, this means the
+  following paths have changed:
 
     * Primary configuration: /etc/puppetdb is now /etc/puppetlabs/puppetdb
     * Logs: /var/log/puppetdb is now /var/log/puppetlabs/puppetdb
@@ -39,10 +43,7 @@ Darin Perusich.
 
     During upgrade we have written a script that will migrate your configuration
     to the new locations. After upgrade you should double check the migrated
-    configuration to ensure everything is correct. Of course we recommend the
-    use of the [PuppetDB Puppet Module][puppetdb-module] version 5, as it will
-    automate a lot of this kind of management and has been modified specifically
-    for PuppetDB 3 support by default.
+    configuration to ensure everything is correct.
 
 * PuppetDB now only supports PostgreSQL 9.4 and newer. Support for
   versions prior to 9.4 have been retired. Users must upgrade
@@ -64,8 +65,9 @@ Darin Perusich.
 
 * The `puppetdb-terminus` package has now been renamed to
   `puppetdb-termini`. Make sure to upgrade your `puppetdb-terminus`
-  package (on the host where your Puppet Master lives), and restart
-  your master service (this is typically called `puppetserver`).
+  package to the `puppetdb-termini` package (on the host where your
+  Puppet Master lives), and restart your master service (this is
+  typically called `puppetserver`).
 
 * Before upgrading you should ensure you have as much free disk space
   as you have data. Database schema changes (also known as migrations)
@@ -73,10 +75,13 @@ Darin Perusich.
   and may mean you have wait during the upgrade as these migrations
   run.
 
-* You may notice some additional system load for the first 30 to 60
-  minutes once the application has started upgrading. This is due to
-  internal changes in the way we check if objects (such as catalogs) are
-  up-to-date.
+* After the upgrade, you may notice some additional system load for
+  the first 30 to 60 minutes. This is due to internal changes in the
+  way we check if objects (such as catalogs) are up-to-date.
+
+* Users manually upgrading PuppetDB should restart both Puppet server
+  and PuppetDB after the upgrade. This has been automated for version
+  5 users of the [PuppetDB Puppet Module][puppetdb-module].
 
 ### Downgrading
 
@@ -90,7 +95,7 @@ Darin Perusich.
 
 ### Breaking Changes
 
-This release retires all api versions before v4 and promotes v4 to be
+This release retires all API versions before v4 and promotes v4 to be
 the stable API. The following changes have been made since the last
 stable release of PuppetDB, which included an experimental v4 API.
 
@@ -100,7 +105,7 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * We've retired some previously deprecated commands ([PDB-840](https://tickets.puppetlabs.com/browse/PDB-840))
 
-    The currently supported commands and versions are now:
+    The currently supported commands and versions are:
 
     * replace catalog, v6
     * replace facts, v4
@@ -111,22 +116,23 @@ stable release of PuppetDB, which included an experimental v4 API.
     processed by PuppetDB so you won't lose the data from messages
     still being processed by PuppetDB before an upgrade.
 
-* All API commands and responses now use underscores, instead of dashes. ([PDB-698](https://tickets.puppetlabs.com/browse/PDB-698))
+* All query parameters, query responses and command wire formats use underscores instead of dashes. ([PDB-698](https://tickets.puppetlabs.com/browse/PDB-698))
 
-    This patch changes our API commands and responses to use underscores instead of
-    dashes, which will make it easier to interface with PDB using languages like
-    javascript and python. Consult the various API endpoints for the exact new
+    This patch changes all incoming and outgoing JSON to use
+    underscores instead of dashes, which will make it easier to
+    interface with PDB using languages like javascript and
+    python. Query parameters also user underscores to be consistent
+    with the response formats. Consult the API docs for the exact new
     parameters if you are uncertain.
 
-* Split the command endpoint (`/v3/commands` or `/v4/commands`) into its own
-  endpoint namespace served at `/pdb/cmd/v1` so it can be versioned and managed separately. ([PDB-1534](https://tickets.puppetlabs.com/browse/PDB-1534)) ([PDB-1561](https://tickets.puppetlabs.com/browse/PDB-1561))
+* Split the command endpoint (`/v3/commands` or `/v4/commands`) into a separate
+  API, mounted at `/pdb/cmd/v1` so it can be versioned and managed separately. ([PDB-1534](https://tickets.puppetlabs.com/browse/PDB-1534)) ([PDB-1561](https://tickets.puppetlabs.com/browse/PDB-1561))
 
-* The `/metrics` endpoint now has its own top level namespace `/metrics/v1` ([PDB-800](https://tickets.puppetlabs.com/browse/PDB-800))
+* `/metrics` has been moved to it's own service, mounted at `/metrics/v1` ([PDB-800](https://tickets.puppetlabs.com/browse/PDB-800))
 
-    This is something we'd been planning on doing for a while, but separation
-    means we can manage and version this endpoint separately. There are plans
-    to have this endpoint supported in other Puppet Labs products also, and
-    this move gears us up for that.
+    This change will allow us to version the metrics service independently
+    from the query service, and clears the way for future incorporation
+    with other PL products.
 
 * Version and server-time are now mounted under the metadata API ([PDB-1562](https://tickets.puppetlabs.com/browse/PDB-1562))
 
@@ -183,14 +189,14 @@ stable release of PuppetDB, which included an experimental v4 API.
     nested entity data. PostgreSQL users will always have the nested
     entity included.
 
-    The cause of this change is a new feature in PostgreSQL that
-    allows us to improve the performance of queries that contain this
-    nested entity data. HSQLDB does not have an analogous feature,
-    which required us to formalize how this nested entity data is
-    returned.
+    The cause of this change is a new feature (json aggregation) in
+    PostgreSQL that allows us to improve the performance of queries
+    that contain this nested entity data. HSQLDB does not have an
+    analogous feature, which required us to formalize how this nested
+    entity data is returned.
 
-    For PostgreSQL API consumers this means, the extra `data` key needs to be
-    traversed to access the real related object data.
+    For PostgreSQL consumers this means the extra `data` key needs to be
+    traversed to access the related object data.
 
 * Add a `noop` flag to reports ([PDB-1177](https://tickets.puppetlabs.com/browse/PDB-1177))
 
@@ -198,17 +204,23 @@ stable release of PuppetDB, which included an experimental v4 API.
     required boolean flag indicating whether the run producing the
     report used `--noop` (for example: `puppet agent -t --noop`).
 
-* Remove `com.` prefix from JMX and ActiveMQ endpoints ([PDB-863](https://tickets.puppetlabs.com/browse/PDB-863))
+* Remove `com.` prefix from JMX MBeans and the ActiveMQ destination name  ([PDB-863](https://tickets.puppetlabs.com/browse/PDB-863))
 
-    The `com.` prefix has been removed from the JMX and ActiveMQ endpoints. They are now in the
-    `puppetlabs.puppetdb` namespace. Any monitoring applications you have that
-    expect the old namespace will need to be changed.
+    The `com.` prefix has been removed from the JMX MBeans and the
+    ActiveMQ destination name. They are now in the
+    `puppetlabs.puppetdb` namespace. Any monitoring applications you
+    have that expect the old namespace will need to be changed. This
+    pertains to JMX MBeans accessed via JMX and via our HTTP based
+    endpoints.
 
-* The endpoints `aggregate-event-counts` and `event-counts` have now been marked as experimental.
+* The endpoints `aggregate-event-counts` and `event-counts` have been marked as experimental.
 
-    These endpoints were introduced to solve specific problems for the PE console,
-    however the design is under question. We're moving these endpoints back to
-    experimental status so that we are able to deliver a better option later on.
+    These endpoints were introduced to solve specific problems for the
+    PE console, however the design is under question. We're moving
+    these endpoints back to experimental status so that we are able to
+    deliver a better option later on. As per our versioning policy,
+    this implies that breaking changes may be made outside of a major
+    release boundary.
 
 * The older puppetdb-\* sub-commands are now retired (`puppetdb-ssl-setup` for example) instead,
   the new sub-command style should be used `puppetdb ssl-setup`. ([PDB_663](https://tickets.puppetlabs.com/browse/PDB-663))
@@ -223,22 +235,22 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * Retire `[jetty]` configuration key `certificate-whitelist` ([PDB-886](https://tickets.puppetlabs.com/browse/PDB-886))
 
-    This now lives in the `[puppetdb]` section.
+    Moved [jetty] configuration key certificate-whitelist to the [puppetdb] section.
 
-* PuppetDB now has a new filesystem layout that complies with the overall Puppet AIO layout ([PDB-1455](https://tickets.puppetlabs.com/browse/PDB-1455))
+* PuppetDB now has a new filesystem layout that complies with the Puppet AIO layout ([PDB-1455](https://tickets.puppetlabs.com/browse/PDB-1455))
 
 * PuppetDB now uses the Ezbake build system which changes the way we package ([PDB-663](https://tickets.puppetlabs.com/browse/PDB-663))
 
-* Due to the Ezbake changes, the `[repl]` block has been renamed to `[nrepl]` and `type` is no longer an accpted parameter ([PDB-663](https://tickets.puppetlabs.com/browse/PDB-663))
+* Due to the Ezbake changes, the `[repl]` block has been renamed to `[nrepl]` and `type` is no longer an accepted parameter ([PDB-663](https://tickets.puppetlabs.com/browse/PDB-663))
 
 * The endpoints contained in `/experimental` have now been removed ([PDB-1127](https://tickets.puppetlabs.com/browse/PDB-1127))
 
-* Return proper `404` errors for shorthand endpoints where their
-  parents do not exist. Previously this returned an empty list. A
-  shorthand endpoint is a convenient way to filter one entity's
-  response using another entity. A good example of this kind of
-  endpoint is using the nodes endpoint to get the facts associated
-  with that node i.e. `/pdb/query/v4/ndoes/foo.com/facts`
+* Return proper `404` errors for shorthand endpoints whose parents do
+  not exist. Previously this returned an empty list. A shorthand
+  endpoint is a convenient way to filter one entity's response using
+  another entity. A good example of this kind of endpoint is using the
+  nodes endpoint to get the facts associated with that node
+  i.e. `/pdb/query/v4/nodes/foo.com/facts`
   ([PDB-1473](https://tickets.puppetlabs.com/browse/PDB-1473))
 
 * To improve performance on the `aggregate-event-counts` endpoint, we've modified the API and underlying storage indexing. We've also dropped HSQLDB support for this endpoint. ([PDB-1587](https://tickets.puppetlabs.com/browse/PDB-1587))
@@ -247,9 +259,9 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * HyperSQL is now deprecated and will be removed in the next major release ([PDB-1508](https://tickets.puppetlabs.com/browse/PDB-1508))
 
-    Installing via the package will now no longer default to using HyperSQL.
-    Instead now we expect PostgreSQL by default, and will return an error if
-    it hasn't been configured.
+    Installing via the package will no longer default to using
+    HyperSQL.  Instead now we expect PostgreSQL by default, and will
+    return an error if it hasn't been configured.
 
 ### New Features
 
@@ -257,7 +269,7 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * We now store report logs ([PDB-1192](https://tickets.puppetlabs.com/browse/PDB-1184))
 
-* We have added `count` aggregation capabilities to the query API ([PDB-1181](https://tickets.puppetlabs.com/browse/PDB-1181))
+* We have added `count` aggregation and `group_by` capabilities to the query API ([PDB-1181](https://tickets.puppetlabs.com/browse/PDB-1181))
 
 * Support `extract` as a top level query operator ([PDB-207](https://tickets.puppetlabs.com/browse/PDB-207))
 
@@ -267,7 +279,7 @@ stable release of PuppetDB, which included an experimental v4 API.
 * Support fallback PuppetDB connections ([PDB-100](https://tickets.puppetlabs.com/browse/PDB-100))
 
     When configuring your connection to PuppetDB, you can now specify a fallback.
-    Instead of the old `server` and `port` config, you can now use a
+    Instead of the now deprecated `server` and `port` config, you can use a
     `server\_urls` config that contains the full path to one or more PuppetDB
     URLs. The old server/port format is still supported.
 
@@ -287,13 +299,13 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * Support for querying [edges](./api/query/v4/edges.html) directly. Previously edges were only returned as part of a catalog. You can also query edges specific to a particular catalog using the new `edges` suffix on the [catalogs](./api/query/v4/catalogs.html) endpoint. ([PDB-1228](https://tickets.puppetlabs.com/browse/PDB-1228)).
 
-* We've added the -A flag to our benchmark tool to simplify passing sample data ([PDB-1249](https://tickets.puppetlabs.com/browse/PDB-1249))
+* Support for passing in an export archive to the load testing tool ([PDB-1249](https://tickets.puppetlabs.com/browse/PDB-1249))
 
-* Now the default behaviour for benchmark is to use some supplied sample data, to lower the barrier for entry for the tooling ([PDB-1249](https://tickets.puppetlabs.com/browse/PDB-1249))
+* Now the default behavior for benchmark is to use some supplied sample data, to lower the barrier for entry for the tooling ([PDB-1249](https://tickets.puppetlabs.com/browse/PDB-1249))
 
 * Support for querying a particular node's factset via the child endpoint `/factsets/<node>`. ([PDB-1599](https://tickets.puppetlabs.com/browse/PDB-1599))
 
-* Support for Apache-style access logging to PuppetDB packages, enabled by default  ([PDB-477](https://tickets.puppetlabs.com/browse/PDB-477))
+* Support for Apache-style access logging to PuppetDB packages, enabled by default ([PDB-477](https://tickets.puppetlabs.com/browse/PDB-477))
 
     Now you can see individual requests logged by the PuppetDB application
     itself, instead of requiring a proxy to do this for you.
@@ -327,10 +339,9 @@ stable release of PuppetDB, which included an experimental v4 API.
 * Switch from `text` based storage of UUID and hashes, to the PostgreSQL `uuid` and `bytea` types respectively ([PDB-1416](https://tickets.puppetlabs.com/browse/PDB-1416))
 
 * The `reports` database table was using the hash string as its
-  primary key, we know have switched to using a smaller bigint primary
-  key for that table, which should result in faster joins in most
-  cases, and smaller foreign key indexes sizes for tables
-  relating to
+  primary key. We have switched to using a smaller bigint primary key
+  for that table. This will result in faster joins and smaller
+  foreign key indexes sizes for tables relating to
   `reports`. ([PDB-1218](https://tickets.puppetlabs.com/browse/PDB-1218))
 
 * We have dropped the `latest\_reports` table in favor of storing a reference to
@@ -355,7 +366,7 @@ stable release of PuppetDB, which included an experimental v4 API.
 
 * Warn user with unknown config items ([PDB-1067](https://tickets.puppetlabs.com/browse/PDB-1067))
 
-* We now use `honeysql` to generate SQL ([PDB-1228](https://tickets.puppetlabs.com/browse/PDB-1228))
+* We now use [`honeysql`](https://github.com/jkk/honeysql) to generate SQL ([PDB-1228](https://tickets.puppetlabs.com/browse/PDB-1228))
 
 * Fixed a bug in extract with 2 element expressions ([PDB-1064](https://tickets.puppetlabs.com/browse/PDB-1064))
 
@@ -390,10 +401,7 @@ stable release of PuppetDB, which included an experimental v4 API.
     shutdown. The first was related to the broker stopping before its
     consumers were removed. The other was related to KahaDB batching
     fails to reset due to the PageFile not being loaded. Upgrading
-    fixed these issues.
-
-errors on PDB shutdown, we upgrade ActiveMQ to 5.7.0 (later 5.11.1). This seems to
-    prevent
+    fixed these failures.
 
 * Refresh service configuration on package upgrades ([PDB-917](https://tickets.puppetlabs.com/browse/PDB-917))
 
@@ -432,9 +440,9 @@ errors on PDB shutdown, we upgrade ActiveMQ to 5.7.0 (later 5.11.1). This seems 
 
 * Improve the error message returned for the `distinct_resources` parameter on the `aggregate-event-counts` endpoint ([PDB-1391](https://tickets.puppetlabs.com/browse/PDB-1391))
 
-* Refactored query-eng database and http streaming to simplify code ([PDB-1465](https://tickets.puppetlabs.com/browse/PDB-1465))
+* Refactored http streaming code ([PDB-1465](https://tickets.puppetlabs.com/browse/PDB-1465))
 
-* Handle comparison queries with non-numerics on the `/facts` endpoint ([PDB-1453](https://tickets.puppetlabs.com/browse/PDB-1453))
+* Reject comparison queries with non-numerics on the `/facts` endpoint ([PDB-1453](https://tickets.puppetlabs.com/browse/PDB-1453))
 
 * Consider reports as part of node expiration, and don't expire nodes that have had a report since the currently configured `node-ttl` ([PDB-1638](https://tickets.puppetlabs.com/browse/PDB-1638))
 
@@ -447,7 +455,7 @@ errors on PDB shutdown, we upgrade ActiveMQ to 5.7.0 (later 5.11.1). This seems 
 
 * Shutdown connection pooling properly when shutting down the service. ([PDB-1348](https://tickets.puppetlabs.com/browse/PDB-1348))
 
-* Garbage collection routines now use `producer-timestamp` for determining deactivation status ([PDB-1289](https://tickets.puppetlabs.com/browse/PDB-1289))
+* Garbage collection routines now use `producer_timestamp` for determining deactivation status ([PDB-1289](https://tickets.puppetlabs.com/browse/PDB-1289))
 
 * Added pagination to service query method ([PDB-1071](https://tickets.puppetlabs.com/browse/PDB-1071))
 
