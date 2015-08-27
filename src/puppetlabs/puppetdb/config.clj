@@ -378,7 +378,6 @@
       convert-config
       configure-catalog-debugging))
 
-
 (defprotocol DefaultedConfig
   (get-config [this])
   (get-in-config [this ks] [this ks default]))
