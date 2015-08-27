@@ -9,7 +9,7 @@
    :password :env/nexus_jenkins_password
    :sign-releases false})
 
-(def tk-version "1.1.1")
+(def tk-version "1.1.2-SNAPSHOT")
 (def tk-jetty9-version "1.3.1")
 (def ks-version "1.1.0")
 

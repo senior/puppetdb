@@ -378,18 +378,18 @@
       convert-config
       configure-catalog-debugging))
 
+(puppetlabs.trapperkeeper.config/add-config-transformer process-config!)
+
 (defprotocol DefaultedConfig
   (get-config [this])
   (get-in-config [this ks] [this ks default]))
 
 (tk/defservice config-service
   DefaultedConfig
-  [[:ConfigService get-config]]
-  (init [this context]
-         (assoc context :config (process-config! (get-config))))
+  [[:ConfigService get-config get-in-config]]
   (get-config [this]
-              (:config (service-context this)))
+              (get-config))
   (get-in-config [this ks]
-                 (get-in (service-context this) ks))
+                 (get-in-config ks))
   (get-in-config [this ks default]
-                 (get-in (service-context this) ks default)))
+                 (get-in-config ks default)))
