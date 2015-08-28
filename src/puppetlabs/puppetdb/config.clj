@@ -382,14 +382,18 @@
   (get-config [this])
   (get-in-config [this ks] [this ks default]))
 
-(tk/defservice config-service
-  DefaultedConfig
-  [[:ConfigService get-config]]
-  (init [this context]
-         (assoc context :config (process-config! (get-config))))
-  (get-config [this]
-              (:config (service-context this)))
-  (get-in-config [this ks]
-                 (get-in (service-context this) ks))
-  (get-in-config [this ks default]
-                 (get-in (service-context this) ks default)))
+(defn create-defaulted-config-service [config-transform-fn]
+  (tk/service
+   DefaultedConfig
+   [[:ConfigService get-config]]
+   (init [this context]
+         (assoc context :config (config-transform-fn (get-config))))
+   (get-config [this]
+               (:config (service-context this)))
+   (get-in-config [this ks]
+                  (get-in (service-context this) ks))
+   (get-in-config [this ks default]
+                  (get-in (service-context this) ks default))))
+
+(def config-service
+  (create-defaulted-config-service process-config!))
