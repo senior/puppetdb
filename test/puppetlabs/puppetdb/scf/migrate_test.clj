@@ -535,3 +535,14 @@
                                      :column_name "hash",
                                      :table_name "factsets"}]}]}
              (diff-schema-maps before-migration (schema-info-map *db*)))))))
+
+(deftest test-pre-3-0-0-rollup
+  (jdbc/with-db-connection *db*
+    (clear-db-for-testing!)
+    (fast-forward-to-migration! 28)
+    (let [before-migration (schema-info-map *db*)]
+      (clear-db-for-testing!)
+      (init-through-2-y-z)
+      (is (= {:index-diff nil
+              :table-diff nil}
+             (diff-schema-maps before-migration (schema-info-map *db*)))))))
