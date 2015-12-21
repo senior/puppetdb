@@ -11,7 +11,9 @@
             [puppetlabs.puppetdb.middleware :as mid]
             [compojure.core :as compojure]
             [clojure.core.async :as async]
-            [puppetlabs.kitchensink.core :as kitchensink]))
+            [puppetlabs.kitchensink.core :as kitchensink]
+            [bidi.bidi :as bidi]
+            [bidi.ring :as bring]))
 
 (def min-supported-commands
   {"replace catalog" 6
@@ -103,6 +105,10 @@
           (do-submit)
           (http/json-response {:uuid uuid}))))))
 
+(defn routes [enqueue-fn get-response-pub]
+  (let [route-data ["/v1" (enqueue-command-handler enqueue-fn get-response-pub)]]
+    (bring/make-handler route-data identity)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
@@ -111,8 +117,7 @@
 
 (defn command-app
   [get-shared-globals enqueue-fn get-response-pub reject-large-commands? max-command-size]
-  (-> (moustache/app
-       ["v1" &] {:any (enqueue-command-handler enqueue-fn get-response-pub)})
+  (-> (routes enqueue-fn get-response-pub)
       validate-command-version
       (mid/fail-when-payload-too-large reject-large-commands? max-command-size)
       mid/verify-accepts-json
