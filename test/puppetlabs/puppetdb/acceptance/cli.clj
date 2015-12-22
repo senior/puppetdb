@@ -15,7 +15,7 @@
             [puppetlabs.puppetdb.testutils.tar :refer [tar->map]]))
 
 (deftest test-anonymized-export-roundtrip
-  (doseq [profile (keys anon/anon-profiles)]
+  (doseq [profile  (take 1 (keys anon/anon-profiles))]
     (let [export-out-file (.getPath (tu/temp-file "export-test" ".tar.gz"))
           anon-out-file (.getPath (tu/temp-file "anon-test" ".tar.gz"))]
       (svc-utils/call-with-single-quiet-pdb-instance

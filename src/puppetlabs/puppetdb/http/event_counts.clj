@@ -11,6 +11,4 @@
                                        "distinct_resources" "distinct_start_time"
                                        "distinct_end_time"]
                                       paging/query-params)}]
-    (app
-     []
-     (http-q/query-route-from "event_counts" version param-spec optional-handlers))))
+    {"" (http-q/query-route-from' "event_counts" version param-spec optional-handlers)}))

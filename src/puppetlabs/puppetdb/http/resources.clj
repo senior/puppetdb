@@ -11,16 +11,16 @@
                    identity)
          handlers (cons handler optional-handlers)
          param-spec {:optional paging/query-params}
-         query-route (partial http-q/query-route-from "resources" version param-spec)]
-     (app
-      []
-      (query-route handlers)
-
-      [type title &]
-      (query-route (concat handlers
-                           [(partial http-q/restrict-resource-query-to-type type)
-                            (partial http-q/restrict-resource-query-to-title title)]))
-
-      [type &]
-      (query-route (concat handlers
-                           [(partial http-q/restrict-resource-query-to-type type)]))))))
+         query-route (partial http-q/query-route-from' "resources" version param-spec)]
+     {"" (query-route handlers)
+      [:type]
+      (fn [{:keys [route-params] :as req}]
+        ((query-route (concat handlers
+                              [(partial http-q/restrict-resource-query-to-type (:type route-params))]))
+         req))      
+      [:type "/" :title]
+      (fn [{:keys [route-params] :as req}]
+        ((query-route (concat handlers
+                               [(partial http-q/restrict-resource-query-to-type (:type route-params))
+                                (partial http-q/restrict-resource-query-to-title (:title route-params))]))
+         req))})))

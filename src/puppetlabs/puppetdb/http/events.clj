@@ -12,6 +12,4 @@
                                 "distinct_start_time"
                                 "distinct_end_time"]
                                paging/query-params)}]
-    (app
-     []
-     (http-q/query-route-from "events" version param-spec optional-handlers))))
+    {"" (http-q/query-route-from' "events" version param-spec optional-handlers)}))

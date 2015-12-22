@@ -48,6 +48,8 @@
   (testing "without environments"
     (without-db-var
      (fn []
+       (println "body of without env")
+       (clojure.pprint/pprint (query-response method (str endpoint "/foo")))
        (is (= 404 (:status (query-response method (str endpoint "/foo"))))))))
 
   (testing "with environments"
@@ -211,6 +213,8 @@
     (is (= false (eng/object-exists? :environment "ussr"))))
 
   (let [{:keys [status body]} (query-response method endpoint)]
+    (println "just got the following body:")
+    (clojure.pprint/pprint body)
     (is (= status http/status-not-found))
     (is (= {:error "No information is known about environment foo"}
            (json/parse-string body true)))))

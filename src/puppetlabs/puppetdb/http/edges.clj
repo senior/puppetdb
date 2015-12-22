@@ -11,6 +11,4 @@
                    identity)
          handlers (cons handler optional-handlers)
          param-spec {:optional paging/query-params}]
-     (app
-      [""]
-      (http-q/query-route-from "edges" version param-spec handlers)))))
+     {"" (http-q/query-route-from' "edges" version param-spec handlers)})))

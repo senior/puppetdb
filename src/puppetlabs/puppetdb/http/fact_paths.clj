@@ -7,6 +7,4 @@
 (defn fact-paths-app
   [version]
   (let [param-spec {:optional paging/query-params}]
-    (app
-     []
-     (http-q/query-route-from "fact_paths" version param-spec))))
+    {"" (http-q/query-route-from' "fact_paths" version param-spec)}))
