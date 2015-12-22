@@ -24,9 +24,9 @@
     404)))
 
 (def routes
-  ["" {"/v1" (refuse-retired-api "v1")
-       "/v2" (refuse-retired-api "v2")
-       "/v3" (refuse-retired-api "v3")
+  ["" {"/v1" [[true (refuse-retired-api "v1")]]
+       "/v2" [[true (refuse-retired-api "v2")]]
+       "/v3" [[true (refuse-retired-api "v3")]]
        "/v4" v4-app}])
 
 (defn build-app
@@ -43,5 +43,4 @@
                       verify-accepts-json
                       (wrap-with-metrics (atom {}) http/leading-uris)
                       (wrap-with-globals get-shared-globals))]
-      (clojure.pprint/pprint req)
       (handler req))))
