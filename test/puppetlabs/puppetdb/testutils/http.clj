@@ -45,6 +45,8 @@
    (let [handlers (or optional-handlers [identity])
          handle-fn (apply comp (vec handlers))
          response (query-response method endpoint query params)]
+     (println "response:")
+     (clojure.pprint/pprint response)
      (is (= http/status-ok (:status response)))
      (-> response
          :body

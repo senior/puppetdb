@@ -43,4 +43,5 @@
                       verify-accepts-json
                       (wrap-with-metrics (atom {}) http/leading-uris)
                       (wrap-with-globals get-shared-globals))]
+      (clojure.pprint/pprint req)
       (handler req))))

@@ -29,16 +29,16 @@
   (let [param-spec {:optional paging/query-params}]
     {"" (http-q/query-route-from' "nodes" version param-spec
                                   [http-q/restrict-query-to-active-nodes])
-     [:node] (-> (fn [{:keys [globals route-params]}]
+     ["/" :node] (-> (fn [{:keys [globals route-params]}]
                    (node-status version
                                 (:node route-params)
                                 (select-keys globals [:scf-read-db :url-prefix :warn-experimental])))
                  ;; Being a singular item, querying and pagination don't really make
                  ;; sense here
                  (validate-query-params {})) 
-     [:node "/facts"]
+     ["/" :node "/facts"]
      (bring/wrap-middleware (f/facts-app version true http-q/restrict-query-to-node)
                             (fn [app] (wrap-with-parent-check' app version :node)))
-     [:node "/resources"]
+     ["/" :node "/resources"]
      (bring/wrap-middleware (r/resources-app version true http-q/restrict-query-to-node)
                             (fn [app] (wrap-with-parent-check' app version :node)))}))
