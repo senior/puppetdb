@@ -26,4 +26,4 @@
       ["/" :fact]
       (query-route (concat handlers
                            [(fn [{:keys [route-params] :as req}]
-                              (http-q/restrict-fact-query-to-name (:fact route-params)))]))})))
+                              (http-q/restrict-fact-query-to-name (:fact route-params) req))]))})))

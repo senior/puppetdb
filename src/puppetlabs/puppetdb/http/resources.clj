@@ -14,12 +14,15 @@
          query-route (partial http-q/query-route-from' "resources" version param-spec)]
      [["" (query-route handlers)]
 
-      [["/" :type "/" :title]
+      [["/" :type "/" [#".*" :title]]
        (fn [{:keys [route-params] :as req}]
-         ((query-route (concat handlers
-                               [(partial http-q/restrict-resource-query-to-type (:type route-params))
-                                (partial http-q/restrict-resource-query-to-title (:title route-params))]))
-          req))]
+         (do
+           (println "req is")
+           (clojure.pprint/pprint req)
+           ((query-route (concat handlers
+                                 [(partial http-q/restrict-resource-query-to-type (:type route-params))
+                                  (partial http-q/restrict-resource-query-to-title (:title route-params))]))
+            req)))]
       
       [["/" :type]
        (fn [{:keys [route-params] :as req}]

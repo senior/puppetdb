@@ -32,7 +32,6 @@
                          (json/parse-string body# true)
                          (catch JsonParseException e#
                            body#)))]
-       (clojure.pprint/pprint response#)
        (assert-success! response#)
        (is (= c-t (get-in response# [:headers "Content-Type"])))
        (do ~@the-body))))
