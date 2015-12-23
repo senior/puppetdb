@@ -37,8 +37,8 @@
                  ;; sense here
                  (validate-query-params {})) 
      ["/" :node "/facts"]
-     (bring/wrap-middleware (f/facts-app version true http-q/restrict-query-to-node)
+     (bring/wrap-middleware (f/facts-app version true http-q/restrict-query-to-node')
                             (fn [app] (wrap-with-parent-check' app version :node)))
      ["/" :node "/resources"]
-     (bring/wrap-middleware (r/resources-app version true http-q/restrict-query-to-node)
+     (bring/wrap-middleware (r/resources-app version true http-q/restrict-query-to-node')
                             (fn [app] (wrap-with-parent-check' app version :node)))}))
