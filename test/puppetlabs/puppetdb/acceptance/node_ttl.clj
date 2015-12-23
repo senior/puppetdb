@@ -32,7 +32,6 @@
              (run-expire-nodes)
 
              (is (= 0 (count (:body (tuhttp/pdb-get (svc-utils/pdb-query-url) "/nodes")))))
-             (clojure.pprint/pprint (tuhttp/pdb-get (svc-utils/pdb-query-url) "/nodes/foo.com"))
              (is (:expired (:body (tuhttp/pdb-get (svc-utils/pdb-query-url) "/nodes/foo.com"))))
              (Thread/sleep 1000)
              (run-purge-nodes)

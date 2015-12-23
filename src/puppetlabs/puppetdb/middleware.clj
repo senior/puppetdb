@@ -173,11 +173,7 @@
                                                      (set (:required param-specs))
                                                      (set (:optional param-specs)))]
                             (seq diff))
-                          (do
-                            (println "stuff broke")
-                            (clojure.pprint/pprint req)
-                            (clojure.pprint/pprint param-specs)
-                            (http/error-response (str "Unsupported query parameter '" (first p) "'")))
+                          (http/error-response (str "Unsupported query parameter '" (first p) "'"))
 
                           :else
                           (app req))))

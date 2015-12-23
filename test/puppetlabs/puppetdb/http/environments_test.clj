@@ -48,8 +48,6 @@
   (testing "without environments"
     (without-db-var
      (fn []
-       (println "body of without env")
-       (clojure.pprint/pprint (query-response method (str endpoint "/foo")))
        (is (= 404 (:status (query-response method (str endpoint "/foo"))))))))
 
   (testing "with environments"

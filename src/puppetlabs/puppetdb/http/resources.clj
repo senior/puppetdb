@@ -3,6 +3,9 @@
             [puppetlabs.puppetdb.query.paging :as paging]
             [net.cgrand.moustache :refer [app]]))
 
+(defn url-decode [x]
+  (java.net.URLDecoder/decode x))
+
 (defn resources-app
   ([version] (resources-app version true))
   ([version restrict-to-active-nodes & optional-handlers]
@@ -17,11 +20,9 @@
       [["/" :type "/" [#".*" :title]]
        (fn [{:keys [route-params] :as req}]
          (do
-           (println "req is")
-           (clojure.pprint/pprint req)
            ((query-route (concat handlers
                                  [(partial http-q/restrict-resource-query-to-type (:type route-params))
-                                  (partial http-q/restrict-resource-query-to-title (:title route-params))]))
+                                  (partial http-q/restrict-resource-query-to-title (url-decode (:title route-params)))]))
             req)))]
       
       [["/" :type]

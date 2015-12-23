@@ -123,7 +123,6 @@
   [req]
   {:pre  [(string? (get-in req [:route-params :node]))]
    :post [(are-queries-different? req %)]}
-  (println "restricting to " (get-in req [:route-params :node]))
   (restrict-query ["=" "certname" (get-in req [:route-params :node])] req))
 
 (defn restrict-query-to-node
