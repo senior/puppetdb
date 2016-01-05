@@ -11,7 +11,6 @@
                                                     wrap-with-illegal-argument-catch
                                                     verify-accepts-json
                                                     make-pdb-handler]]
-            [net.cgrand.moustache :refer [app]]
             [ring.util.response :as rr]
             [bidi.bidi :as bidi]
             [bidi.ring :as bring]))

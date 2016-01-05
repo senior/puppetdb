@@ -7,7 +7,6 @@
             [puppetlabs.puppetdb.http.resources :as r]
             [puppetlabs.puppetdb.http.events :as ev]
             [puppetlabs.puppetdb.http.reports :as rp]
-            [net.cgrand.moustache :refer [app]]
             [puppetlabs.puppetdb.middleware :refer [validate-query-params
                                                     wrap-with-parent-check]]
             [bidi.ring :as bring]))

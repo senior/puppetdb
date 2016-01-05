@@ -4,7 +4,6 @@
             [puppetlabs.puppetdb.http.facts :as f]
             [puppetlabs.puppetdb.http.resources :as r]
             [puppetlabs.puppetdb.http.query :as http-q]
-            [net.cgrand.moustache :refer [app]]
             [puppetlabs.puppetdb.middleware :refer [validate-query-params
                                                     wrap-with-parent-check
                                                     wrap-with-parent-check']]

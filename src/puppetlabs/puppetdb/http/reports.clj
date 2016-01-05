@@ -1,7 +1,6 @@
 (ns puppetlabs.puppetdb.http.reports
   (:require [puppetlabs.puppetdb.query.paging :as paging]
             [puppetlabs.puppetdb.query-eng :refer [produce-streaming-body]]
-            [net.cgrand.moustache :refer [app]]
             [puppetlabs.puppetdb.http.query :as http-q]
             [puppetlabs.puppetdb.http.events :as e]
             [puppetlabs.puppetdb.cheshire :as json]

@@ -1,7 +1,6 @@
 (ns puppetlabs.puppetdb.http.facts
   (:require [puppetlabs.puppetdb.http.query :as http-q]
             [puppetlabs.puppetdb.query.paging :as paging]
-            [net.cgrand.moustache :refer [app]]
             [bidi.ring :as bring]))
 
 (defn facts-app

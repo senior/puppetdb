@@ -10,7 +10,6 @@
             [schema.core :as s]
             [puppetlabs.puppetdb.query.paging :as paging]
             [puppetlabs.puppetdb.middleware :refer [wrap-with-parent-check wrap-with-parent-check']]
-            [net.cgrand.moustache :refer [app]]
             [bidi.ring :as bring]))
 
 (defn catalog-status

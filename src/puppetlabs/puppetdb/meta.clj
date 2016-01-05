@@ -1,6 +1,5 @@
 (ns puppetlabs.puppetdb.meta
   (:require [clojure.tools.logging :as log]
-            [net.cgrand.moustache :as moustache]
             [clj-time.core :refer [now]]
             [puppetlabs.puppetdb.middleware
              :refer [verify-accepts-json wrap-with-globals validate-no-query-params]]

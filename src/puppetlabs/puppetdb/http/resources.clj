@@ -1,7 +1,6 @@
 (ns puppetlabs.puppetdb.http.resources
   (:require [puppetlabs.puppetdb.http.query :as http-q]
-            [puppetlabs.puppetdb.query.paging :as paging]
-            [net.cgrand.moustache :refer [app]]))
+            [puppetlabs.puppetdb.query.paging :as paging]))
 
 (defn url-decode [x]
   (java.net.URLDecoder/decode x))

@@ -6,7 +6,6 @@
             [puppetlabs.puppetdb.command :as command]
             [puppetlabs.puppetdb.http :as http]
             [puppetlabs.puppetdb.cheshire :as json]
-            [net.cgrand.moustache :as moustache]
             [puppetlabs.puppetdb.config :as conf]
             [puppetlabs.puppetdb.middleware :as mid]
             [compojure.core :as compojure]
@@ -112,7 +111,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
-;; The below fns expect to be called from a moustache handler and
+;; The below fns expect to be called from a ring handler and
 ;; return functions that accept a ring request map
 
 (defn command-app

@@ -9,7 +9,6 @@
             [puppetlabs.puppetdb.query-eng :refer [produce-streaming-body]]
             [clojure.set :as set]
             [puppetlabs.kitchensink.core :as kitchensink]
-            [net.cgrand.moustache :refer [app]]
             [schema.core :as s]
             [puppetlabs.puppetdb.http :as http]
             [puppetlabs.puppetdb.schema :as pls]
@@ -360,7 +359,7 @@
 
 
 
-(defn query-route
+#_(defn query-route
   [version param-spec optional-handlers]
   (app
    (extract-query param-spec)
@@ -371,7 +370,7 @@
                                     (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental])))
           optional-handlers)))
 
-(defn query-route-from
+#_(defn query-route-from
   "Convenience wrapper for query-route, which automatically wraps the query in a
   `from` to set context."
   ([entity version param-spec]

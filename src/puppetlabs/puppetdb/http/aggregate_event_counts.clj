@@ -1,6 +1,5 @@
 (ns puppetlabs.puppetdb.http.aggregate-event-counts
-  (:require [puppetlabs.puppetdb.http.query :as http-q]
-            [net.cgrand.moustache :refer [app]]))
+  (:require [puppetlabs.puppetdb.http.query :as http-q]))
 
 (defn aggregate-event-counts-app
   "Ring app for querying for aggregated summary information about resource events."

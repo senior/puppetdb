@@ -1,6 +1,5 @@
 (ns puppetlabs.puppetdb.http.factsets
-  (:require [net.cgrand.moustache :refer [app]]
-            [puppetlabs.puppetdb.http :as http]
+  (:require [puppetlabs.puppetdb.http :as http]
             [puppetlabs.puppetdb.http.facts :as facts]
             [puppetlabs.puppetdb.http.query :as http-q]
             [puppetlabs.puppetdb.middleware :refer [wrap-with-parent-check wrap-with-parent-check']]

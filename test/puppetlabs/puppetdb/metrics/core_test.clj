@@ -72,6 +72,7 @@
                     :let [response (app
                                     (get-request
                                      (str version uri)))]]
+              (println                        (str version uri))
               (is (= (:status response)
                      http/status-ok))
               (is (= (content-type response)

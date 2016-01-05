@@ -1,7 +1,6 @@
 (ns puppetlabs.puppetdb.http.fact-names
   (:require [puppetlabs.puppetdb.query.paging :as paging]
             [puppetlabs.puppetdb.http.query :as http-q]
-            [net.cgrand.moustache :refer [app]]
             [puppetlabs.puppetdb.query-eng :refer [produce-streaming-body]]
             [clojure.walk :refer [keywordize-keys]]
             [puppetlabs.puppetdb.utils :refer [assoc-when]]

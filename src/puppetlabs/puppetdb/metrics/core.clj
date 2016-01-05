@@ -76,14 +76,10 @@
 (def list-mbeans
   "Function for validating the request then getting the list of mbeans currently known
    by the application"
-  (-> mbean-names
-      mid/verify-accepts-json
-      mid/validate-no-query-params))
+  mbean-names)
 
 (defn mbean
   "Function for getting a specific mbean, identified by `names-coll`. `names-coll`
    is list of mbean name segments"
   [names-coll]
-  (-> (convert-shortened-mbean-name names-coll)
-      mid/verify-accepts-json
-      mid/validate-no-query-params))
+  (convert-shortened-mbean-name names-coll))
