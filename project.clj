@@ -85,7 +85,8 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [puppetlabs/http-client "0.4.4"]
                  [puppetlabs/comidi "0.3.0"]
-                 [bidi "1.23.1" :exclusions [org.clojure/clojurescript]]]
+                 [bidi "1.23.1" :exclusions [org.clojure/clojurescript]]
+                 [puppetlabs/comidi "0.3.0"]]
 
   :jvm-opts ~pdb-jvm-opts
 
