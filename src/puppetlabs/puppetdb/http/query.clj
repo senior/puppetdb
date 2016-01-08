@@ -311,7 +311,9 @@
   parameters/body to a pdb query map"
   [param-spec]
   (fn [{:keys [request-method body params puppetdb-query] :as req}]
-    (assoc req :puppetdb-query (create-query-map req param-spec))))
+    (if (= ::not-found (get req :puppetdb-query ::not-found))
+      (assoc req :puppetdb-query (create-query-map req param-spec))
+      req)))
 
 (defn extract-query
   "Query handler that converts the incoming request (GET or POST)
@@ -367,9 +369,14 @@
 (defn query-handler
   [version]
   (fn [{:keys [params globals puppetdb-query]}]
-    (produce-streaming-body version
-                            (validate-distinct-options! (merge (keywordize-keys params) puppetdb-query))
-                            (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental]))))
+    (try
+      (produce-streaming-body version
+                              (validate-distinct-options! (merge (keywordize-keys params) puppetdb-query))
+                              (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental]))
+      (catch Exception e
+        (println "\n\n\n\n\nProblem")
+        (.printStackTrace e)
+        (throw e)))))
 
 (defn query-route-from'
   "Convenience wrapper for query-route, which automatically wraps the query in a

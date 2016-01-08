@@ -19,6 +19,7 @@
             [puppetlabs.puppetdb.query-eng :refer [produce-streaming-body
                                                    stream-query-result]]
             [puppetlabs.puppetdb.middleware :refer [validate-no-query-params
+                                                    validate-query-params
                                                     wrap-with-parent-check
                                                     wrap-with-parent-check'
                                                     wrap-with-parent-check'']]
@@ -31,6 +32,16 @@
             [clojure.walk :refer [keywordize-keys]]))
 
 (def version :v4)
+
+(defn create-query-handler [entity param-spec]
+  (comp (http-q/query-handler version)
+        #(http-q/restrict-query-to-entity entity %)
+        (http-q/extract-query' param-spec)))
+
+(defn create-paging-query-handler [entity]
+  (comp (http-q/query-handler version)
+        #(http-q/restrict-query-to-entity entity %)
+        (http-q/extract-query' {:optional paging/query-params})))
 
 (defn experimental-index-app
   [version]
@@ -53,19 +64,20 @@
 (defn events-app
   "Ring app for querying events"
   [version]
-  (let [param-spec {:optional (concat
+  (comp (http-q/query-handler version)
+        #(http-q/restrict-query-to-entity "events" %)
+        (http-q/extract-query' {:optional (concat
                                ["query"
                                 "distinct_resources"
                                 "distinct_start_time"
                                 "distinct_end_time"]
-                               paging/query-params)}]
-    (http-q/query-route-from' "events" version param-spec)))
+                               paging/query-params)})))
 
 
 
 (defn reports-app
   [version]
-  {"" [["" (http-q/query-route-from' "reports" version {:optional paging/query-params})]
+  {"" [["" (create-paging-query-handler "reports")]
        
        [["/" :hash "/events"]
         (wrap-with-parent-check'' (comp (events-app version) http-q/restrict-query-to-report') version :report :hash)]
@@ -86,21 +98,28 @@
 (defn resources-app
   [version]
   (let [param-spec {:optional paging/query-params}]
-    {"" (http-q/query-route-from' "resources" version param-spec [http-q/restrict-query-to-active-nodes])
-
+    {"" (comp (http-q/query-handler version)
+              #(http-q/restrict-query-to-entity "resources" %)
+              http-q/restrict-query-to-active-nodes
+              (http-q/extract-query' param-spec))
 
      ["/" :type]
-     {"" (http-q/query-route-from' "resources" version param-spec [http-q/restrict-query-to-active-nodes
-                                                                (fn [{:keys [route-params] :as req}]
-                                                                  (http-q/restrict-resource-query-to-type (:type route-params) req))])
+     {"" (comp (http-q/query-handler version)
+               #(http-q/restrict-query-to-entity "resources" %)
+               (fn [{:keys [route-params] :as req}]
+                 (http-q/restrict-resource-query-to-type (:type route-params) req))
+               http-q/restrict-query-to-active-nodes
+               (http-q/extract-query' param-spec))
       
       ["/" [#".*" :title]]
-      (http-q/query-route-from' "resources" version param-spec [http-q/restrict-query-to-active-nodes
-                                                                (fn [{:keys [route-params] :as req}]
-                                                                  (http-q/restrict-resource-query-to-title (url-decode (:title route-params)) req))
-                                                                
-                                                                (fn [{:keys [route-params] :as req}]
-                                                                  (http-q/restrict-resource-query-to-type (:type route-params) req))])}}))
+      (comp (http-q/query-handler version)
+            #(http-q/restrict-query-to-entity "resources" %)
+            (fn [{:keys [route-params] :as req}]
+              (http-q/restrict-resource-query-to-title (url-decode (:title route-params)) req))
+            (fn [{:keys [route-params] :as req}]
+              (http-q/restrict-resource-query-to-type (:type route-params) req))
+            http-q/restrict-query-to-active-nodes
+            (http-q/extract-query' param-spec))}}))
 
 (defn catalog-status
   "Produce a response body for a request to retrieve the catalog for `node`."
@@ -117,7 +136,7 @@
 
 (defn catalog-app
   [version]
-  {"" (http-q/query-route-from' "catalogs" version {:optional paging/query-params})
+  {"" (create-paging-query-handler "catalogs")
 
    ["/" :node]
    {"" (fn [{:keys [globals route-params]}]
@@ -125,30 +144,43 @@
                          (select-keys globals [:scf-read-db :url-prefix :warn-experimental])))
 
     ["/edges"]
-    (-> (comp (http-q/query-route-from' "edges" version {:optional paging/query-params})
-              http-q/restrict-query-to-node')
+    (-> (comp (http-q/query-handler version)
+              http-q/restrict-query-to-node'
+              #(http-q/restrict-query-to-entity "edges"  %)
+              (http-q/extract-query' {:optional paging/query-params}))
         (wrap-with-parent-check'' version :catalog :node))
 
     ["/resources"]
-    (-> (comp (resources-app version) http-q/restrict-query-to-node')
+    (-> (comp (resources-app version)
+              http-q/restrict-query-to-node')
         (wrap-with-parent-check'' version :catalog :node))}})
 
 (defn facts-app
   [version]
   (let [param-spec {:optional paging/query-params}]
-    {"" 
-     (http-q/query-route-from' "facts" version param-spec [http-q/restrict-query-to-active-nodes])
+    {""
+     (comp (http-q/query-handler version)
+           #(http-q/restrict-query-to-entity "facts" %)
+           http-q/restrict-query-to-active-nodes
+           (http-q/extract-query' param-spec))
 
      ["/" :fact]
-     {"" (http-q/query-route-from' "facts" version param-spec [http-q/restrict-query-to-active-nodes
-                                                               (fn [{:keys [route-params] :as req}]
-                                                                 (http-q/restrict-fact-query-to-name (:fact route-params) req))])
+     {"" (comp (http-q/query-handler version)
+               #(http-q/restrict-query-to-entity "facts" %)
+               (fn [{:keys [route-params] :as req}]
+                 (http-q/restrict-fact-query-to-name (:fact route-params) req))
+               http-q/restrict-query-to-active-nodes
+               (http-q/extract-query' param-spec))
+
       ["/" :value]
-      (http-q/query-route-from' "facts" version param-spec [http-q/restrict-query-to-active-nodes
-                                                            (fn [{:keys [route-params] :as req}]
-                                                              (http-q/restrict-fact-query-to-name (:fact route-params) req))
-                                                            (fn [{:keys [route-params] :as req}]
-                                                              (http-q/restrict-fact-query-to-value (:value route-params) req))])}}))
+      (comp (http-q/query-handler version)
+            #(http-q/restrict-query-to-entity "facts" %)
+            (fn [{:keys [route-params] :as req}]
+              (http-q/restrict-fact-query-to-name (:fact route-params) req))
+            (fn [{:keys [route-params] :as req}]
+              (http-q/restrict-fact-query-to-value (:value route-params) req))
+            http-q/restrict-query-to-active-nodes
+            (http-q/extract-query' param-spec))}}))
 
 (defn factset-status
   "Produces a response body for a request to retrieve the factset for `node`."
@@ -195,20 +227,132 @@
                          (partial http-q/restrict-query-to-entity "fact_names"))
                         {:optional paging/query-params}))
 
-(defn create-query-handler [entity param-spec]
-  (comp (http-q/query-handler version)
-        #(http-q/restrict-query-to-entity entity %)
-        (http-q/extract-query' param-spec)))
+(defn node-status
+  "Produce a response body for a single environment."
+  [api-version node options]
+  (let [status (first
+                (stream-query-result api-version
+                                         ["from" "nodes" ["=" "certname" node]]
+                                         {}
+                                         options))]
+    (if status
+      (http/json-response status)
+      (http/status-not-found-response "node" node))))
 
-(defn create-paging-query-handler [entity]
-  (comp (http-q/query-handler version)
-        #(http-q/restrict-query-to-entity entity %)
-        (http-q/extract-query' {:optional paging/query-params})))
+(defn node-app
+  [version]
+  (let [param-spec {:optional paging/query-params}]
+    {"" (comp (http-q/query-handler version)
+              #(http-q/restrict-query-to-entity "nodes" %)
+              http-q/restrict-query-to-active-nodes
+              (http-q/extract-query' param-spec))
+
+     ["/" :node]
+     {"" (-> (fn [{:keys [globals route-params]}]
+               (node-status version
+                            (:node route-params)
+                            (select-keys globals [:scf-read-db :url-prefix :warn-experimental])))
+             ;; Being a singular item, querying and pagination don't really make
+             ;; sense here
+             (validate-query-params {})) 
+
+      ["/facts"]
+      (second
+       (cmdi/wrap-routes 
+        (cmdi/wrap-routes ["" (facts-app version)]
+                          (fn [handler]
+                            (comp handler
+                                  http-q/restrict-query-to-node'
+                                  (http-q/extract-query' param-spec))))
+        #(wrap-with-parent-check'' % version :node :node)))
+
+      ["/resources"]
+      (second
+       (cmdi/wrap-routes 
+        (cmdi/wrap-routes ["" (resources-app version)]
+                          (fn [handler]
+                            (comp handler
+                                  http-q/restrict-query-to-node'
+                                  (http-q/extract-query' param-spec))))
+        #(wrap-with-parent-check'' % version :node :node)))}}))
+
+(defn environment-status
+  "Produce a response body for a single environment."
+  [api-version environment options]
+  (let [status (first
+                (stream-query-result api-version
+                                         ["from" "environments" ["=" "name" environment]]
+                                         {}
+                                         options))]
+    (if status
+      (http/json-response status)
+      (http/status-not-found-response "environment" environment))))
+
+(defn environments-app
+  [version & optional-handlers]
+  (let [param-spec {:optional paging/query-params}]
+    {"" (http-q/query-route-from' "environments" version param-spec)
+
+     ["/" :environment]
+     {"" (validate-query-params (fn [{:keys [globals route-params]}]
+                                  (environment-status version (:environment route-params)
+                                                      (select-keys globals [:scf-read-db :warn-experimental :url-prefix])))
+                                {})
+
+      ["/facts"]
+      (second
+       (cmdi/wrap-routes ["" (facts-app version)]
+                         (fn [handler]
+                           (wrap-with-parent-check''
+                            (comp handler
+                                  http-q/restrict-query-to-environment'
+                                  (http-q/extract-query' param-spec))
+                            version :environment :environment))))
+      
+
+      ["/resources"]
+      (second
+       (cmdi/wrap-routes ["" (resources-app version)]
+                         (fn [handler]
+                           (wrap-with-parent-check''
+                            (comp handler
+                                  http-q/restrict-query-to-environment'
+                                  (http-q/extract-query' param-spec))
+                            version :environment :environment))))
+
+
+      ["/events"]
+      (second
+       (cmdi/wrap-routes ["" (events-app version)]
+                         (fn [handler]
+                           (wrap-with-parent-check''
+                            (comp handler
+                                  http-q/restrict-query-to-environment'
+                                  (http-q/extract-query' {:optional (concat
+                                                                     ["query"
+                                                                      "distinct_resources"
+                                                                      "distinct_start_time"
+                                                                      "distinct_end_time"]
+                                                                     paging/query-params)}))
+                            version :environment :environment))))
+      
+
+      ["/reports"]
+      (second
+       (cmdi/wrap-routes ["" (reports-app version)]
+                         (fn [handler]
+                           (wrap-with-parent-check'' (comp handler
+                                                           http-q/restrict-query-to-environment'
+                                                           (http-q/extract-query' param-spec))
+                                                     version :environment :environment))))}}))
 
 (def v4-app
   {"" (experimental-index-app version)
    "/facts" (facts-app version)
-   "/edges" (http-q/query-route-from' "edges" version {:optional paging/query-params} [http-q/restrict-query-to-active-nodes])
+   "/edges" (comp (http-q/query-handler version)
+                  http-q/restrict-query-to-active-nodes
+                  #(http-q/restrict-query-to-entity "edges" %)
+                  (http-q/extract-query' {:optional paging/query-params}))
    "/factsets" (factset-app version)
    "/fact-names" (fact-names-app version)
    "/fact-contents"   (comp (http-q/query-handler version)
@@ -217,8 +361,8 @@
                             (http-q/extract-query' {:optional paging/query-params}))
    "/fact-paths" (create-paging-query-handler "fact_paths")
    
-   "/nodes" (nodes/node-app version)
-   "/environments" (envs/environments-app version)
+   "/nodes" (node-app version)
+   "/environments" (environments-app version)
 
 
    "/resources" (resources-app version)
