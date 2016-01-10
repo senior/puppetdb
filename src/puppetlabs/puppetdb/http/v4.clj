@@ -36,7 +36,10 @@
 
 (defn experimental-index-app
   [version]
-  (cmdi/wrap-routes (index/index-app version)
+  (cmdi/wrap-routes (cmdi/ANY "" []
+                              (comp (http-q/query-handler version)
+                                    (http-q/extract-query' {:optional paging/query-params
+                                                            :required ["query"]})))
                     (fn [handler]
                       (fn [req]
                         (http/experimental-warning handler "The root endpoint is experimental" req)))))
