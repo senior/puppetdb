@@ -306,15 +306,6 @@
      (throw (IllegalArgumentException. "PuppetDB queries must be made via GET/POST")))
    param-spec))
 
-(defn extract-query'
-  "Query handler that converts the incoming request (GET or POST)
-  parameters/body to a pdb query map"
-  [param-spec]
-  (fn [{:keys [request-method body params puppetdb-query] :as req}]
-    (if (= ::not-found (get req :puppetdb-query ::not-found))
-      (assoc req :puppetdb-query (create-query-map req param-spec))
-      req)))
-
 (defn extract-query
   "Query handler that converts the incoming request (GET or POST)
   parameters/body to a pdb query map"
@@ -358,36 +349,9 @@
        (IllegalArgumentException.
          "'distinct_resources' query parameter requires accompanying parameters 'distinct_start_time' and 'distinct_end_time'")))))
 
-(defn query-route'
-  [version param-spec optional-handlers]
-  (apply comp
-         (fn [{:keys [params globals puppetdb-query]}]
-           (produce-streaming-body version
-                                   (validate-distinct-options! (merge (keywordize-keys params) puppetdb-query))
-                                   (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental])))
-         (concat 
-          optional-handlers
-          [(extract-query' param-spec)])))
-
 (defn query-handler
   [version]
   (fn [{:keys [params globals puppetdb-query]}]
-    (try
-      (produce-streaming-body version
-                              (validate-distinct-options! (merge (keywordize-keys params) puppetdb-query))
-                              (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental]))
-      (catch Exception e
-        (println "\n\n\n\n\nProblem")
-        (.printStackTrace e)
-        (throw e)))))
-
-(defn query-route-from'
-  "Convenience wrapper for query-route, which automatically wraps the query in a
-  `from` to set context."
-  ([entity version param-spec]
-   (query-route-from' entity version param-spec [identity]))
-  ([entity version param-spec optional-handlers]
-   (let [handlers (cons (partial restrict-query-to-entity entity)
-                        optional-handlers)]
-     (query-route' version param-spec handlers))))
-
+    (produce-streaming-body version
+                            (validate-distinct-options! (merge (keywordize-keys params) puppetdb-query))
+                            (select-keys globals [:scf-read-db :url-prefix :pretty-print :warn-experimental]))))

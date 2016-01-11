@@ -8,8 +8,6 @@
                                                    stream-query-result]]
             [puppetlabs.puppetdb.middleware :refer [validate-no-query-params
                                                     validate-query-params
-                                                    wrap-with-parent-check
-                                                    wrap-with-parent-check'
                                                     wrap-with-parent-check'']]
             [puppetlabs.comidi :as cmdi]
             [schema.core :as s]
@@ -32,9 +30,7 @@
   (apply comp
          (http-q/query-handler version)
          #(http-q/restrict-query-to-entity entity %)
-         handler-fns
-         #_(concat handler-fns
-                 [(http-q/extract-query' param-spec)])))
+         handler-fns))
 
 (defn add-parent-check [route version entity]
   (cmdi/wrap-routes route

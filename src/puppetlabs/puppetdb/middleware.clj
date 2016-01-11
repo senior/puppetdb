@@ -367,42 +367,11 @@
         (app req)
         (http/json-response {:error (str "No information is known about " (name parent) " " (get route-params route-param-key))} http/status-not-found)))))
 
-(defn wrap-with-parent-check'
-  "Middleware that checks the parent exists before serving the rest of the
-   application. This ensures we always return 404's on child paths when the
-   parent data is empty."
-  [app version parent]
-  (fn [{:keys [globals route-params] :as req}]
-    (let [{:keys [scf-read-db url-prefix]} globals]
-      ;; There is a race condition here, in particular we open up 1 transaction
-      ;; for the parent test, but the rest of the query results are done via the
-      ;; streaming query. This can't be solved until we work out a way to
-      ;; pass through an existing db handle through to the streamed query thread.
-      (if (jdbc/with-transacted-connection scf-read-db
-            (qe/object-exists? parent (:node route-params)))
-        (app req)
-        (http/json-response {:error (str "No information is known about " (name parent) " " (:node route-params))} http/status-not-found)))))
-
-(defn wrap-with-parent-check
-  "Middleware that checks the parent exists before serving the rest of the
-   application. This ensures we always return 404's on child paths when the
-   parent data is empty."
-  [app version parent id]
-  (fn [{:keys [globals] :as req}]
-    (let [{:keys [scf-read-db url-prefix]} globals]
-      ;; There is a race condition here, in particular we open up 1 transaction
-      ;; for the parent test, but the rest of the query results are done via the
-      ;; streaming query. This can't be solved until we work out a way to
-      ;; pass through an existing db handle through to the streamed query thread.
-      (if (jdbc/with-transacted-connection scf-read-db
-            (qe/object-exists? parent id))
-        (app req)
-        (http/json-response {:error (str "No information is known about " (name parent) " " id)} http/status-not-found)))))
-
 (defn make-pdb-handler
   "Create a Ring handler from the route definition data
   structure. Matches a handler from the uri in the request, and invokes
   it with the request as a parameter."
+  ([route] (make-pdb-handler route identity))
   ([route handler-fn]
       (assert route "Cannot create a Ring handler with a nil Route(s) parameter")
       (fn [{:keys [uri path-info] :as req}]
@@ -412,8 +381,5 @@
           (when handler
             (bring/request
              (handler-fn handler)
-             (-> req
-                 (update-in [:route-params] merge route-params))
-             (apply dissoc match-context :handler (keys req))
-             )))))
-   ([route] (make-pdb-handler route identity)))
+             (update-in req [:route-params] merge route-params)
+             (apply dissoc match-context :handler (keys req))))))))
