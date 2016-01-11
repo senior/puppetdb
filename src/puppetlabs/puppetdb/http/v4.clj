@@ -21,34 +21,21 @@
 (def version :v4)
 
 (def v4-app
-  (cmdi/routes
-   (cmdi/context ""
-                 (handlers/experimental-index-routes version))
-   (cmdi/context "/facts"
-                 (handlers/facts-routes version))
-   (cmdi/context "/edges"
-                 (handlers/edge-routes version))
-   (cmdi/context "/factsets"
-                 (handlers/factset-routes version))
-   (cmdi/context "/fact-names"
-                 (handlers/fact-names-routes version))
-   (cmdi/context "/fact-contents"
-                 (handlers/fact-contents-routes version))
-   (cmdi/context "/fact-paths"
-                 (handlers/fact-path-routes version))
-   
-   (cmdi/context "/nodes"
-                 (handlers/node-routes version))
-   (cmdi/context "/environments"
-                 (handlers/environments-routes version))
-   (cmdi/context "/resources"
-                 (handlers/resources-routes version))
-   (cmdi/context "/catalogs"
-                 (handlers/catalog-routes version))
-   (cmdi/context "/events"
-                 (handlers/events-routes version))
-   (cmdi/context "/event-counts"
-                 (handlers/event-counts-routes version))
-   (cmdi/context "/aggregate-event-counts"
-                 (handlers/agg-event-counts-routes version)) 
-   (cmdi/context "/reports" (handlers/reports-routes version))))
+  (apply cmdi/routes
+         (map (fn [[route-str handler]]
+                (cmdi/context route-str (handler version)))
+              {"" handlers/experimental-index-routes
+               "/facts" handlers/facts-routes
+               "/edges" handlers/edge-routes
+               "/factsets" handlers/factset-routes
+               "/fact-names" handlers/fact-names-routes
+               "/fact-contents" handlers/fact-contents-routes
+               "/fact-paths" handlers/fact-path-routes
+               "/nodes" handlers/node-routes
+               "/environments" handlers/environments-routes
+               "/resources" handlers/resources-routes
+               "/catalogs" handlers/catalog-routes
+               "/events" handlers/events-routes
+               "/event-counts" handlers/event-counts-routes
+               "/aggregate-event-counts" handlers/agg-event-counts-routes 
+               "/reports" handlers/reports-routes})))
