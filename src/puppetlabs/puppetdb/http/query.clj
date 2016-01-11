@@ -320,7 +320,10 @@
   parameters/body to a pdb query map"
   [handler param-spec]
   (fn [{:keys [request-method body params puppetdb-query] :as req}]
-    (handler (assoc req :puppetdb-query (create-query-map req param-spec)))))
+    (handler
+     (if puppetdb-query
+       req
+       (assoc req :puppetdb-query (create-query-map req param-spec))))))
 
 (defn validate-distinct-options!
   "Validate the HTTP query params related to a `distinct_resources` query.  Return a
