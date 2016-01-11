@@ -171,19 +171,19 @@
 (defn restrict-fact-query-to-name
   "Restrict the query parameter of the supplied request so that it
    only returns facts with the given name"
-  [fact req]
-  {:pre  [(string? fact)]
+  [req]
+  {:pre  [(string? (get-in req [:route-params :fact]))]
    :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "name" fact]
+  (restrict-query ["=" "name" (get-in req [:route-params :fact])]
                   req))
 
 (defn restrict-fact-query-to-value
   "Restrict the query parameter of the supplied request so that it
   only returns facts with the given name"
-  [value req]
-  {:pre  [(string? value)]
+  [req]
+  {:pre  [(string? (get-in req [:route-params :value]))]
    :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "value" value]
+  (restrict-query ["=" "value" (get-in req [:route-params :value])]
                   req))
 
 (defn restrict-resource-query-to-type
@@ -231,9 +231,9 @@
 
 (pls/defn-validated restrict-query-to-entity
   "Restrict the query to a particular entity, by wrapping the query in a from."
-  [entity :- String
-   req]
-  (update-in req [:puppetdb-query :query] #(wrap-with-from entity %)))
+  [entity :- String]
+  (fn [req]
+    (update-in req [:puppetdb-query :query] #(wrap-with-from entity %))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Conversion/validation of query parameters
