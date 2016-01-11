@@ -351,7 +351,7 @@
       wrap-with-default-body
       wrap-with-debug-logging))
 
-(defn wrap-with-parent-check''
+(defn parent-check
   "Middleware that checks the parent exists before serving the rest of the
    application. This ensures we always return 404's on child paths when the
    parent data is empty."

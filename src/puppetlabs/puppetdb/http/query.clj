@@ -116,7 +116,7 @@
     (restrict-query ["=" ["node" "active"] true] req)))
 
 
-(defn restrict-query-to-node'
+(defn restrict-query-to-node
   "Restrict the query parameter of the supplied request so that it
    only returns results for the supplied node"
   [req]
@@ -124,15 +124,7 @@
    :post [(are-queries-different? req %)]}
   (restrict-query ["=" "certname" (get-in req [:route-params :node])] req))
 
-(defn restrict-query-to-node
-  "Restrict the query parameter of the supplied request so that it
-   only returns results for the supplied node"
-  [node req]
-  {:pre  [(string? node)]
-   :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "certname" node] req))
-
-(defn restrict-query-to-report'
+(defn restrict-query-to-report
   "Restrict the query parameter of the supplied request so that it
    only returns results for the supplied active node"
   [req]
@@ -141,31 +133,13 @@
   (restrict-query ["=" "report" (get-in req [:route-params :hash])]
                   req))
 
-(defn restrict-query-to-report
-  "Restrict the query parameter of the supplied request so that it
-   only returns results for the supplied active node"
-  [hash req]
-  {:pre  [(string? hash)]
-   :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "report" hash]
-                  req))
-
-(defn restrict-query-to-environment'
+(defn restrict-query-to-environment
   "Restrict the query parameter of the supplied request so that it
    only returns results for the supplied environment"
   [req]
   {:pre  [(string? (get-in req [:route-params :environment]))]
    :post [(are-queries-different? req %)]}
   (restrict-query ["=" "environment" (get-in req [:route-params :environment])]
-                  req))
-
-(defn restrict-query-to-environment
-  "Restrict the query parameter of the supplied request so that it
-   only returns results for the supplied environment"
-  [environment req]
-  {:pre  [(string? environment)]
-   :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "environment" environment]
                   req))
 
 (defn restrict-fact-query-to-name
@@ -189,38 +163,20 @@
 (defn restrict-resource-query-to-type
   "Restrict the query parameter of the supplied request so that it
   only returns resources with the given type"
-  [type req]
-  {:pre  [(string? type)]
+  [req]
+  {:pre  [(string? (get-in req [:route-params :type]))]
    :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "type" type]
+  (restrict-query ["=" "type" (get-in req [:route-params :type])]
                   req))
 
 (defn restrict-resource-query-to-title
   "Restrict the query parameter of the supplied request so that it
    only returns resources with the given title"
-  [title req]
-  {:pre  [(string? title)]
+  [req]
+  {:pre  [(string? (get-in req [:route-params :title]))]
    :post [(are-queries-different? req %)]}
-  (restrict-query ["=" "title" title]
+  (restrict-query ["=" "title" (get-in req [:route-params :title])]
                   req))
-
-(defn restrict-resource-query-to-type'
-  "Restrict the query parameter of the supplied request so that it
-  only returns resources with the given type"
-  [type]
-  {:pre  [(string? type)]
-   :post [(fn? %)]}
-  (fn [req]
-    (restrict-query ["=" "type" type] req)))
-
-(defn restrict-resource-query-to-title'
-  "Restrict the query parameter of the supplied request so that it
-   only returns resources with the given title"
-  [title]
-  {:pre  [(string? title)]
-   :post [(fn? %)]}
-  (fn [req]
-    (restrict-query ["=" "title" title] req)))
 
 (defn wrap-with-from
   "Wrap a query in a from, using the entity and any provided query"
