@@ -14,7 +14,9 @@
             [puppetlabs.trapperkeeper.services :refer [defservice service-context service-id]]
             [schema.core :as s]
             [puppetlabs.puppetdb.config :as conf]
-            [puppetlabs.puppetdb.schema :as pls]))
+            [puppetlabs.puppetdb.schema :as pls]
+            [clojure.core.async :as async]
+            [com.climate.claypoole :as cp]))
 
 ;; ## Performance counters
 
@@ -340,7 +342,7 @@
    handler-fn :- message-fn-schema]
   (swap! listener-atom conj [pred handler-fn]))
 
-(defn start-receiver
+#_(defn start-receiver
   [connection endpoint discard-dir process-msg]
   (let [sess (.createSession connection true 0)
         q (.createQueue sess endpoint)
@@ -360,6 +362,64 @@
              (throw ex))))))
     {:session sess :consumer consumer :producer producer}))
 
+(defn create-processor-fn [connection endpoint discard-dir message-processing-fn]
+  (fn [message]
+    (with-open [session (.createSession connection false javax.jms.Session/CLIENT_ACKNOWLEDGE)]
+      (let [send (fn [x y]
+                   (let [q (.createQueue session endpoint)]
+                     (with-open [producer (.createProducer session q)]
+                       (.send producer (mq/to-jms-message session x y))
+                       (.acknowledge message))))
+            handle (create-message-handler send discard-dir message-processing-fn)]
+        (try
+          (handle (mq/convert-jms-message message))
+          (catch Throwable ex
+            (log/error ex "message receive failed")
+            (throw ex))
+          (finally
+            (.acknowledge message)))))))
+
+(defn create-message-receiver
+  [connection endpoint process-command-fn]
+  (let [session (.createSession connection false javax.jms.Session/CLIENT_ACKNOWLEDGE)
+        consumer (.createConsumer session (.createQueue session endpoint))]
+    (loop []
+      (try
+        (let [msg (.receive consumer)]
+          (println "hey look, a message")
+          (process-command-fn msg)
+          (println "done with the message, success"))
+        (recur)
+        (catch javax.jms.IllegalStateException e
+          (println "Ignoring illegal state..."))
+        (catch Exception e
+          (println "\n\n\n\n\nShit's broken\n\n\n\n\n\n")
+          (.printStackTrace e)
+          (throw e))))))
+
+(defn create-threadpool []
+  (java.util.concurrent.ThreadPoolExecutor. 1
+                                            Integer/MAX_VALUE
+                                            1
+                                            java.util.concurrent.TimeUnit/MINUTES
+                                            (java.util.concurrent.SynchronousQueue.)))
+
+(defn create-bounded-executor [size]
+  {:semaphore (java.util.concurrent.Semaphore. size)
+   :threadpool (create-threadpool)})
+
+(defn submit-message [{:keys [semaphore threadpool]} handler-fn]
+  (fn [message]
+    (.acquire semaphore)
+    (try
+      (.execute threadpool (fn []
+                             (try
+                               (handler-fn message)
+                               (finally
+                                 (.release semaphore)))))
+      (catch java.util.concurrent.RejectedExecutionException e
+        (.release semaphore)))))
+
 (defservice message-listener-service
   MessageListenerService
   [[:DefaultedConfig get-config]
@@ -374,25 +434,34 @@
           factory (mq/activemq-connection-factory (conf/mq-broker-url config))
           endpoint (conf/mq-endpoint config)
           connection (.createConnection factory)
+          _ (do
+              (.setExceptionListener
+               connection
+               (reify ExceptionListener
+                 (onException [this ex]
+                   (log/error ex "receiver queue connection error"))))
+              (.start connection))
           process-msg #(process-message this %)
-          receivers (doall (repeatedly (conf/mq-thread-count config)
+          message-processor-fn (create-processor-fn connection endpoint discard-dir process-msg)
+          executor (create-bounded-executor (conf/mq-thread-count config))
+          receiver-thread (Thread. (fn []
+                                     (create-message-receiver (.createConnection factory) endpoint (submit-message executor message-processor-fn))))
+          _ (do (.setDaemon receiver-thread false)
+                (println "getting ready to start the thread")
+                (.start receiver-thread))
+          #_ #_receivers (doall (repeatedly (conf/mq-thread-count config)
                                        #(start-receiver connection
                                                         endpoint
                                                         discard-dir
                                                         process-msg)))]
-      (.setExceptionListener
-       connection
-       (reify ExceptionListener
-         (onException [this ex]
-           (log/error ex "receiver queue connection error"))))
-      (.start connection)
+
       (assoc context
              :factory factory
              :connection connection
-             :receivers receivers)))
+             #_#_:receivers receivers)))
 
   (stop [this {:keys [factory connection receivers] :as context}]
-    (doseq [{:keys [session producer consumer]} receivers]
+    #_(doseq [{:keys [session producer consumer]} receivers]
       (.close producer)
       (.close consumer)
       (.close session))

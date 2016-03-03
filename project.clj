@@ -92,7 +92,8 @@
                                                               org.slf4j/slf4j-api]]
                  [com.taoensso/nippy "2.10.0" :exclusions [org.clojure/tools.reader]]
                  [bidi "1.25.1" :exclusions [org.clojure/clojurescript]]
-                 [puppetlabs/comidi "0.3.1"]]
+                 [puppetlabs/comidi "0.3.1"]
+                 [com.climate/claypoole "1.1.2"]]
 
   :jvm-opts ~pdb-jvm-opts
 
