@@ -356,64 +356,57 @@
          (log/error ex "receiver queue connection error"))))
     (.start)))
 
-
-(defn send-delayed-message [factory endpoint]
+(defn send-delayed-message [{:keys [^javax.jms.ConnectionFactory conn-pool endpoint]}]
   (fn [message-to-convert message-properties]
-    (with-open [connection (create-connection factory)
+    (with-open [connection (create-connection conn-pool)
                 session (create-session connection)]
       
       (let [q (create-queue session endpoint)]
         (with-open [producer (.createProducer session q)]
+
           (.send producer (mq/to-jms-message session message-to-convert message-properties)))))))
 
-(defn create-message-handler [factory endpoint discard-dir message-processing-fn]
-  (wrap-message-handler-middleware (send-delayed-message factory endpoint)
-                                   discard-dir
-                                   message-processing-fn))
+(defn create-command-consumer [{:keys [discard-dir] :as mq-context} command-handler]
+  (let [message-handler (wrap-message-handler-middleware (send-delayed-message mq-context)
+                                                         discard-dir
+                                                         command-handler)]
+    (fn [^javax.jms.Message message]
+      ;; When the queue is shutting down, it sends nil message
+      (when message
+        (try
+          (message-handler (mq/convert-jms-message message))
+          (.acknowledge message)
+          (catch Throwable ex
+            (log/error ex "message receive failed")
+            (throw ex)))))))
 
-(defn create-processor-fn [handle-fn]
-  (fn [^javax.jms.Message message]
-    ;; When the queue is shutting down, it sends nil message
-    (when message
-      (try
-        (handle-fn (mq/convert-jms-message message))
-        (.acknowledge message)
-        (catch Throwable ex
-          (log/error ex "message receive failed")
-          (throw ex))))))
-
-(defn receive-messages [^javax.jms.MessageConsumer consumer process-command-fn]
-  (process-command-fn (.receive consumer))
-  (recur consumer process-command-fn))
-
-(defn create-message-receiver
-  [factory endpoint process-command-fn]
-  (with-open [connection (create-connection factory)
+(defn create-mq-receiver
+  [{:keys [^javax.jms.ConnectionFactory conn-pool endpoint]} mq-message-handler]
+  (with-open [connection (create-connection conn-pool)
               session (create-session connection)
               consumer (.createConsumer session (create-queue session endpoint))]
     (try
-      (receive-messages consumer process-command-fn)
+      (loop []
+        (mq-message-handler (.receive consumer))
+        (recur))
+
       (catch javax.jms.IllegalStateException e
 
         (log/trace e "Received IllegalStateException, shutting down")
-        (log/info "Received IllegalStateException, shutting down")
+        (log/info "Received IllegalStateException, shutting down")))))
 
-        (when connection
-          (.close connection))))))
-
-(defn create-threadpool []
-  (java.util.concurrent.ThreadPoolExecutor. 1
-                                            Integer/MAX_VALUE
-                                            1
-                                            java.util.concurrent.TimeUnit/MINUTES
-                                            (java.util.concurrent.SynchronousQueue.)))
-
-(defn create-bounded-executor [size]
+(defn create-command-handler-threadpool [size]
   {:semaphore (java.util.concurrent.Semaphore. size)
-   :threadpool (create-threadpool)})
+   :threadpool (java.util.concurrent.ThreadPoolExecutor. 1
+                                                         Integer/MAX_VALUE
+                                                         1
+                                                         java.util.concurrent.TimeUnit/MINUTES
+                                                         (java.util.concurrent.SynchronousQueue.))})
 
-(defn submit-message [{:keys [^java.util.concurrent.Semaphore semaphore
-                              ^java.util.concurrent.ExecutorService threadpool]} handler-fn]
+(defn command-submission-handler
+  [{:keys [^java.util.concurrent.Semaphore semaphore
+           ^java.util.concurrent.ExecutorService threadpool]}
+   handler-fn]
   (fn [message]
     (.acquire semaphore)
     (try
@@ -425,6 +418,17 @@
       (catch java.util.concurrent.RejectedExecutionException e
         (.release semaphore)))))
 
+(defn run-mq-listener-thread [mq-context message-consumer-fn]
+  (doto (Thread. (fn []
+                   (create-mq-receiver mq-context message-consumer-fn)))
+    (.setDaemon false)
+    (.start)))
+
+(defn create-mq-context [config]
+  {:discard-dir (conf/mq-discard-dir config)
+   :endpoint (conf/mq-endpoint config)
+   :conn-pool (mq/activemq-connection-factory (conf/mq-broker-url config))})
+
 (defservice message-listener-service
   MessageListenerService
   [[:DefaultedConfig get-config]
@@ -435,24 +439,24 @@
 
   (start [this context]
     (let [config (get-config)
-          discard-dir (conf/mq-discard-dir config)
-          factory (mq/activemq-connection-factory (conf/mq-broker-url config))
-          endpoint (conf/mq-endpoint config)
-          process-msg #(process-message this %)
-          handle-fn (create-message-handler factory endpoint discard-dir process-msg)
-          message-processor-fn (create-processor-fn handle-fn)
-          executor (create-bounded-executor (conf/mq-thread-count config))
-          receiver-thread (Thread. (fn []
-                                     (create-message-receiver factory endpoint (submit-message executor message-processor-fn))))
-          _ (do (.setDaemon receiver-thread false)
-                (println "getting ready to start the thread")
-                (.start receiver-thread))]
+          mq-context (create-mq-context config)
+
+          command-threadpool (create-command-handler-threadpool (conf/mq-thread-count config))
+          
+          command-handler #(process-message this %)
+          message-handler (create-command-consumer mq-context command-handler)
+          mq-message-handler (command-submission-handler command-threadpool message-handler)]
+
+      (run-mq-listener-thread mq-context mq-message-handler)
 
       (assoc context
-             :factory factory)))
+             :conn-pool (:conn-pool mq-context)
+             :consumer-threadpool command-threadpool)))
 
-  (stop [this {:keys [factory connection receivers] :as context}]
-    (.close factory)
+  (stop [this {:keys [conn-pool consumer-threadpool receiver-thread] :as context}]
+        (.drainPermits (:semaphore consumer-threadpool))
+        (.shutdown (:threadpool consumer-threadpool))
+        (.close conn-pool)
     context)
 
   (register-listener [this pred listener-fn]
