@@ -300,13 +300,13 @@
 
     (publish-fn (json/generate-string msg) (mq/delay-property delay :seconds))))
 
-(defn create-message-handler
-  [publish discarded-dir message-fn]
+(defn wrap-message-handler-middleware
+  [send-delayed-msg-fn discarded-dir message-fn]
   (let [discard        #(dlo/store-failed-message %1 %2 discarded-dir)
         on-discard     #(handle-command-discard % discard)
         on-parse-error #(handle-parse-error %1 %2 discard)
         on-fatal       #(handle-command-failure %1 %2 discard)
-        on-retry       #(handle-command-retry %1 %2 publish)]
+        on-retry       #(handle-command-retry %1 %2 send-delayed-msg-fn)]
     (-> message-fn
         (wrap-with-discard on-discard maximum-allowable-retries)
         (wrap-with-exception-handling on-retry on-fatal)
@@ -342,60 +342,64 @@
    handler-fn :- message-fn-schema]
   (swap! listener-atom conj [pred handler-fn]))
 
-#_(defn start-receiver
-  [connection endpoint discard-dir process-msg]
-  (let [sess (.createSession connection true 0)
-        q (.createQueue sess endpoint)
-        consumer (.createConsumer sess q)
-        producer (.createProducer sess q)
-        send #(mq/commit-or-rollback sess
-                (.send producer (mq/to-jms-message sess %1 %2)))
-        handle (create-message-handler send discard-dir process-msg)]
-    (.setMessageListener
-     consumer
-     (reify MessageListener
-       (onMessage [this msg]
-         (try
-           (mq/commit-or-rollback sess (handle (mq/convert-jms-message msg)))
-           (catch Throwable ex
-             (log/error ex "message receive failed")
-             (throw ex))))))
-    {:session sess :consumer consumer :producer producer}))
+(defn ^javax.jms.Session create-session [^javax.jms.Connection connection]
+  (.createSession connection false javax.jms.Session/CLIENT_ACKNOWLEDGE))
 
-(defn create-processor-fn [connection endpoint discard-dir message-processing-fn]
-  (fn [message]
-    (with-open [session (.createSession connection false javax.jms.Session/CLIENT_ACKNOWLEDGE)]
-      (let [send (fn [x y]
-                   (let [q (.createQueue session endpoint)]
-                     (with-open [producer (.createProducer session q)]
-                       (.send producer (mq/to-jms-message session x y))
-                       (.acknowledge message))))
-            handle (create-message-handler send discard-dir message-processing-fn)]
-        (try
-          (handle (mq/convert-jms-message message))
-          (catch Throwable ex
-            (log/error ex "message receive failed")
-            (throw ex))
-          (finally
-            (.acknowledge message)))))))
+(defn ^javax.jms.Queue create-queue [^javax.jms.Session session endpoint]
+  (.createQueue session endpoint))
+
+(defn ^javax.jms.Connection create-connection [^javax.jms.ConnectionFactory factory]
+  (doto (.createConnection factory)
+    (.setExceptionListener
+     (reify ExceptionListener
+       (onException [this ex]
+         (log/error ex "receiver queue connection error"))))
+    (.start)))
+
+
+(defn send-delayed-message [factory endpoint]
+  (fn [message-to-convert message-properties]
+    (with-open [connection (create-connection factory)
+                session (create-session connection)]
+      
+      (let [q (create-queue session endpoint)]
+        (with-open [producer (.createProducer session q)]
+          (.send producer (mq/to-jms-message session message-to-convert message-properties)))))))
+
+(defn create-message-handler [factory endpoint discard-dir message-processing-fn]
+  (wrap-message-handler-middleware (send-delayed-message factory endpoint)
+                                   discard-dir
+                                   message-processing-fn))
+
+(defn create-processor-fn [handle-fn]
+  (fn [^javax.jms.Message message]
+    ;; When the queue is shutting down, it sends nil message
+    (when message
+      (try
+        (handle-fn (mq/convert-jms-message message))
+        (.acknowledge message)
+        (catch Throwable ex
+          (log/error ex "message receive failed")
+          (throw ex))))))
+
+(defn receive-messages [^javax.jms.MessageConsumer consumer process-command-fn]
+  (process-command-fn (.receive consumer))
+  (recur consumer process-command-fn))
 
 (defn create-message-receiver
-  [connection endpoint process-command-fn]
-  (let [session (.createSession connection false javax.jms.Session/CLIENT_ACKNOWLEDGE)
-        consumer (.createConsumer session (.createQueue session endpoint))]
-    (loop []
-      (try
-        (let [msg (.receive consumer)]
-          (println "hey look, a message")
-          (process-command-fn msg)
-          (println "done with the message, success"))
-        (recur)
-        (catch javax.jms.IllegalStateException e
-          (println "Ignoring illegal state..."))
-        (catch Exception e
-          (println "\n\n\n\n\nShit's broken\n\n\n\n\n\n")
-          (.printStackTrace e)
-          (throw e))))))
+  [factory endpoint process-command-fn]
+  (with-open [connection (create-connection factory)
+              session (create-session connection)
+              consumer (.createConsumer session (create-queue session endpoint))]
+    (try
+      (receive-messages consumer process-command-fn)
+      (catch javax.jms.IllegalStateException e
+
+        (log/trace e "Received IllegalStateException, shutting down")
+        (log/info "Received IllegalStateException, shutting down")
+
+        (when connection
+          (.close connection))))))
 
 (defn create-threadpool []
   (java.util.concurrent.ThreadPoolExecutor. 1
@@ -408,7 +412,8 @@
   {:semaphore (java.util.concurrent.Semaphore. size)
    :threadpool (create-threadpool)})
 
-(defn submit-message [{:keys [semaphore threadpool]} handler-fn]
+(defn submit-message [{:keys [^java.util.concurrent.Semaphore semaphore
+                              ^java.util.concurrent.ExecutorService threadpool]} handler-fn]
   (fn [message]
     (.acquire semaphore)
     (try
@@ -433,39 +438,20 @@
           discard-dir (conf/mq-discard-dir config)
           factory (mq/activemq-connection-factory (conf/mq-broker-url config))
           endpoint (conf/mq-endpoint config)
-          connection (.createConnection factory)
-          _ (do
-              (.setExceptionListener
-               connection
-               (reify ExceptionListener
-                 (onException [this ex]
-                   (log/error ex "receiver queue connection error"))))
-              (.start connection))
           process-msg #(process-message this %)
-          message-processor-fn (create-processor-fn connection endpoint discard-dir process-msg)
+          handle-fn (create-message-handler factory endpoint discard-dir process-msg)
+          message-processor-fn (create-processor-fn handle-fn)
           executor (create-bounded-executor (conf/mq-thread-count config))
           receiver-thread (Thread. (fn []
-                                     (create-message-receiver (.createConnection factory) endpoint (submit-message executor message-processor-fn))))
+                                     (create-message-receiver factory endpoint (submit-message executor message-processor-fn))))
           _ (do (.setDaemon receiver-thread false)
                 (println "getting ready to start the thread")
-                (.start receiver-thread))
-          #_ #_receivers (doall (repeatedly (conf/mq-thread-count config)
-                                       #(start-receiver connection
-                                                        endpoint
-                                                        discard-dir
-                                                        process-msg)))]
+                (.start receiver-thread))]
 
       (assoc context
-             :factory factory
-             :connection connection
-             #_#_:receivers receivers)))
+             :factory factory)))
 
   (stop [this {:keys [factory connection receivers] :as context}]
-    #_(doseq [{:keys [session producer consumer]} receivers]
-      (.close producer)
-      (.close consumer)
-      (.close session))
-    (.close connection)
     (.close factory)
     context)
 

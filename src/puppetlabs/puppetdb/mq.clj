@@ -337,3 +337,6 @@
   (proxy [PooledConnectionFactory java.lang.AutoCloseable]
       [(ActiveMQConnectionFactory. spec)]
     (close [] (.stop this))))
+
+(defn activemq-connection-factory2 [spec]
+  (ActiveMQConnectionFactory. spec))
