@@ -381,19 +381,22 @@
             (throw ex)))))))
 
 (defn create-mq-receiver
-  [{:keys [^javax.jms.ConnectionFactory conn-pool endpoint]} mq-message-handler]
+  [{:keys [^javax.jms.ConnectionFactory conn-pool endpoint]} mq-message-handler mq-connected-promise]
   (with-open [connection (create-connection conn-pool)
               session (create-session connection)
               consumer (.createConsumer session (create-queue session endpoint))]
     (try
+      (deliver mq-connected-promise true)
       (loop []
         (mq-message-handler (.receive consumer))
         (recur))
-
+      
       (catch javax.jms.IllegalStateException e
 
         (log/trace e "Received IllegalStateException, shutting down")
-        (log/info "Received IllegalStateException, shutting down")))))
+        (log/info "Received IllegalStateException, shutting down"))
+      (catch Exception e
+        (log/error e)))))
 
 (defn create-command-handler-threadpool [size]
   {:semaphore (java.util.concurrent.Semaphore. size)
@@ -418,9 +421,9 @@
       (catch java.util.concurrent.RejectedExecutionException e
         (.release semaphore)))))
 
-(defn run-mq-listener-thread [mq-context message-consumer-fn]
+(defn run-mq-listener-thread [mq-context message-consumer-fn mq-connected-promise]
   (doto (Thread. (fn []
-                   (create-mq-receiver mq-context message-consumer-fn)))
+                   (create-mq-receiver mq-context message-consumer-fn mq-connected-promise)))
     (.setDaemon false)
     (.start)))
 
@@ -445,9 +448,12 @@
           
           command-handler #(process-message this %)
           message-handler (create-command-consumer mq-context command-handler)
-          mq-message-handler (command-submission-handler command-threadpool message-handler)]
+          mq-message-handler (command-submission-handler command-threadpool message-handler)
+          mq-connected-promise (promise)]
 
-      (run-mq-listener-thread mq-context mq-message-handler)
+      (run-mq-listener-thread mq-context mq-message-handler mq-connected-promise)
+      
+      @mq-connected-promise
 
       (assoc context
              :conn-pool (:conn-pool mq-context)
@@ -456,7 +462,9 @@
   (stop [this {:keys [conn-pool consumer-threadpool receiver-thread] :as context}]
         (.drainPermits (:semaphore consumer-threadpool))
         (.shutdown (:threadpool consumer-threadpool))
-        (.close conn-pool)
+        (when-not (.awaitTermination (:threadpool consumer-threadpool) 10 java.util.concurrent.TimeUnit/SECONDS)
+          (.shutdownNow (:threadpool consumer-threadpool)))
+        (.stop conn-pool)
     context)
 
   (register-listener [this pred listener-fn]
