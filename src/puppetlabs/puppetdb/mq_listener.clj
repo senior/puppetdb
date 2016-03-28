@@ -366,7 +366,10 @@
 
           (.send producer (mq/to-jms-message session message-to-convert message-properties)))))))
 
-(defn create-command-consumer [{:keys [discard-dir] :as mq-context} command-handler]
+(defn create-command-consumer
+  "Create and return a command handler. This function does the work of
+  consuming/storing a command. Handled commands are acknowledged here"
+  [{:keys [discard-dir] :as mq-context} command-handler]
   (let [message-handler (wrap-message-handler-middleware (send-delayed-message mq-context)
                                                          discard-dir
                                                          command-handler)]
@@ -376,16 +379,21 @@
         (try
           (message-handler (mq/convert-jms-message message))
           (.acknowledge message)
-          (catch Throwable ex
-            (log/error ex "message receive failed")
-            (throw ex)))))))
+          (catch Exception ex
+            (log/error ex "Exception raised from processing message, message is not acknowledged and will be retried")))))))
 
 (defn create-mq-receiver
+  "Infinite loop, intended to be run in an isolated thread that
+  recieves a message from ActiveMQ, passes it to `mq-message-handler`
+  and looks for the next message"
   [{:keys [^javax.jms.ConnectionFactory conn-pool endpoint]} mq-message-handler mq-connected-promise]
   (with-open [connection (create-connection conn-pool)
               session (create-session connection)
               consumer (.createConsumer session (create-queue session endpoint))]
     (try
+      ;; delivering the promise here we have ensured that we can
+      ;; connect to the MQ and that the queue has been created (for
+      ;; the first startup of PuppetDB)
       (deliver mq-connected-promise true)
       (loop []
         (mq-message-handler (.receive consumer))
@@ -398,7 +406,13 @@
       (catch Exception e
         (log/error e)))))
 
-(defn create-command-handler-threadpool [size]
+(defn create-command-handler-threadpool
+  "Creates an unbounded threadpool with the intent that access to the
+  threadpool is bounded by the semaphore. Implicitly the threadpool is
+  bounded by `size`, but since the semaphore is handling that aspect,
+  it's more efficient to use an unbounded pool and not duplicate the
+  constraint in both the semaphore and the threadpool"
+  [size]
   {:semaphore (java.util.concurrent.Semaphore. size)
    :threadpool (java.util.concurrent.ThreadPoolExecutor. 1
                                                          Integer/MAX_VALUE
@@ -407,10 +421,14 @@
                                                          (java.util.concurrent.SynchronousQueue.))})
 
 (defn command-submission-handler
+  "Creates a message handler that submits the message to
+  `threadpool`. The `threadpool` is guarded by `semaphore` and will
+  block until a semaphore token is available"
   [{:keys [^java.util.concurrent.Semaphore semaphore
            ^java.util.concurrent.ExecutorService threadpool]}
    handler-fn]
   (fn [message]
+    ;; This call blocks waiting for a semamphore token
     (.acquire semaphore)
     (try
       (.execute threadpool (fn []
@@ -421,13 +439,19 @@
       (catch java.util.concurrent.RejectedExecutionException e
         (.release semaphore)))))
 
-(defn run-mq-listener-thread [mq-context message-consumer-fn mq-connected-promise]
+(defn run-mq-listener-thread
+  "Creates (and starts) an isolated thread to continually receive new
+  ActiveMQ messages and pass them to the `message-consumer-fn`"
+  [mq-context message-consumer-fn mq-connected-promise]
   (doto (Thread. (fn []
                    (create-mq-receiver mq-context message-consumer-fn mq-connected-promise)))
     (.setDaemon false)
     (.start)))
 
-(defn create-mq-context [config]
+(defn create-mq-context
+  "The MQ context contains a connection pool that pools both ActiveMQ
+  connections and sessions"
+  [config]
   {:discard-dir (conf/mq-discard-dir config)
    :endpoint (conf/mq-endpoint config)
    :conn-pool (mq/activemq-connection-factory (conf/mq-broker-url config))})
@@ -460,10 +484,25 @@
              :consumer-threadpool command-threadpool)))
 
   (stop [this {:keys [conn-pool consumer-threadpool receiver-thread] :as context}]
+
+        ;; Prevent new work from being accepted
         (.drainPermits (:semaphore consumer-threadpool))
-        (.shutdown (:threadpool consumer-threadpool))
-        (when-not (.awaitTermination (:threadpool consumer-threadpool) 10 java.util.concurrent.TimeUnit/SECONDS)
-          (.shutdownNow (:threadpool consumer-threadpool)))
+
+        (let [threadpool (:threadpool consumer-threadpool)]
+          ;; Shutdown the threadpool, allowing in-flight work to finish
+          (.shutdown threadpool)
+
+          ;; This will block, waiting for the threadpool to shutdown
+          (when-not (.awaitTermination threadpool 10 java.util.concurrent.TimeUnit/SECONDS)
+
+            (log/warn "Attempted to shutdown command threadpool, not stopped after 10 seconds, forcibly shutting it down")
+
+            ;; This will force the shutdown of the threadpool and will
+            ;; not allow current threads to finish
+            (.shutdownNow threadpool)
+            (log/warn "Command threadpool forcibly shutdown")))
+
+        ;; Shutdown the ActiveMQ connection pool
         (.stop conn-pool)
     context)
 
