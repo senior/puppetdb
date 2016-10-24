@@ -1267,13 +1267,20 @@
                       command-delay-ms 1
                       scf-store/replace-existing-catalog
                       (fn [& args]
-                        (.countDown latch)
-                        (println "got the latch " (.getId (Thread/currentThread)))
-                        (flush)
-                        (let [res (apply orig-replace-existing-catalog args)]
-                          (println "finished the replace " (.getId (Thread/currentThread)))
+                        (binding [*err* *out*]
+                          (.countDown latch)
+                          (println "got the latch " (.getId (Thread/currentThread)))
                           (flush)
-                          res))]
+                          (try
+                            (apply orig-replace-existing-catalog args)
+                            (catch Exception e
+                              (println "Received error '%s' for thread id '%s'" (.getMessage e) (.getId (Thread/currentThread)))
+                              (.printStackTrace e)
+                              (flush)
+                              (throw e))
+                            (finally
+                              (println "finished the replace " (.getId (Thread/currentThread)))
+                              (flush)))))]
           (let [first-message? (atom false)
                 second-message? (atom false)
                 fut (future
