@@ -1268,7 +1268,10 @@
                       scf-store/replace-existing-catalog
                       (fn [& args]
                         (.countDown latch)
-                        (apply orig-replace-existing-catalog args))]
+                        (println "got the latch")
+                        (let [res (apply orig-replace-existing-catalog args)]
+                          (println "finished the replace")
+                          res))]
           (let [first-message? (atom false)
                 second-message? (atom false)
                 fut (future
