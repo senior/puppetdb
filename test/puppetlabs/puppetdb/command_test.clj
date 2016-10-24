@@ -1274,7 +1274,8 @@
                           (try
                             (apply orig-replace-existing-catalog args)
                             (catch Exception e
-                              (println "Received error '%s' for thread id '%s'" (.getMessage e) (.getId (Thread/currentThread)))
+                              (printf "Received error '%s' for thread id '%s'" (.getMessage e) (.getId (Thread/currentThread)))
+                              (flush)
                               (.printStackTrace e)
                               (flush)
                               (throw e))

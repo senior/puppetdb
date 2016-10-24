@@ -724,6 +724,8 @@
    refs-to-hashes :- {resource-ref-schema String}
    received-timestamp :- pls/Timestamp]
 
+  (println "orig replace-existing-catalog")
+  (flush)
   (inc! (:updated-catalog performance-metrics))
 
   (time! (:catalog-hash-miss performance-metrics)
@@ -760,14 +762,21 @@
               (cond
                 (some-> latest-producer-timestamp
                         (.after (to-timestamp producer_timestamp)))
-                (log/warnf "Not replacing catalog for certname %s because local data is newer." certname)
+                (do
+                  (println "Not replacing catalog")
+                  (flush)
+                  (log/warnf "Not replacing catalog for certname %s because local data is newer." certname))
 
                 (= stored-hash hash)
-                (update-existing-catalog catalog-id hash catalog received-timestamp)
+                (do
+                  (println "hashes are the same")
+                  (flush)
+                  (update-existing-catalog catalog-id hash catalog received-timestamp))
 
                 :else
                 (let [refs-to-hashes (time! (:resource-hashes performance-metrics)
                                             (kitchensink/mapvals shash/resource-identity-hash resources))]
+                  (println "hashes are different existing catalog? " (nil? catalog-id))
                   (if (nil? catalog-id)
                     (add-new-catalog certname-id hash catalog refs-to-hashes received-timestamp)
                     (replace-existing-catalog certname-id catalog-id hash catalog refs-to-hashes received-timestamp))))
