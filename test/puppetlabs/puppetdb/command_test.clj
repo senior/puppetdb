@@ -1268,9 +1268,11 @@
                       scf-store/replace-existing-catalog
                       (fn [& args]
                         (.countDown latch)
-                        (println "got the latch")
+                        (println "got the latch " (.getId (Thread/currentThread)))
+                        (flush)
                         (let [res (apply orig-replace-existing-catalog args)]
-                          (println "finished the replace")
+                          (println "finished the replace " (.getId (Thread/currentThread)))
+                          (flush)
                           res))]
           (let [first-message? (atom false)
                 second-message? (atom false)
