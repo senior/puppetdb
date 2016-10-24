@@ -1247,6 +1247,10 @@
             (is (true? @second-message?))))))))
 
 (deftest concurrent-catalog-resource-updates
+  (println
+   "****************************************************"
+   "concurrent-catalog-resource-updates test is starting"
+   "****************************************************")
   (testing "Should allow only one replace catalogs update for a given cert at a time"
     (with-message-handler {:keys [handle-message command-chan dlo delay-pool q]}
       (let [test-catalog (get-in catalogs [:empty])
@@ -1315,7 +1319,11 @@
                       pg-serialization-failure-ex?)))
 
             (is (true? @first-message?))
-            (is (true? @second-message?))))))))
+            (is (true? @second-message?)))))))
+    (println
+     "****************************************************"
+     "concurrent-catalog-resource-updates test is ending"
+     "****************************************************"))
 
 (let [cases [{:certname "foo.example.com"
               :command {:command (command-names :deactivate-node)
