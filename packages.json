@@ -1,0 +1,3086 @@
+{
+    "package": {
+        "kbd-misc": {
+            "ensure": "1.15.5-11.el7"
+        }, 
+        "texlive-latex-bin": {
+            "ensure": "2:svn26689.0-38.el7"
+        }, 
+        "dbus-python": {
+            "ensure": "1.1.1-9.el7"
+        }, 
+        "pth": {
+            "ensure": "2.0.7-23.el7"
+        }, 
+        "iputils": {
+            "ensure": "20121221-7.el7"
+        }, 
+        "texlive-xstring-doc": {
+            "ensure": "2:svn29258.1.7a-38.el7"
+        }, 
+        "texlive-jadetex-bin": {
+            "ensure": "2:svn3006.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-collection-fontsrecommended": {
+            "ensure": "2:svn28082.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-preprint": {
+            "ensure": "2:svn16085.0-38.el7"
+        }, 
+        "perl-parent": {
+            "ensure": "1:0.225-244.el7"
+        }, 
+        "numactl-libs": {
+            "ensure": "2.0.9-5.el7_1"
+        }, 
+        "gd": {
+            "ensure": "2.0.35-26.el7"
+        }, 
+        "btrfs-progs": {
+            "ensure": "3.19.1-1.el7"
+        }, 
+        "rsyslog": {
+            "ensure": "7.4.7-12.el7"
+        }, 
+        "texlive-latex-fonts": {
+            "ensure": "2:svn28888.0-38.el7"
+        }, 
+        "texlive-setspace-doc": {
+            "ensure": "2:svn24881.6.7a-38.el7"
+        }, 
+        "gdbm": {
+            "ensure": "1.10-8.el7"
+        }, 
+        "poppler": {
+            "ensure": "0.26.5-5.el7"
+        }, 
+        "gpgme": {
+            "ensure": "1.3.2-5.el7"
+        }, 
+        "texlive-lettrine-doc": {
+            "ensure": "2:svn29391.1.64-38.el7"
+        }, 
+        "texlive-bibtex-doc": {
+            "ensure": "2:svn26689.0.99d-38.el7"
+        }, 
+        "texlive-dvipdfm-bin": {
+            "ensure": "2:svn13663.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-texlive.infra": {
+            "ensure": "2:svn28217.0-38.el7"
+        }, 
+        "centos-release": {
+            "ensure": "7-2.1511.el7.centos.2.10"
+        }, 
+        "texlive-metapost-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "libnfsidmap": {
+            "ensure": "0.25-12.el7"
+        }, 
+        "postgresql-libs": {
+            "ensure": "9.2.15-1.el7_2"
+        }, 
+        "giflib": {
+            "ensure": "4.1.6-9.el7"
+        }, 
+        "texlive-url": {
+            "ensure": "2:svn16864.3.2-38.el7"
+        }, 
+        "trousers": {
+            "ensure": "0.3.13-1.el7"
+        }, 
+        "texlive-pst-text-doc": {
+            "ensure": "2:svn15878.1.00-38.el7"
+        }, 
+        "texlive-ifmtarg": {
+            "ensure": "2:svn19363.1.2a-38.el7"
+        }, 
+        "bzip2-libs": {
+            "ensure": "1.0.6-13.el7"
+        }, 
+        "texlive-t2-doc": {
+            "ensure": "2:svn29349.0-38.el7"
+        }, 
+        "texlive-fix2col": {
+            "ensure": "2:svn17133.0-38.el7"
+        }, 
+        "texlive-pdftex-bin": {
+            "ensure": "2:svn27321.0-38.20130427_r30134.el7"
+        }, 
+        "libdb-utils": {
+            "ensure": "5.3.21-19.el7"
+        }, 
+        "texlive-fancybox": {
+            "ensure": "2:svn18304.1.4-38.el7"
+        }, 
+        "libXmu": {
+            "ensure": "1.1.2-2.el7"
+        }, 
+        "texlive-arphic-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "iwl2030-firmware": {
+            "ensure": "18.168.6.1-43.el7"
+        }, 
+        "libcom_err": {
+            "ensure": "1.42.9-7.el7"
+        }, 
+        "texlive-soul": {
+            "ensure": "2:svn15878.2.4-38.el7"
+        }, 
+        "ca-certificates": {
+            "ensure": "2015.2.4-71.el7"
+        }, 
+        "texlive-attachfile": {
+            "ensure": "2:svn21866.v1.5b-38.el7"
+        }, 
+        "texlive-tetex-bin": {
+            "ensure": "2:svn27344.0-38.20130427_r30134.el7"
+        }, 
+        "gnutls": {
+            "ensure": "3.3.8-12.el7_1.1"
+        }, 
+        "perl-File-Temp": {
+            "ensure": "0.23.01-3.el7"
+        }, 
+        "texlive-xetex-pstricks-doc": {
+            "ensure": "2:svn17055.0-38.el7"
+        }, 
+        "basesystem": {
+            "ensure": "10.0-7.el7.centos"
+        }, 
+        "perl-Text-ParseWords": {
+            "ensure": "3.29-4.el7"
+        }, 
+        "texlive-pst-eps": {
+            "ensure": "2:svn15878.1.0-38.el7"
+        }, 
+        "p11-kit": {
+            "ensure": "0.20.7-3.el7"
+        }, 
+        "iproute": {
+            "ensure": "3.10.0-54.el7"
+        }, 
+        "texlive-eepic-doc": {
+            "ensure": "2:svn15878.1.1e-38.el7"
+        }, 
+        "device-mapper-persistent-data": {
+            "ensure": "0.5.5-1.el7"
+        }, 
+        "texlive-latex": {
+            "ensure": "2:svn27907.0-38.el7"
+        }, 
+        "texlive-lm-math": {
+            "ensure": "2:svn29044.1.958-38.el7"
+        }, 
+        "cpio": {
+            "ensure": "2.11-24.el7"
+        }, 
+        "cryptsetup-libs": {
+            "ensure": "1.6.7-1.el7"
+        }, 
+        "texlive-cm-super-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-scheme-basic": {
+            "ensure": "2:svn25923.0-38.20130427_r30134.el7"
+        }, 
+        "libmodman": {
+            "ensure": "2.0.1-8.el7"
+        }, 
+        "texlive-latex-fonts-doc": {
+            "ensure": "2:svn28888.0-38.el7"
+        }, 
+        "libXau": {
+            "ensure": "1.0.8-2.1.el7"
+        }, 
+        "texlive-beton-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "libselinux-utils": {
+            "ensure": "2.2.2-6.el7"
+        }, 
+        "perl-Scalar-List-Utils": {
+            "ensure": "1.27-248.el7"
+        }, 
+        "texlive-enumitem-doc": {
+            "ensure": "2:svn24146.3.5.2-38.el7"
+        }, 
+        "parted": {
+            "ensure": "3.1-23.el7"
+        }, 
+        "zlib": {
+            "ensure": "1.2.7-15.el7"
+        }, 
+        "texlive-fpl-doc": {
+            "ensure": "2:svn15878.1.002-38.el7"
+        }, 
+        "texlive-textpos-doc": {
+            "ensure": "2:svn28261.1.7h-38.el7"
+        }, 
+        "mozjs17": {
+            "ensure": "17.0.0-12.el7"
+        }, 
+        "texlive-xdvi-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-makeindex-doc": {
+            "ensure": "2:svn26689.2.12-38.el7"
+        }, 
+        "xalan-j2": {
+            "ensure": "2.7.1-23.el7"
+        }, 
+        "texlive-xecolor": {
+            "ensure": "2:svn29660.0.1-38.el7"
+        }, 
+        "libxslt": {
+            "ensure": "1.1.28-5.el7"
+        }, 
+        "libxshmfence": {
+            "ensure": "1.2-1.el7"
+        }, 
+        "texlive-xetex-itrans": {
+            "ensure": "2:svn24105.4.0-38.el7"
+        }, 
+        "texlive-seminar-doc": {
+            "ensure": "2:svn18322.1.5-38.el7"
+        }, 
+        "teckit": {
+            "ensure": "2.5.1-11.el7"
+        }, 
+        "texlive-pstricks-add": {
+            "ensure": "2:svn28750.3.59-38.el7"
+        }, 
+        "texlive-dvipng-doc": {
+            "ensure": "2:svn26689.1.14-38.el7"
+        }, 
+        "libunistring": {
+            "ensure": "0.9.3-9.el7"
+        }, 
+        "texlive-collection-htmlxml": {
+            "ensure": "2:svn28251.0-38.20130427_r30134.el7"
+        }, 
+        "keyutils-libs": {
+            "ensure": "1.5.8-3.el7"
+        }, 
+        "perl-Encode": {
+            "ensure": "2.51-7.el7"
+        }, 
+        "libproxy": {
+            "ensure": "0.4.11-8.el7"
+        }, 
+        "texlive-fontspec": {
+            "ensure": "2:svn29412.v2.3a-38.el7"
+        }, 
+        "libgpg-error": {
+            "ensure": "1.12-3.el7"
+        }, 
+        "lvm2-libs": {
+            "ensure": "7:2.02.130-5.el7"
+        }, 
+        "texlive-preprint-doc": {
+            "ensure": "2:svn16085.0-38.el7"
+        }, 
+        "hiera": {
+            "ensure": [
+                "3.2.2"
+            ]
+        }, 
+        "texlive-etex-pkg": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "texlive-parskip": {
+            "ensure": "2:svn19963.2.0-38.el7"
+        }, 
+        "net-ssh": {
+            "ensure": [
+                "2.9.2"
+            ]
+        }, 
+        "texlive-kpathsea-lib-devel": {
+            "ensure": "2:2012-38.20130427_r30134.el7"
+        }, 
+        "texlive-wasy": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-ae": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "python-javapackages": {
+            "ensure": "3.4.1-11.el7"
+        }, 
+        "gawk": {
+            "ensure": "4.0.2-4.el7"
+        }, 
+        "aic94xx-firmware": {
+            "ensure": "30-6.el7"
+        }, 
+        "javamail": {
+            "ensure": "1.4.6-8.el7"
+        }, 
+        "libbasicobjects": {
+            "ensure": "0.1.1-25.el7"
+        }, 
+        "texlive-courier": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-colortbl-doc": {
+            "ensure": "2:svn25394.v1.0a-38.el7"
+        }, 
+        "libpwquality": {
+            "ensure": "1.2.3-4.el7"
+        }, 
+        "iwl4965-firmware": {
+            "ensure": "228.61.2.24-43.el7"
+        }, 
+        "libselinux": {
+            "ensure": "2.2.2-6.el7"
+        }, 
+        "texlive-eso-pic": {
+            "ensure": "2:svn21515.2.0c-38.el7"
+        }, 
+        "mesa-libglapi": {
+            "ensure": "10.6.5-3.20150824.el7"
+        }, 
+        "apache-commons-pool": {
+            "ensure": "1.6-9.el7"
+        }, 
+        "io-console": {
+            "ensure": [
+                "0.4.3"
+            ]
+        }, 
+        "hostname": {
+            "ensure": "3.13-3.el7"
+        }, 
+        "e2fsprogs-libs": {
+            "ensure": "1.42.9-7.el7"
+        }, 
+        "texlive-extsizes": {
+            "ensure": "2:svn17263.1.4a-38.el7"
+        }, 
+        "texlive-kerkis": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-pst-3d-doc": {
+            "ensure": "2:svn17257.1.10-38.el7"
+        }, 
+        "texlive-thumbpdf": {
+            "ensure": "2:svn26689.3.15-38.el7"
+        }, 
+        "texlive-amsmath": {
+            "ensure": "2:svn29327.2.14-38.el7"
+        }, 
+        "lcms2": {
+            "ensure": "2.6-2.el7"
+        }, 
+        "texlive-polyglossia": {
+            "ensure": "2:svn26163.v1.2.1-38.el7"
+        }, 
+        "apr": {
+            "ensure": "1.4.8-3.el7"
+        }, 
+        "texlive-varwidth": {
+            "ensure": "2:svn24104.0.92-38.el7"
+        }, 
+        "hocon": {
+            "ensure": [
+                "0.9.3"
+            ]
+        }, 
+        "iprutils": {
+            "ensure": "2.4.8-1.el7"
+        }, 
+        "texlive-tools": {
+            "ensure": "2:svn26263.0-38.el7"
+        }, 
+        "file-libs": {
+            "ensure": "5.11-31.el7"
+        }, 
+        "python-libs": {
+            "ensure": "2.7.5-34.el7"
+        }, 
+        "texlive-thumbpdf-doc": {
+            "ensure": "2:svn26689.3.15-38.el7"
+        }, 
+        "libxcb": {
+            "ensure": "1.11-4.el7"
+        }, 
+        "texlive-wasysym-doc": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "python-lxml": {
+            "ensure": "3.2.1-4.el7"
+        }, 
+        "httpd": {
+            "ensure": "2.4.6-40.el7.centos.4"
+        }, 
+        "texlive-marginnote": {
+            "ensure": "2:svn25880.v1.1i-38.el7"
+        }, 
+        "texlive-breakurl-doc": {
+            "ensure": "2:svn15878.1.30-38.el7"
+        }, 
+        "texlive-ifluatex": {
+            "ensure": "2:svn26725.1.3-38.el7"
+        }, 
+        "grub2": {
+            "ensure": "1:2.02-0.29.el7.centos"
+        }, 
+        "libnetfilter_conntrack": {
+            "ensure": "1.0.4-2.el7"
+        }, 
+        "texlive-collection-latex": {
+            "ensure": "2:svn25030.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-iftex-doc": {
+            "ensure": "2:svn29654.0.2-38.el7"
+        }, 
+        "texlive-footmisc": {
+            "ensure": "2:svn23330.5.5b-38.el7"
+        }, 
+        "perl": {
+            "ensure": "4:5.16.3-286.el7"
+        }, 
+        "tzdata": {
+            "ensure": "2015g-1.el7"
+        }, 
+        "yum-metadata-parser": {
+            "ensure": "1.1.4-10.el7"
+        }, 
+        "texlive-dvipdfmx-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-marginnote-doc": {
+            "ensure": "2:svn25880.v1.1i-38.el7"
+        }, 
+        "iwl3160-firmware": {
+            "ensure": "22.0.7.0-43.el7"
+        }, 
+        "texlive-xmltex": {
+            "ensure": "2:svn28273.0.8-38.el7"
+        }, 
+        "texlive-fixlatvian-doc": {
+            "ensure": "2:svn21631.1a-38.el7"
+        }, 
+        "texlive-pdfpages-doc": {
+            "ensure": "2:svn27574.0.4t-38.el7"
+        }, 
+        "texlive-ncntrsbk": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-garuda-c90": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "quota-nls": {
+            "ensure": "1:4.01-11.el7"
+        }, 
+        "texlive-xstring": {
+            "ensure": "2:svn29258.1.7a-38.el7"
+        }, 
+        "libXtst": {
+            "ensure": "1.2.2-2.1.el7"
+        }, 
+        "libnfnetlink": {
+            "ensure": "1.0.1-4.el7"
+        }, 
+        "qrencode-libs": {
+            "ensure": "3.4.1-3.el7"
+        }, 
+        "texlive-ifxetex-doc": {
+            "ensure": "2:svn19685.0.5-38.el7"
+        }, 
+        "libICE": {
+            "ensure": "1.0.9-2.el7"
+        }, 
+        "yum-plugin-fastestmirror": {
+            "ensure": "1.1.31-34.el7"
+        }, 
+        "texlive-kastrup": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "tzdata-java": {
+            "ensure": "2016h-1.el7"
+        }, 
+        "texlive-rotating": {
+            "ensure": "2:svn16832.2.16b-38.el7"
+        }, 
+        "texlive-l3packages-doc": {
+            "ensure": "2:svn29361.SVN_4467-38.el7"
+        }, 
+        "texlive-multirow-doc": {
+            "ensure": "2:svn17256.1.6-38.el7"
+        }, 
+        "iwl5150-firmware": {
+            "ensure": "8.24.2.2-43.el7"
+        }, 
+        "texlive-csquotes": {
+            "ensure": "2:svn24393.5.1d-38.el7"
+        }, 
+        "libpath_utils": {
+            "ensure": "0.2.1-25.el7"
+        }, 
+        "setup": {
+            "ensure": "2.8.71-6.el7"
+        }, 
+        "kernel-tools-libs": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "libtasn1": {
+            "ensure": "3.8-2.el7"
+        }, 
+        "jbigkit-libs": {
+            "ensure": "2.0-11.el7"
+        }, 
+        "texlive-xecyr": {
+            "ensure": "2:svn20221.1.1-38.el7"
+        }, 
+        "texlive-dvips-doc": {
+            "ensure": "2:svn29585.0-38.el7"
+        }, 
+        "texlive-fontwrap-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-kastrup-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "apache-commons-logging": {
+            "ensure": "1.1.2-7.el7"
+        }, 
+        "texlive-lua-alt-getopt": {
+            "ensure": "2:svn29349.0.7.0-38.el7"
+        }, 
+        "ethtool": {
+            "ensure": "2:3.15-2.el7"
+        }, 
+        "sqlite": {
+            "ensure": "3.7.17-8.el7"
+        }, 
+        "libuuid": {
+            "ensure": "2.23.2-26.el7"
+        }, 
+        "java-1.8.0-openjdk": {
+            "ensure": "1:1.8.0.111-1.b15.el7_2"
+        }, 
+        "tar": {
+            "ensure": "2:1.26-29.el7"
+        }, 
+        "texlive-cm-doc": {
+            "ensure": "2:svn29581.0-38.el7"
+        }, 
+        "sudo": {
+            "ensure": "1.8.6p7-16.el7"
+        }, 
+        "texlive-etoolbox-doc": {
+            "ensure": "2:svn20922.2.1-38.el7"
+        }, 
+        "texlive-euenc-doc": {
+            "ensure": "2:svn19795.0.1h-38.el7"
+        }, 
+        "logrotate": {
+            "ensure": "3.8.6-6.el7"
+        }, 
+        "texlive-setspace": {
+            "ensure": "2:svn24881.6.7a-38.el7"
+        }, 
+        "dhcp-common": {
+            "ensure": "12:4.2.5-42.el7.centos"
+        }, 
+        "emacs-filesystem": {
+            "ensure": "1:24.3-18.el7"
+        }, 
+        "gsettings-desktop-schemas": {
+            "ensure": "3.14.2-1.el7"
+        }, 
+        "acl": {
+            "ensure": "2.2.51-12.el7"
+        }, 
+        "xerces-j2": {
+            "ensure": "2.11.0-17.el7_0"
+        }, 
+        "texlive-euenc": {
+            "ensure": "2:svn19795.0.1h-38.el7"
+        }, 
+        "texlive-kpathsea-lib": {
+            "ensure": "2:2012-38.20130427_r30134.el7"
+        }, 
+        "glibc-devel": {
+            "ensure": "2.17-106.el7_2.4"
+        }, 
+        "gcc": {
+            "ensure": "4.8.5-4.el7"
+        }, 
+        "libblkid": {
+            "ensure": "2.23.2-26.el7"
+        }, 
+        "texlive-lm-doc": {
+            "ensure": "2:svn28119.2.004-38.el7"
+        }, 
+        "texlive-ncctools-doc": {
+            "ensure": "2:svn15878.3.5-38.el7"
+        }, 
+        "texlive-lm": {
+            "ensure": "2:svn28119.2.004-38.el7"
+        }, 
+        "iwl6000-firmware": {
+            "ensure": "9.221.4.1-43.el7"
+        }, 
+        "texlive-stmaryrd": {
+            "ensure": "2:svn22027.0-38.el7"
+        }, 
+        "tomcat-servlet-3.0-api": {
+            "ensure": "7.0.54-8.el7_2"
+        }, 
+        "stomp": {
+            "ensure": [
+                "1.3.3"
+            ]
+        }, 
+        "ebtables": {
+            "ensure": "2.0.10-13.el7"
+        }, 
+        "texlive-wasy-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-eepic": {
+            "ensure": "2:svn15878.1.1e-38.el7"
+        }, 
+        "avahi-libs": {
+            "ensure": "0.6.31-15.el7"
+        }, 
+        "centos-logos": {
+            "ensure": "70.0.6-3.el7.centos"
+        }, 
+        "emacs-nox": {
+            "ensure": "1:24.3-18.el7"
+        }, 
+        "avalon-logkit": {
+            "ensure": "2.1-14.el7"
+        }, 
+        "texlive-polyglossia-doc": {
+            "ensure": "2:svn26163.v1.2.1-38.el7"
+        }, 
+        "perl-constant": {
+            "ensure": "1.27-2.el7"
+        }, 
+        "pyliblzma": {
+            "ensure": "0.5.3-11.el7"
+        }, 
+        "ncurses-libs": {
+            "ensure": "5.9-13.20130511.el7"
+        }, 
+        "polkit": {
+            "ensure": "0.112-5.el7"
+        }, 
+        "iwl100-firmware": {
+            "ensure": "39.31.5.1-43.el7"
+        }, 
+        "jansson": {
+            "ensure": "2.4-6.el7"
+        }, 
+        "texlive-marvosym": {
+            "ensure": "2:svn29349.2.2a-38.el7"
+        }, 
+        "texlive-cns": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-thailatex-doc": {
+            "ensure": "2:svn29349.0.5.1-38.el7"
+        }, 
+        "perl-Pod-Usage": {
+            "ensure": "1.63-3.el7"
+        }, 
+        "texlive-amscls-doc": {
+            "ensure": "2:svn29207.0-38.el7"
+        }, 
+        "texlive-plain": {
+            "ensure": "2:svn26647.0-38.el7"
+        }, 
+        "texlive-anysize": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "glib2": {
+            "ensure": "2.42.2-5.el7"
+        }, 
+        "postfix": {
+            "ensure": "2:2.10.1-6.el7"
+        }, 
+        "texlive-rcs": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-etex": {
+            "ensure": "2:svn22198.2.1-38.el7"
+        }, 
+        "alsa-lib": {
+            "ensure": "1.0.28-2.el7"
+        }, 
+        "texlive-oberdiek-doc": {
+            "ensure": "2:svn26725.0-38.el7"
+        }, 
+        "texlive-metapost": {
+            "ensure": "2:svn26689.1.212-38.el7"
+        }, 
+        "gpg-pubkey": {
+            "ensure": "f4a80eb5-53a7ff4b"
+        }, 
+        "libini_config": {
+            "ensure": "1.2.0-25.el7"
+        }, 
+        "texlive-eurosym": {
+            "ensure": "2:svn17265.1.4_subrfix-38.el7"
+        }, 
+        "openssh-clients": {
+            "ensure": "6.6.1p1-23.el7_2"
+        }, 
+        "libuser": {
+            "ensure": "0.60-7.el7_1"
+        }, 
+        "texlive-memoir": {
+            "ensure": "2:svn21638.3.6j_patch_6.0g-38.el7"
+        }, 
+        "perl-libs": {
+            "ensure": "4:5.16.3-286.el7"
+        }, 
+        "texlive-fontbook": {
+            "ensure": "2:svn23608.0.2-38.el7"
+        }, 
+        "libX11": {
+            "ensure": "1.6.3-2.el7"
+        }, 
+        "texlive-natbib": {
+            "ensure": "2:svn20668.8.31b-38.el7"
+        }, 
+        "texlive-xdvi": {
+            "ensure": "2:svn26689.22.85-38.el7"
+        }, 
+        "kbd": {
+            "ensure": "1.15.5-11.el7"
+        }, 
+        "texlive-ncctools": {
+            "ensure": "2:svn15878.3.5-38.el7"
+        }, 
+        "texlive-lm-math-doc": {
+            "ensure": "2:svn29044.1.958-38.el7"
+        }, 
+        "kexec-tools": {
+            "ensure": "2.0.7-38.el7"
+        }, 
+        "perl-Time-HiRes": {
+            "ensure": "4:1.9725-3.el7"
+        }, 
+        "texlive-pslatex": {
+            "ensure": "2:svn16416.0-38.el7"
+        }, 
+        "texlive-hyphenat-doc": {
+            "ensure": "2:svn15878.2.3c-38.el7"
+        }, 
+        "texlive-pst-text": {
+            "ensure": "2:svn15878.1.00-38.el7"
+        }, 
+        "texlive-tex-gyre-math-doc": {
+            "ensure": "2:svn29045.0-38.el7"
+        }, 
+        "systemd": {
+            "ensure": "219-19.el7"
+        }, 
+        "selinux-policy": {
+            "ensure": "3.13.1-60.el7"
+        }, 
+        "texlive-typehtml": {
+            "ensure": "2:svn17134.0-38.el7"
+        }, 
+        "wget": {
+            "ensure": "1.14-10.el7_0.1"
+        }, 
+        "lvm2": {
+            "ensure": "7:2.02.130-5.el7"
+        }, 
+        "python-slip-dbus": {
+            "ensure": "0.4.0-2.el7"
+        }, 
+        "texlive-changebar-doc": {
+            "ensure": "2:svn29349.3.5c-38.el7"
+        }, 
+        "libacl": {
+            "ensure": "2.2.51-12.el7"
+        }, 
+        "dracut-config-rescue": {
+            "ensure": "033-359.el7"
+        }, 
+        "libnl3": {
+            "ensure": "3.2.21-10.el7"
+        }, 
+        "texlive-ucs": {
+            "ensure": "2:svn27549.2.1-38.el7"
+        }, 
+        "libSM": {
+            "ensure": "1.2.2-2.el7"
+        }, 
+        "policycoreutils": {
+            "ensure": "2.2.5-20.el7"
+        }, 
+        "pixman": {
+            "ensure": "0.32.6-3.el7"
+        }, 
+        "texlive-fontware-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-subfigure-doc": {
+            "ensure": "2:svn15878.2.1.5-38.el7"
+        }, 
+        "python": {
+            "ensure": "2.7.5-34.el7"
+        }, 
+        "iwl3945-firmware": {
+            "ensure": "15.32.2.9-43.el7"
+        }, 
+        "libidn": {
+            "ensure": "1.28-4.el7"
+        }, 
+        "rake": {
+            "ensure": [
+                "10.1.0"
+            ]
+        }, 
+        "texlive-ec": {
+            "ensure": "2:svn25033.1.0-38.el7"
+        }, 
+        "texlive-mparhack-doc": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "texlive-mnsymbol": {
+            "ensure": "2:svn18651.1.4-38.el7"
+        }, 
+        "texlive-helvetic": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "grubby": {
+            "ensure": "8.28-17.el7"
+        }, 
+        "texlive-philokalia": {
+            "ensure": "2:svn18651.1.1-38.el7"
+        }, 
+        "libgudev1": {
+            "ensure": "219-19.el7"
+        }, 
+        "openjpeg-libs": {
+            "ensure": "1.5.1-10.el7"
+        }, 
+        "texlive-epstopdf-bin": {
+            "ensure": "2:svn18336.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-realscripts-doc": {
+            "ensure": "2:svn29423.0.3b-38.el7"
+        }, 
+        "texlive-cm-lgc-doc": {
+            "ensure": "2:svn28250.0.5-38.el7"
+        }, 
+        "dhclient": {
+            "ensure": "12:4.2.5-42.el7.centos"
+        }, 
+        "libss": {
+            "ensure": "1.42.9-7.el7"
+        }, 
+        "nspr": {
+            "ensure": "4.10.8-2.el7_1"
+        }, 
+        "texlive-filehook-doc": {
+            "ensure": "2:svn24280.0.5d-38.el7"
+        }, 
+        "dbus": {
+            "ensure": "1:1.6.12-13.el7"
+        }, 
+        "texlive-jknapltx": {
+            "ensure": "2:svn19440.0-38.el7"
+        }, 
+        "libmnl": {
+            "ensure": "1.0.3-7.el7"
+        }, 
+        "texlive-fontbook-doc": {
+            "ensure": "2:svn23608.0.2-38.el7"
+        }, 
+        "texlive-fncychap": {
+            "ensure": "2:svn20710.v1.34-38.el7"
+        }, 
+        "libXfont": {
+            "ensure": "1.5.1-2.el7"
+        }, 
+        "perl-threads": {
+            "ensure": "1.87-4.el7"
+        }, 
+        "libnl3-cli": {
+            "ensure": "3.2.21-10.el7"
+        }, 
+        "texlive-luaotfload": {
+            "ensure": "2:svn26718.1.26-38.el7"
+        }, 
+        "texlive-mdwtools": {
+            "ensure": "2:svn15878.1.05.4-38.el7"
+        }, 
+        "texlive-enctex-doc": {
+            "ensure": "2:svn28602.0-38.el7"
+        }, 
+        "texlive-uhc": {
+            "ensure": "2:svn16791.0-38.el7"
+        }, 
+        "texlive-babelbib": {
+            "ensure": "2:svn25245.1.31-38.el7"
+        }, 
+        "cairo": {
+            "ensure": "1.14.2-1.el7"
+        }, 
+        "audit-libs": {
+            "ensure": "2.4.1-5.el7"
+        }, 
+        "texlive-marvosym-doc": {
+            "ensure": "2:svn29349.2.2a-38.el7"
+        }, 
+        "nss-sysinit": {
+            "ensure": "3.19.1-18.el7"
+        }, 
+        "gpm-libs": {
+            "ensure": "1.20.7-5.el7"
+        }, 
+        "libgcc": {
+            "ensure": "4.8.5-4.el7"
+        }, 
+        "facter": {
+            "ensure": [
+                "3.5.0"
+            ]
+        }, 
+        "texlive-ms-doc": {
+            "ensure": "2:svn24467.0-38.el7"
+        }, 
+        "texlive-threeparttable-doc": {
+            "ensure": "2:svn17383.0-38.el7"
+        }, 
+        "pam": {
+            "ensure": "1.1.8-12.el7_1.1"
+        }, 
+        "patch": {
+            "ensure": "2.7.1-8.el7"
+        }, 
+        "texlive-pst-coil": {
+            "ensure": "2:svn24020.1.06-38.el7"
+        }, 
+        "gettext-libs": {
+            "ensure": "0.18.2.1-4.el7"
+        }, 
+        "texlive-luatex": {
+            "ensure": "2:svn26689.0.70.1-38.el7"
+        }, 
+        "texlive-filecontents": {
+            "ensure": "2:svn24250.1.3-38.el7"
+        }, 
+        "libref_array": {
+            "ensure": "0.1.5-25.el7"
+        }, 
+        "avalon-framework": {
+            "ensure": "4.3-10.el7"
+        }, 
+        "texlive-filecontents-doc": {
+            "ensure": "2:svn24250.1.3-38.el7"
+        }, 
+        "texlive-titlesec-doc": {
+            "ensure": "2:svn24852.2.10.0-38.el7"
+        }, 
+        "texlive-collection-basic": {
+            "ensure": "2:svn26314.0-38.20130427_r30134.el7"
+        }, 
+        "apache-commons-dbcp": {
+            "ensure": "1.4-17.el7"
+        }, 
+        "texlive-xunicode": {
+            "ensure": "2:svn23897.0.981-38.el7"
+        }, 
+        "dbus-libs": {
+            "ensure": "1:1.6.12-13.el7"
+        }, 
+        "texlive-tex4ht-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-sauerj-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-sectsty-doc": {
+            "ensure": "2:svn15878.2.0.2-38.el7"
+        }, 
+        "poppler-data": {
+            "ensure": "0.4.6-3.el7"
+        }, 
+        "texlive-babel-doc": {
+            "ensure": "2:svn24756.3.8m-38.el7"
+        }, 
+        "texlive-xetex-bin": {
+            "ensure": "2:svn26912.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-beamer-doc": {
+            "ensure": "2:svn29349.3.26-38.el7"
+        }, 
+        "texlive-amsfonts-doc": {
+            "ensure": "2:svn29208.3.04-38.el7"
+        }, 
+        "texlive-tools-doc": {
+            "ensure": "2:svn26263.0-38.el7"
+        }, 
+        "texlive-cm-super": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "ecj": {
+            "ensure": "1:4.2.1-8.el7"
+        }, 
+        "texlive-tipa": {
+            "ensure": "2:svn29349.1.3-38.el7"
+        }, 
+        "texlive-hyph-utf8-doc": {
+            "ensure": "2:svn29641.0-38.el7"
+        }, 
+        "kbd-legacy": {
+            "ensure": "1.15.5-11.el7"
+        }, 
+        "texlive-was": {
+            "ensure": "2:svn21439.0-38.el7"
+        }, 
+        "elfutils-libelf": {
+            "ensure": "0.163-3.el7"
+        }, 
+        "xorg-x11-fonts-Type1": {
+            "ensure": "7.5-9.el7"
+        }, 
+        "geronimo-jms": {
+            "ensure": "1.1.1-19.el7"
+        }, 
+        "texlive-appendix-doc": {
+            "ensure": "2:svn15878.1.2b-38.el7"
+        }, 
+        "bash": {
+            "ensure": "4.2.46-19.el7"
+        }, 
+        "glibc-common": {
+            "ensure": "2.17-106.el7_2.4"
+        }, 
+        "liblockfile": {
+            "ensure": "1.08-17.el7"
+        }, 
+        "texlive-wrapfig": {
+            "ensure": "2:svn22048.3.6-38.el7"
+        }, 
+        "rootfiles": {
+            "ensure": "8.1-11.el7"
+        }, 
+        "texlive-xepersian-doc": {
+            "ensure": "2:svn29661.12.1-38.el7"
+        }, 
+        "libedit": {
+            "ensure": "3.0-12.20121213cvs.el7"
+        }, 
+        "openssh": {
+            "ensure": "6.6.1p1-23.el7_2"
+        }, 
+        "texlive-xkeyval": {
+            "ensure": "2:svn27995.2.6a-38.el7"
+        }, 
+        "openssl": {
+            "ensure": "1:1.0.1e-51.el7_2.4"
+        }, 
+        "texlive-pgf": {
+            "ensure": "2:svn22614.2.10-38.el7"
+        }, 
+        "texlive-xmltex-doc": {
+            "ensure": "2:svn28273.0.8-38.el7"
+        }, 
+        "iwl5000-firmware": {
+            "ensure": "8.83.5.1_1-43.el7"
+        }, 
+        "yum": {
+            "ensure": "3.4.3-132.el7.centos.0.1"
+        }, 
+        "python-perf": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "texlive-xifthen-doc": {
+            "ensure": "2:svn15878.1.3-38.el7"
+        }, 
+        "texlive-texconfig-bin": {
+            "ensure": "2:svn27344.0-38.20130427_r30134.el7"
+        }, 
+        "libxml2": {
+            "ensure": "2.9.1-5.el7_1.2"
+        }, 
+        "texlive-pst-grad": {
+            "ensure": "2:svn15878.1.06-38.el7"
+        }, 
+        "texlive-fncychap-doc": {
+            "ensure": "2:svn20710.v1.34-38.el7"
+        }, 
+        "texlive-svn-prov-doc": {
+            "ensure": "2:svn18017.3.1862-38.el7"
+        }, 
+        "gssproxy": {
+            "ensure": "0.4.1-7.el7"
+        }, 
+        "javapackages-tools": {
+            "ensure": "3.4.1-11.el7"
+        }, 
+        "tcp_wrappers": {
+            "ensure": "7.6-77.el7"
+        }, 
+        "harfbuzz": {
+            "ensure": "0.9.36-1.el7"
+        }, 
+        "xz": {
+            "ensure": "5.1.2-12alpha.el7"
+        }, 
+        "iwl6000g2b-firmware": {
+            "ensure": "17.168.5.2-43.el7"
+        }, 
+        "rpcbind": {
+            "ensure": "0.2.0-32.el7"
+        }, 
+        "puppet": {
+            "ensure": [
+                "4.8.0"
+            ]
+        }, 
+        "perl-Filter": {
+            "ensure": "1.49-3.el7"
+        }, 
+        "iwl7260-firmware": {
+            "ensure": "22.0.7.0-43.el7"
+        }, 
+        "texlive-luatexbase-doc": {
+            "ensure": "2:svn22560.0.31-38.el7"
+        }, 
+        "vim-minimal": {
+            "ensure": "2:7.4.160-1.el7"
+        }, 
+        "glibc-headers": {
+            "ensure": "2.17-106.el7_2.4"
+        }, 
+        "texlive-sepnum": {
+            "ensure": "2:svn20186.2.0-38.el7"
+        }, 
+        "texlive-norasi-c90": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-fp": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "python-pycurl": {
+            "ensure": "7.19.0-17.el7"
+        }, 
+        "puppetlabs-release": {
+            "ensure": "22.0-2"
+        }, 
+        "texlive-xtab-doc": {
+            "ensure": "2:svn23347.2.3f-38.el7"
+        }, 
+        "pkgconfig": {
+            "ensure": "1:0.27.1-4.el7"
+        }, 
+        "texlive-xetex-tibetan": {
+            "ensure": "2:svn28847.0.1-38.el7"
+        }, 
+        "json-c": {
+            "ensure": "0.11-4.el7_0"
+        }, 
+        "NetworkManager-libnm": {
+            "ensure": "1:1.0.6-27.el7"
+        }, 
+        "texlive-epsf-doc": {
+            "ensure": "2:svn21461.2.7.4-38.el7"
+        }, 
+        "microcode_ctl": {
+            "ensure": "2:2.1-12.el7"
+        }, 
+        "texlive-pst-math": {
+            "ensure": "2:svn20176.0.61-38.el7"
+        }, 
+        "NetworkManager": {
+            "ensure": "1:1.0.6-27.el7"
+        }, 
+        "fxload": {
+            "ensure": "2002_04_11-16.el7"
+        }, 
+        "fontpackages-filesystem": {
+            "ensure": "1.44-8.el7"
+        }, 
+        "texlive-xetex-pstricks": {
+            "ensure": "2:svn17055.0-38.el7"
+        }, 
+        "audit": {
+            "ensure": "2.4.1-5.el7"
+        }, 
+        "groff-base": {
+            "ensure": "1.22.2-8.el7"
+        }, 
+        "texlive-eurosym-doc": {
+            "ensure": "2:svn17265.1.4_subrfix-38.el7"
+        }, 
+        "texlive-paralist": {
+            "ensure": "2:svn15878.2.3b-38.el7"
+        }, 
+        "rdoc": {
+            "ensure": [
+                "4.1.0"
+            ]
+        }, 
+        "perl-Getopt-Long": {
+            "ensure": "2.40-2.el7"
+        }, 
+        "texlive-ctable-doc": {
+            "ensure": "2:svn26694.1.23-38.el7"
+        }, 
+        "minitest": {
+            "ensure": [
+                "4.7.5"
+            ]
+        }, 
+        "authconfig": {
+            "ensure": "6.2.8-10.el7"
+        }, 
+        "texlive-xeindex-doc": {
+            "ensure": "2:svn16760.0.2-38.el7"
+        }, 
+        "libevent": {
+            "ensure": "2.0.21-4.el7"
+        }, 
+        "texlive-multido-doc": {
+            "ensure": "2:svn18302.1.42-38.el7"
+        }, 
+        "ncurses-base": {
+            "ensure": "5.9-13.20130511.el7"
+        }, 
+        "tomcat-jsp-2.2-api": {
+            "ensure": "7.0.54-8.el7_2"
+        }, 
+        "libtalloc": {
+            "ensure": "2.1.2-1.el7"
+        }, 
+        "grep": {
+            "ensure": "2.20-2.el7"
+        }, 
+        "texlive-pxfonts": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-overpic-doc": {
+            "ensure": "2:svn19712.0.53-38.el7"
+        }, 
+        "texlive-hyphen-base": {
+            "ensure": "2:svn29197.0-38.el7"
+        }, 
+        "texlive-cmap": {
+            "ensure": "2:svn26568.0-38.el7"
+        }, 
+        "texlive-mnsymbol-doc": {
+            "ensure": "2:svn18651.1.4-38.el7"
+        }, 
+        "texlive-texlive.infra-doc": {
+            "ensure": "2:svn28217.0-38.el7"
+        }, 
+        "tomcat-lib": {
+            "ensure": "7.0.54-8.el7_2"
+        }, 
+        "texlive-pdfpages": {
+            "ensure": "2:svn27574.0.4t-38.el7"
+        }, 
+        "texlive-hyperref": {
+            "ensure": "2:svn28213.6.83m-38.el7"
+        }, 
+        "texlive-sauerj": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "iwl1000-firmware": {
+            "ensure": "1:39.31.5.1-43.el7"
+        }, 
+        "texlive-mfnfss-doc": {
+            "ensure": "2:svn19410.0-38.el7"
+        }, 
+        "texlive-textcase": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-cjk-doc": {
+            "ensure": "2:svn26296.4.8.3-38.el7"
+        }, 
+        "cronie-anacron": {
+            "ensure": "1.4.11-14.el7"
+        }, 
+        "xfsprogs": {
+            "ensure": "3.2.2-2.el7"
+        }, 
+        "texlive-dvipdfmx-def": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "man-db": {
+            "ensure": "2.6.3-9.el7"
+        }, 
+        "texlive-t2": {
+            "ensure": "2:svn29349.0-38.el7"
+        }, 
+        "libcroco": {
+            "ensure": "0.6.8-5.el7"
+        }, 
+        "texlive-pspicture": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "test-unit": {
+            "ensure": [
+                "2.1.9.0"
+            ]
+        }, 
+        "texlive-bibtex": {
+            "ensure": "2:svn26689.0.99d-38.el7"
+        }, 
+        "texlive-xtab": {
+            "ensure": "2:svn23347.2.3f-38.el7"
+        }, 
+        "texlive-hyph-utf8": {
+            "ensure": "2:svn29641.0-38.el7"
+        }, 
+        "selinux-policy-targeted": {
+            "ensure": "3.13.1-60.el7"
+        }, 
+        "texlive-fancyref-doc": {
+            "ensure": "2:svn15878.0.9c-38.el7"
+        }, 
+        "xz-libs": {
+            "ensure": "5.1.2-12alpha.el7"
+        }, 
+        "texlive-bidi-doc": {
+            "ensure": "2:svn29650.12.2-38.el7"
+        }, 
+        "dbus-glib": {
+            "ensure": "0.100-7.el7"
+        }, 
+        "mesa-libgbm": {
+            "ensure": "10.6.5-3.20150824.el7"
+        }, 
+        "crontabs": {
+            "ensure": "1.11-6.20121102git.el7"
+        }, 
+        "bind-libs-lite": {
+            "ensure": "32:9.9.4-29.el7"
+        }, 
+        "texlive-ifoddpage-doc": {
+            "ensure": "2:svn23979.0-38.el7"
+        }, 
+        "dracut-network": {
+            "ensure": "033-359.el7"
+        }, 
+        "texlive-latex-bin-bin": {
+            "ensure": "2:svn14050.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-parallel": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-soul-doc": {
+            "ensure": "2:svn15878.2.4-38.el7"
+        }, 
+        "texlive-bibtopic": {
+            "ensure": "2:svn15878.1.1a-38.el7"
+        }, 
+        "texlive-arabxetex": {
+            "ensure": "2:svn17470.v1.1.4-38.el7"
+        }, 
+        "which": {
+            "ensure": "2.20-7.el7"
+        }, 
+        "libcap": {
+            "ensure": "2.22-8.el7"
+        }, 
+        "texlive-avantgar": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-adjustbox-doc": {
+            "ensure": "2:svn26555.0-38.el7"
+        }, 
+        "mailcap": {
+            "ensure": "2.1.41-2.el7"
+        }, 
+        "texlive-sectsty": {
+            "ensure": "2:svn15878.2.0.2-38.el7"
+        }, 
+        "cracklib-dicts": {
+            "ensure": "2.9.0-11.el7"
+        }, 
+        "libdb": {
+            "ensure": "5.3.21-19.el7"
+        }, 
+        "passwd": {
+            "ensure": "0.79-4.el7"
+        }, 
+        "texlive-pst-grad-doc": {
+            "ensure": "2:svn15878.1.06-38.el7"
+        }, 
+        "texlive-showexpl-doc": {
+            "ensure": "2:svn27790.v0.3j-38.el7"
+        }, 
+        "texlive-type1cm": {
+            "ensure": "2:svn21820.0-38.el7"
+        }, 
+        "emacs-common": {
+            "ensure": "1:24.3-18.el7"
+        }, 
+        "kmod-libs": {
+            "ensure": "20-5.el7"
+        }, 
+        "gzip": {
+            "ensure": "1.5-8.el7"
+        }, 
+        "perl-Pod-Escapes": {
+            "ensure": "1:1.04-286.el7"
+        }, 
+        "texlive-graphics-doc": {
+            "ensure": "2:svn25405.1.0o-38.el7"
+        }, 
+        "texlive-dvipdfm": {
+            "ensure": "2:svn26689.0.13.2d-38.el7"
+        }, 
+        "texlive-luatex-bin": {
+            "ensure": "2:svn26912.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-extsizes-doc": {
+            "ensure": "2:svn17263.1.4a-38.el7"
+        }, 
+        "cronie": {
+            "ensure": "1.4.11-14.el7"
+        }, 
+        "t1lib": {
+            "ensure": "5.1.2-14.el7"
+        }, 
+        "rpm-libs": {
+            "ensure": "4.11.3-17.el7"
+        }, 
+        "texlive-arphic": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-seminar": {
+            "ensure": "2:svn18322.1.5-38.el7"
+        }, 
+        "texlive-mathpazo": {
+            "ensure": "2:svn15878.1.003-38.el7"
+        }, 
+        "nettle": {
+            "ensure": "2.7.1-4.el7"
+        }, 
+        "texlive-txfonts": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-lualatex-math": {
+            "ensure": "2:svn29346.1.2-38.el7"
+        }, 
+        "texlive-psfrag": {
+            "ensure": "2:svn15878.3.04-38.el7"
+        }, 
+        "texlive-caption": {
+            "ensure": "2:svn29026.3.3__2013_02_03_-38.el7"
+        }, 
+        "texlive-wadalab": {
+            "ensure": "2:svn22576.0-38.el7"
+        }, 
+        "texlive-tex4ht-doc": {
+            "ensure": "2:svn29474.0-38.el7"
+        }, 
+        "texlive-metafont": {
+            "ensure": "2:svn26689.2.718281-38.el7"
+        }, 
+        "nss-tools": {
+            "ensure": "3.19.1-18.el7"
+        }, 
+        "python-urlgrabber": {
+            "ensure": "3.10-7.el7"
+        }, 
+        "libpipeline": {
+            "ensure": "1.2.3-3.el7"
+        }, 
+        "text": {
+            "ensure": [
+                "1.3.1"
+            ]
+        }, 
+        "dhcp-libs": {
+            "ensure": "12:4.2.5-42.el7.centos"
+        }, 
+        "texlive-collection-xetex": {
+            "ensure": "2:svn29634.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-crop-doc": {
+            "ensure": "2:svn15878.1.5-38.el7"
+        }, 
+        "libtirpc": {
+            "ensure": "0.2.4-0.6.el7"
+        }, 
+        "texlive-makecmds": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "findutils": {
+            "ensure": "1:4.5.11-5.el7"
+        }, 
+        "popt": {
+            "ensure": "1.13-16.el7"
+        }, 
+        "texlive-tex4ht": {
+            "ensure": "2:svn29474.0-38.el7"
+        }, 
+        "perl-Pod-Perldoc": {
+            "ensure": "3.20-4.el7"
+        }, 
+        "make": {
+            "ensure": "1:3.82-21.el7"
+        }, 
+        "texlive-wasysym": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "gobject-introspection": {
+            "ensure": "1.42.0-1.el7"
+        }, 
+        "texlive-mfnfss": {
+            "ensure": "2:svn19410.0-38.el7"
+        }, 
+        "texlive-pst-node-doc": {
+            "ensure": "2:svn27799.1.25-38.el7"
+        }, 
+        "perl-macros": {
+            "ensure": "4:5.16.3-286.el7"
+        }, 
+        "fast_gettext": {
+            "ensure": [
+                "1.1.0"
+            ]
+        }, 
+        "fontconfig": {
+            "ensure": "2.10.95-7.el7"
+        }, 
+        "texlive-ucs-doc": {
+            "ensure": "2:svn27549.2.1-38.el7"
+        }, 
+        "iwl2000-firmware": {
+            "ensure": "18.168.6.1-43.el7"
+        }, 
+        "keyutils": {
+            "ensure": "1.5.8-3.el7"
+        }, 
+        "os-prober": {
+            "ensure": "1.58-5.el7"
+        }, 
+        "texlive-euler-doc": {
+            "ensure": "2:svn17261.2.5-38.el7"
+        }, 
+        "texlive-algorithms": {
+            "ensure": "2:svn15878.0.1-38.el7"
+        }, 
+        "texlive-euler": {
+            "ensure": "2:svn17261.2.5-38.el7"
+        }, 
+        "iptables": {
+            "ensure": "1.4.21-16.el7"
+        }, 
+        "kernel-headers": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "texlive-mfware-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-ms": {
+            "ensure": "2:svn24467.0-38.el7"
+        }, 
+        "texlive-collection-documentation-base": {
+            "ensure": "2:svn17091.0-38.20130427_r30134.el7"
+        }, 
+        "systemd-libs": {
+            "ensure": "219-19.el7"
+        }, 
+        "texlive-placeins-doc": {
+            "ensure": "2:svn19848.2.2-38.el7"
+        }, 
+        "texlive-stmaryrd-doc": {
+            "ensure": "2:svn22027.0-38.el7"
+        }, 
+        "lksctp-tools": {
+            "ensure": "1.0.13-3.el7"
+        }, 
+        "util-linux": {
+            "ensure": "2.23.2-26.el7"
+        }, 
+        "libdaemon": {
+            "ensure": "0.14-7.el7"
+        }, 
+        "texlive-mh": {
+            "ensure": "2:svn29420.0-38.el7"
+        }, 
+        "texlive-kpathsea-doc": {
+            "ensure": "2:svn28792.0-38.el7"
+        }, 
+        "texlive-index-doc": {
+            "ensure": "2:svn24099.4.1beta-38.el7"
+        }, 
+        "texlive-euro": {
+            "ensure": "2:svn22191.1.1-38.el7"
+        }, 
+        "texlive-mh-doc": {
+            "ensure": "2:svn29420.0-38.el7"
+        }, 
+        "texlive-rsfs-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-babelbib-doc": {
+            "ensure": "2:svn25245.1.31-38.el7"
+        }, 
+        "tuned": {
+            "ensure": "2.5.1-4.el7"
+        }, 
+        "krb5-libs": {
+            "ensure": "1.13.2-10.el7"
+        }, 
+        "texlive-zapfchan": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-fancyvrb": {
+            "ensure": "2:svn18492.2.8-38.el7"
+        }, 
+        "net-tools": {
+            "ensure": "2.0-0.17.20131004git.el7"
+        }, 
+        "teamd": {
+            "ensure": "1.17-5.el7"
+        }, 
+        "texlive-cm-lgc": {
+            "ensure": "2:svn28250.0.5-38.el7"
+        }, 
+        "texlive-fontware": {
+            "ensure": "2:svn26689.0-38.el7"
+        }, 
+        "kernel": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "texlive-lua-alt-getopt-doc": {
+            "ensure": "2:svn29349.0.7.0-38.el7"
+        }, 
+        "texlive-datetime": {
+            "ensure": "2:svn19834.2.58-38.el7"
+        }, 
+        "texlive-psfrag-doc": {
+            "ensure": "2:svn15878.3.04-38.el7"
+        }, 
+        "locale": {
+            "ensure": [
+                "2.1.2"
+            ]
+        }, 
+        "texlive-koma-script": {
+            "ensure": "2:svn27255.3.11b-38.el7"
+        }, 
+        "texlive-ae-doc": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "texlive-makeindex-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "firewalld": {
+            "ensure": "0.3.9-14.el7"
+        }, 
+        "libpciaccess": {
+            "ensure": "0.13.4-2.el7"
+        }, 
+        "postgresql-server": {
+            "ensure": "9.2.15-1.el7_2"
+        }, 
+        "sed": {
+            "ensure": "4.2.2-5.el7"
+        }, 
+        "texlive-passivetex": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-pst-eps-doc": {
+            "ensure": "2:svn15878.1.0-38.el7"
+        }, 
+        "xorg-x11-font-utils": {
+            "ensure": "1:7.5-20.el7"
+        }, 
+        "perl-threads-shared": {
+            "ensure": "1.43-6.el7"
+        }, 
+        "glib-networking": {
+            "ensure": "2.42.0-1.el7"
+        }, 
+        "kmod": {
+            "ensure": "20-5.el7"
+        }, 
+        "texlive-ptext-doc": {
+            "ensure": "2:svn28124.1-38.el7"
+        }, 
+        "nss-util": {
+            "ensure": "3.19.1-4.el7_1"
+        }, 
+        "hwdata": {
+            "ensure": "0.252-8.1.el7"
+        }, 
+        "texlive-xetex": {
+            "ensure": "2:svn26330.0.9997.5-38.el7"
+        }, 
+        "libestr": {
+            "ensure": "0.1.9-2.el7"
+        }, 
+        "device-mapper": {
+            "ensure": "7:1.02.107-5.el7"
+        }, 
+        "texlive-utopia": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "lua": {
+            "ensure": "5.1.4-14.el7"
+        }, 
+        "texlive-amsmath-doc": {
+            "ensure": "2:svn29327.2.14-38.el7"
+        }, 
+        "semantic_puppet": {
+            "ensure": [
+                "0.1.2"
+            ]
+        }, 
+        "kpartx": {
+            "ensure": "0.4.9-85.el7"
+        }, 
+        "libpng": {
+            "ensure": "2:1.5.13-7.el7_2"
+        }, 
+        "python-iniparse": {
+            "ensure": "0.4-9.el7"
+        }, 
+        "irqbalance": {
+            "ensure": "3:1.0.7-5.el7"
+        }, 
+        "texlive-jadetex-doc": {
+            "ensure": "2:svn23409.3.13-38.el7"
+        }, 
+        "texlive-etex-pkg-doc": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "texlive-overpic": {
+            "ensure": "2:svn19712.0.53-38.el7"
+        }, 
+        "perl-Exporter": {
+            "ensure": "5.68-3.el7"
+        }, 
+        "libsemanage": {
+            "ensure": "2.1.10-18.el7"
+        }, 
+        "texlive-metalogo": {
+            "ensure": "2:svn18611.0.12-38.el7"
+        }, 
+        "texlive-showexpl": {
+            "ensure": "2:svn27790.v0.3j-38.el7"
+        }, 
+        "hardlink": {
+            "ensure": "1:1.0-19.el7"
+        }, 
+        "texlive-parallel-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-tetex": {
+            "ensure": "2:svn29585.3.0-38.el7"
+        }, 
+        "libcollection": {
+            "ensure": "0.6.2-25.el7"
+        }, 
+        "texlive-metapost-doc": {
+            "ensure": "2:svn26689.1.212-38.el7"
+        }, 
+        "texlive-xetex-def": {
+            "ensure": "2:svn29154.0.95-38.el7"
+        }, 
+        "newt": {
+            "ensure": "0.52.15-4.el7"
+        }, 
+        "texlive-appendix": {
+            "ensure": "2:svn15878.1.2b-38.el7"
+        }, 
+        "texlive-fpl": {
+            "ensure": "2:svn15878.1.002-38.el7"
+        }, 
+        "texlive-booktabs-doc": {
+            "ensure": "2:svn15878.1.61803-38.el7"
+        }, 
+        "perl-Carp": {
+            "ensure": "1.26-244.el7"
+        }, 
+        "texlive-beton": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-changepage-doc": {
+            "ensure": "2:svn15878.1.0c-38.el7"
+        }, 
+        "texlive-gsftopk": {
+            "ensure": "2:svn26689.1.19.2-38.el7"
+        }, 
+        "texlive-textpos": {
+            "ensure": "2:svn28261.1.7h-38.el7"
+        }, 
+        "perl-File-Path": {
+            "ensure": "2.09-2.el7"
+        }, 
+        "virt-what": {
+            "ensure": "1.13-6.el7"
+        }, 
+        "nss-softokn": {
+            "ensure": "3.16.2.3-13.el7_1"
+        }, 
+        "texlive-pst-slpe": {
+            "ensure": "2:svn24391.1.31-38.el7"
+        }, 
+        "texlive-pst-math-doc": {
+            "ensure": "2:svn20176.0.61-38.el7"
+        }, 
+        "iwl135-firmware": {
+            "ensure": "18.168.6.1-43.el7"
+        }, 
+        "binutils": {
+            "ensure": "2.23.52.0.1-55.el7"
+        }, 
+        "libattr": {
+            "ensure": "2.4.46-12.el7"
+        }, 
+        "texlive-psnfss-doc": {
+            "ensure": "2:svn23394.9.2a-38.el7"
+        }, 
+        "texlive-titling": {
+            "ensure": "2:svn15878.2.1d-38.el7"
+        }, 
+        "python-configobj": {
+            "ensure": "4.7.2-7.el7"
+        }, 
+        "texlive-bidi": {
+            "ensure": "2:svn29650.12.2-38.el7"
+        }, 
+        "texlive-mflogo": {
+            "ensure": "2:svn17487.0-38.el7"
+        }, 
+        "texlive-xecyr-doc": {
+            "ensure": "2:svn20221.1.1-38.el7"
+        }, 
+        "deep_merge": {
+            "ensure": [
+                "1.0.1"
+            ]
+        }, 
+        "gettext-setup": {
+            "ensure": [
+                "0.6"
+            ]
+        }, 
+        "mesa-libGL": {
+            "ensure": "10.6.5-3.20150824.el7"
+        }, 
+        "texlive-fancyref": {
+            "ensure": "2:svn15878.0.9c-38.el7"
+        }, 
+        "texlive-fancybox-doc": {
+            "ensure": "2:svn18304.1.4-38.el7"
+        }, 
+        "texlive-eso-pic-doc": {
+            "ensure": "2:svn21515.2.0c-38.el7"
+        }, 
+        "texlive-anysize-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "rpm": {
+            "ensure": "4.11.3-17.el7"
+        }, 
+        "glibc": {
+            "ensure": "2.17-106.el7_2.4"
+        }, 
+        "libssh2": {
+            "ensure": "1.4.3-10.el7"
+        }, 
+        "texlive-mparhack": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "texlive-charter": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-ifoddpage": {
+            "ensure": "2:svn23979.0-38.el7"
+        }, 
+        "texlive-xetexconfig": {
+            "ensure": "2:svn28819.0-38.el7"
+        }, 
+        "texlive-dvipdfmx-doc": {
+            "ensure": "2:svn26765.0-38.el7"
+        }, 
+        "texlive-collectbox-doc": {
+            "ensure": "2:svn26557.0-38.el7"
+        }, 
+        "gnupg2": {
+            "ensure": "2.0.22-3.el7"
+        }, 
+        "libgcrypt": {
+            "ensure": "1.5.3-12.el7_1.1"
+        }, 
+        "json": {
+            "ensure": [
+                "1.8.1"
+            ]
+        }, 
+        "libverto": {
+            "ensure": "0.2.5-4.el7"
+        }, 
+        "texlive-ifxetex": {
+            "ensure": "2:svn19685.0.5-38.el7"
+        }, 
+        "texlive-texconfig": {
+            "ensure": "2:svn29349.0-38.el7"
+        }, 
+        "texlive-pgf-doc": {
+            "ensure": "2:svn22614.2.10-38.el7"
+        }, 
+        "texlive-pst-plot": {
+            "ensure": "2:svn28729.1.44-38.el7"
+        }, 
+        "dracut": {
+            "ensure": "033-359.el7"
+        }, 
+        "texlive-crop": {
+            "ensure": "2:svn15878.1.5-38.el7"
+        }, 
+        "texlive-index": {
+            "ensure": "2:svn24099.4.1beta-38.el7"
+        }, 
+        "cracklib": {
+            "ensure": "2.9.0-11.el7"
+        }, 
+        "procps-ng": {
+            "ensure": "3.3.10-3.el7"
+        }, 
+        "texlive-makecmds-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "plymouth-core-libs": {
+            "ensure": "0.8.9-0.24.20140113.el7.centos"
+        }, 
+        "ncurses": {
+            "ensure": "5.9-13.20130511.el7"
+        }, 
+        "nfs-utils": {
+            "ensure": "1:1.3.0-0.21.el7"
+        }, 
+        "graphite2": {
+            "ensure": "1.3.6-1.el7_2"
+        }, 
+        "texlive-tex-gyre-doc": {
+            "ensure": "2:svn18651.2.004-38.el7"
+        }, 
+        "tomcat-el-2.2-api": {
+            "ensure": "7.0.54-8.el7_2"
+        }, 
+        "texlive-footmisc-doc": {
+            "ensure": "2:svn23330.5.5b-38.el7"
+        }, 
+        "libXpm": {
+            "ensure": "3.5.11-3.el7"
+        }, 
+        "texlive-mathspec-doc": {
+            "ensure": "2:svn15878.0.2-38.el7"
+        }, 
+        "texlive-pdftex-doc": {
+            "ensure": "2:svn29585.1.40.11-38.el7"
+        }, 
+        "texlive-metalogo-doc": {
+            "ensure": "2:svn18611.0.12-38.el7"
+        }, 
+        "perl-PathTools": {
+            "ensure": "3.40-5.el7"
+        }, 
+        "texlive-glyphlist": {
+            "ensure": "2:svn28576.0-38.el7"
+        }, 
+        "texlive-kerkis-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-gsftopk-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-underscore": {
+            "ensure": "2:svn18261.0-38.el7"
+        }, 
+        "texlive-tocloft": {
+            "ensure": "2:svn20084.2.3e-38.el7"
+        }, 
+        "texlive-amsfonts": {
+            "ensure": "2:svn29208.3.04-38.el7"
+        }, 
+        "texlive-makeindex": {
+            "ensure": "2:svn26689.2.12-38.el7"
+        }, 
+        "texlive-pst-3d": {
+            "ensure": "2:svn17257.1.10-38.el7"
+        }, 
+        "texlive-fmtcount-doc": {
+            "ensure": "2:svn28068.2.02-38.el7"
+        }, 
+        "texlive-hyperref-doc": {
+            "ensure": "2:svn28213.6.83m-38.el7"
+        }, 
+        "perl-Pod-Simple": {
+            "ensure": "1:3.28-4.el7"
+        }, 
+        "rdma": {
+            "ensure": "7.2_4.1_rc6-1.el7"
+        }, 
+        "puppetlabs-release-pc1": {
+            "ensure": "1.1.0-2.el7"
+        }, 
+        "pinentry": {
+            "ensure": "0.8.1-14.el7"
+        }, 
+        "texlive": {
+            "ensure": "2:2012-38.20130427_r30134.el7"
+        }, 
+        "texlive-lualatex-math-doc": {
+            "ensure": "2:svn29346.1.2-38.el7"
+        }, 
+        "libassuan": {
+            "ensure": "2.1.0-3.el7"
+        }, 
+        "pygpgme": {
+            "ensure": "0.3-9.el7"
+        }, 
+        "texlive-base": {
+            "ensure": "2:2012-38.20130427_r30134.el7"
+        }, 
+        "expat": {
+            "ensure": "2.1.0-8.el7"
+        }, 
+        "texlive-collectbox": {
+            "ensure": "2:svn26557.0-38.el7"
+        }, 
+        "texlive-epsf": {
+            "ensure": "2:svn21461.2.7.4-38.el7"
+        }, 
+        "texlive-mdwtools-doc": {
+            "ensure": "2:svn15878.1.05.4-38.el7"
+        }, 
+        "texlive-jknapltx-doc": {
+            "ensure": "2:svn19440.0-38.el7"
+        }, 
+        "iwl6000g2a-firmware": {
+            "ensure": "17.168.5.3-43.el7"
+        }, 
+        "texlive-listings-doc": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "chkconfig": {
+            "ensure": "1.3.61-5.el7"
+        }, 
+        "texlive-charter-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-currfile": {
+            "ensure": "2:svn29012.0.7b-38.el7"
+        }, 
+        "texlive-unisugar": {
+            "ensure": "2:svn22357.0.92-38.el7"
+        }, 
+        "texlive-l3experimental-doc": {
+            "ensure": "2:svn29361.SVN_4467-38.el7"
+        }, 
+        "texlive-cite": {
+            "ensure": "2:svn19955.5.3-38.el7"
+        }, 
+        "texlive-dvipdfm-doc": {
+            "ensure": "2:svn26689.0.13.2d-38.el7"
+        }, 
+        "texlive-tex-gyre": {
+            "ensure": "2:svn18651.2.004-38.el7"
+        }, 
+        "python-decorator": {
+            "ensure": "3.4.0-3.el7"
+        }, 
+        "texlive-xecjk-doc": {
+            "ensure": "2:svn28816.3.1.2-38.el7"
+        }, 
+        "texlive-bibtex-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-svn-prov": {
+            "ensure": "2:svn18017.3.1862-38.el7"
+        }, 
+        "coreutils": {
+            "ensure": "8.22-15.el7"
+        }, 
+        "texlive-uhc-doc": {
+            "ensure": "2:svn16791.0-38.el7"
+        }, 
+        "texlive-xetex-itrans-doc": {
+            "ensure": "2:svn24105.4.0-38.el7"
+        }, 
+        "libcap-ng": {
+            "ensure": "0.7.5-4.el7"
+        }, 
+        "texlive-ntgclass": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "iwl6050-firmware": {
+            "ensure": "41.28.5.1-43.el7"
+        }, 
+        "texlive-l3packages": {
+            "ensure": "2:svn29361.SVN_4467-38.el7"
+        }, 
+        "texlive-cm": {
+            "ensure": "2:svn29581.0-38.el7"
+        }, 
+        "libsoup": {
+            "ensure": "2.48.1-3.el7"
+        }, 
+        "log4j": {
+            "ensure": "1.2.17-15.el7"
+        }, 
+        "libgomp": {
+            "ensure": "4.8.5-4.el7"
+        }, 
+        "texlive-xetexfontinfo-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-xcolor": {
+            "ensure": "2:svn15878.2.11-38.el7"
+        }, 
+        "texlive-etex-doc": {
+            "ensure": "2:svn22198.2.1-38.el7"
+        }, 
+        "texlive-jadetex": {
+            "ensure": "2:svn23409.3.13-38.el7"
+        }, 
+        "p11-kit-trust": {
+            "ensure": "0.20.7-3.el7"
+        }, 
+        "texlive-xepersian": {
+            "ensure": "2:svn29661.12.1-38.el7"
+        }, 
+        "texlive-dvips-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "perl-podlators": {
+            "ensure": "2.5.1-3.el7"
+        }, 
+        "texlive-times": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-pst-blur": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "texlive-luatex-doc": {
+            "ensure": "2:svn26689.0.70.1-38.el7"
+        }, 
+        "openldap": {
+            "ensure": "2.4.40-8.el7"
+        }, 
+        "rpm-python": {
+            "ensure": "4.11.3-17.el7"
+        }, 
+        "libsysfs": {
+            "ensure": "2.1.0-16.el7"
+        }, 
+        "alsa-tools-firmware": {
+            "ensure": "1.0.28-2.el7"
+        }, 
+        "texlive-metapost-examples-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-pst-slpe-doc": {
+            "ensure": "2:svn24391.1.31-38.el7"
+        }, 
+        "zziplib": {
+            "ensure": "0.13.62-5.el7"
+        }, 
+        "texlive-textcase-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-dvipng": {
+            "ensure": "2:svn26689.1.14-38.el7"
+        }, 
+        "texlive-filehook": {
+            "ensure": "2:svn24280.0.5d-38.el7"
+        }, 
+        "texlive-sansmath": {
+            "ensure": "2:svn17997.1.1-38.el7"
+        }, 
+        "texlive-fontspec-doc": {
+            "ensure": "2:svn29412.v2.3a-38.el7"
+        }, 
+        "texlive-zapfding": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-parskip-doc": {
+            "ensure": "2:svn19963.2.0-38.el7"
+        }, 
+        "libaio": {
+            "ensure": "0.3.109-13.el7"
+        }, 
+        "texlive-ifetex": {
+            "ensure": "2:svn24853.1.2-38.el7"
+        }, 
+        "python-pyudev": {
+            "ensure": "0.15-7.el7"
+        }, 
+        "texlive-fontwrap": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-dvips": {
+            "ensure": "2:svn29585.0-38.el7"
+        }, 
+        "texlive-epstopdf-doc": {
+            "ensure": "2:svn26577.0-38.el7"
+        }, 
+        "libsepol": {
+            "ensure": "2.1.9-3.el7"
+        }, 
+        "filesystem": {
+            "ensure": "3.2-20.el7"
+        }, 
+        "NetworkManager-team": {
+            "ensure": "1:1.0.6-27.el7"
+        }, 
+        "texlive-rcs-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-mptopdf": {
+            "ensure": "2:svn26689.0-38.el7"
+        }, 
+        "texlive-bigfoot-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-type1cm-doc": {
+            "ensure": "2:svn21820.0-38.el7"
+        }, 
+        "libtevent": {
+            "ensure": "0.9.25-1.el7"
+        }, 
+        "texlive-misc": {
+            "ensure": "2:svn24955.0-38.el7"
+        }, 
+        "texlive-ulem": {
+            "ensure": "2:svn26785.0-38.el7"
+        }, 
+        "lzo": {
+            "ensure": "2.06-8.el7"
+        }, 
+        "less": {
+            "ensure": "458-9.el7"
+        }, 
+        "texlive-pstricks-doc": {
+            "ensure": "2:svn29678.2.39-38.el7"
+        }, 
+        "texlive-fancyhdr": {
+            "ensure": "2:svn15878.3.1-38.el7"
+        }, 
+        "texlive-chngcntr-doc": {
+            "ensure": "2:svn17157.1.0a-38.el7"
+        }, 
+        "texlive-xecjk": {
+            "ensure": "2:svn28816.3.1.2-38.el7"
+        }, 
+        "rpm-build-libs": {
+            "ensure": "4.11.3-17.el7"
+        }, 
+        "psych": {
+            "ensure": [
+                "2.0.5"
+            ]
+        }, 
+        "texlive-placeins": {
+            "ensure": "2:svn19848.2.2-38.el7"
+        }, 
+        "file": {
+            "ensure": "5.11-31.el7"
+        }, 
+        "texlive-rotating-doc": {
+            "ensure": "2:svn16832.2.16b-38.el7"
+        }, 
+        "texlive-beamer": {
+            "ensure": "2:svn29349.3.26-38.el7"
+        }, 
+        "texlive-tex-gyre-math": {
+            "ensure": "2:svn29045.0-38.el7"
+        }, 
+        "texlive-cite-doc": {
+            "ensure": "2:svn19955.5.3-38.el7"
+        }, 
+        "openssl-libs": {
+            "ensure": "1:1.0.1e-51.el7_2.4"
+        }, 
+        "texlive-kpathsea-bin": {
+            "ensure": "2:svn27347.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-multirow": {
+            "ensure": "2:svn17256.1.6-38.el7"
+        }, 
+        "texlive-microtype-doc": {
+            "ensure": "2:svn29392.2.5-38.el7"
+        }, 
+        "libpcap": {
+            "ensure": "14:1.5.3-8.el7"
+        }, 
+        "texlive-natbib-doc": {
+            "ensure": "2:svn20668.8.31b-38.el7"
+        }, 
+        "texlive-section-doc": {
+            "ensure": "2:svn20180.0-38.el7"
+        }, 
+        "texlive-bera": {
+            "ensure": "2:svn20031.0-38.el7"
+        }, 
+        "texlive-qstest-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "snappy": {
+            "ensure": "1.1.0-3.el7"
+        }, 
+        "texlive-attachfile-doc": {
+            "ensure": "2:svn21866.v1.5b-38.el7"
+        }, 
+        "texlive-ptext": {
+            "ensure": "2:svn28124.1-38.el7"
+        }, 
+        "gmp": {
+            "ensure": "1:6.0.0-11.el7"
+        }, 
+        "texlive-colortbl": {
+            "ensure": "2:svn25394.v1.0a-38.el7"
+        }, 
+        "texlive-pst-tree-doc": {
+            "ensure": "2:svn24142.1.12-38.el7"
+        }, 
+        "texlive-babel": {
+            "ensure": "2:svn24756.3.8m-38.el7"
+        }, 
+        "bind-license": {
+            "ensure": "32:9.9.4-29.el7"
+        }, 
+        "iwl7265-firmware": {
+            "ensure": "22.0.7.0-43.el7"
+        }, 
+        "texlive-xetex-tibetan-doc": {
+            "ensure": "2:svn28847.0.1-38.el7"
+        }, 
+        "perl-Socket": {
+            "ensure": "2.010-3.el7"
+        }, 
+        "texlive-mptopdf-bin": {
+            "ensure": "2:svn18674.0-38.20130427_r30134.el7"
+        }, 
+        "apr-util": {
+            "ensure": "1.5.2-6.el7"
+        }, 
+        "texlive-mflogo-doc": {
+            "ensure": "2:svn17487.0-38.el7"
+        }, 
+        "alsa-firmware": {
+            "ensure": "1.0.28-2.el7"
+        }, 
+        "texlive-lettrine": {
+            "ensure": "2:svn29391.1.64-38.el7"
+        }, 
+        "libdrm": {
+            "ensure": "2.4.60-3.el7"
+        }, 
+        "polkit-pkla-compat": {
+            "ensure": "0.1-4.el7"
+        }, 
+        "iwl105-firmware": {
+            "ensure": "18.168.6.1-43.el7"
+        }, 
+        "texlive-pst-plot-doc": {
+            "ensure": "2:svn28729.1.44-38.el7"
+        }, 
+        "pygobject3-base": {
+            "ensure": "3.14.0-3.el7"
+        }, 
+        "cyrus-sasl-lib": {
+            "ensure": "2.1.26-19.2.el7"
+        }, 
+        "texlive-microtype": {
+            "ensure": "2:svn29392.2.5-38.el7"
+        }, 
+        "texlive-dvipdfmx": {
+            "ensure": "2:svn26765.0-38.el7"
+        }, 
+        "texlive-xltxtra": {
+            "ensure": "2:svn19809.0.5e-38.el7"
+        }, 
+        "texlive-was-doc": {
+            "ensure": "2:svn21439.0-38.el7"
+        }, 
+        "texlive-cns-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-xesearch-doc": {
+            "ensure": "2:svn16041.0-38.el7"
+        }, 
+        "texlive-oberdiek": {
+            "ensure": "2:svn26725.0-38.el7"
+        }, 
+        "texlive-xunicode-doc": {
+            "ensure": "2:svn23897.0.981-38.el7"
+        }, 
+        "texlive-titlesec": {
+            "ensure": "2:svn24852.2.10.0-38.el7"
+        }, 
+        "dnsmasq": {
+            "ensure": "2.66-14.el7_1"
+        }, 
+        "texlive-latex-doc": {
+            "ensure": "2:svn27907.0-38.el7"
+        }, 
+        "texlive-etoolbox": {
+            "ensure": "2:svn20922.2.1-38.el7"
+        }, 
+        "biosdevname": {
+            "ensure": "0.6.2-1.el7"
+        }, 
+        "texlive-ltxmisc": {
+            "ensure": "2:svn21927.0-38.el7"
+        }, 
+        "texlive-xkeyval-doc": {
+            "ensure": "2:svn27995.2.6a-38.el7"
+        }, 
+        "grub2-tools": {
+            "ensure": "1:2.02-0.29.el7.centos"
+        }, 
+        "shared-mime-info": {
+            "ensure": "1.1-9.el7"
+        }, 
+        "texlive-ifluatex-doc": {
+            "ensure": "2:svn26725.1.3-38.el7"
+        }, 
+        "httpd-tools": {
+            "ensure": "2.4.6-40.el7.centos.4"
+        }, 
+        "texlive-cmextra": {
+            "ensure": "2:svn14075.0-38.el7"
+        }, 
+        "texlive-xetexfontinfo": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-ntgclass-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-pxfonts-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-framed-doc": {
+            "ensure": "2:svn26789.0.96-38.el7"
+        }, 
+        "texlive-powerdot": {
+            "ensure": "2:svn25656.1.4i-38.el7"
+        }, 
+        "xml-commons-resolver": {
+            "ensure": "1.2-15.el7"
+        }, 
+        "texlive-psnfss": {
+            "ensure": "2:svn23394.9.2a-38.el7"
+        }, 
+        "texlive-thumbpdf-bin": {
+            "ensure": "2:svn6898.0-38.20130427_r30134.el7"
+        }, 
+        "apache-commons-collections": {
+            "ensure": "3.2.1-22.el7_2"
+        }, 
+        "texlive-chngcntr": {
+            "ensure": "2:svn17157.1.0a-38.el7"
+        }, 
+        "texlive-pst-tree": {
+            "ensure": "2:svn24142.1.12-38.el7"
+        }, 
+        "plymouth-scripts": {
+            "ensure": "0.8.9-0.24.20140113.el7.centos"
+        }, 
+        "libicu": {
+            "ensure": "50.1.2-15.el7"
+        }, 
+        "texlive-geometry": {
+            "ensure": "2:svn19716.5.6-38.el7"
+        }, 
+        "bigdecimal": {
+            "ensure": [
+                "1.2.4"
+            ]
+        }, 
+        "texlive-tetex-doc": {
+            "ensure": "2:svn29585.3.0-38.el7"
+        }, 
+        "texlive-l3kernel-doc": {
+            "ensure": "2:svn29409.SVN_4469-38.el7"
+        }, 
+        "texlive-fancyvrb-doc": {
+            "ensure": "2:svn18492.2.8-38.el7"
+        }, 
+        "texlive-ulem-doc": {
+            "ensure": "2:svn26785.0-38.el7"
+        }, 
+        "texlive-lastpage-doc": {
+            "ensure": "2:svn28985.1.2l-38.el7"
+        }, 
+        "texlive-mfware": {
+            "ensure": "2:svn26689.0-38.el7"
+        }, 
+        "shadow-utils": {
+            "ensure": "2:4.1.5.1-18.el7"
+        }, 
+        "linux-firmware": {
+            "ensure": "20150904-43.git6ebf5d5.el7"
+        }, 
+        "texlive-framed": {
+            "ensure": "2:svn26789.0.96-38.el7"
+        }, 
+        "texlive-realscripts": {
+            "ensure": "2:svn29423.0.3b-38.el7"
+        }, 
+        "texlive-underscore-doc": {
+            "ensure": "2:svn18261.0-38.el7"
+        }, 
+        "libXaw": {
+            "ensure": "1.0.12-5.el7"
+        }, 
+        "libXfixes": {
+            "ensure": "5.0.1-2.1.el7"
+        }, 
+        "ttmkfdir": {
+            "ensure": "3.0.9-42.el7"
+        }, 
+        "fipscheck": {
+            "ensure": "1.4.1-5.el7"
+        }, 
+        "texlive-utopia-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-unisugar-doc": {
+            "ensure": "2:svn22357.0.92-38.el7"
+        }, 
+        "texlive-luaotfload-doc": {
+            "ensure": "2:svn26718.1.26-38.el7"
+        }, 
+        "texlive-texlive.infra-bin": {
+            "ensure": "2:svn22566.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-changepage": {
+            "ensure": "2:svn15878.1.0c-38.el7"
+        }, 
+        "texlive-carlisle-doc": {
+            "ensure": "2:svn18258.0-38.el7"
+        }, 
+        "dmidecode": {
+            "ensure": "1:2.12-9.el7"
+        }, 
+        "texlive-xmltex-bin": {
+            "ensure": "2:svn3006.0-38.20130427_r30134.el7"
+        }, 
+        "systemd-sysv": {
+            "ensure": "219-19.el7"
+        }, 
+        "libX11-common": {
+            "ensure": "1.6.3-2.el7"
+        }, 
+        "texlive-sepnum-doc": {
+            "ensure": "2:svn20186.2.0-38.el7"
+        }, 
+        "texlive-amscls": {
+            "ensure": "2:svn29207.0-38.el7"
+        }, 
+        "texlive-typehtml-doc": {
+            "ensure": "2:svn17134.0-38.el7"
+        }, 
+        "libteam": {
+            "ensure": "1.17-5.el7"
+        }, 
+        "texlive-pst-fill": {
+            "ensure": "2:svn15878.1.01-38.el7"
+        }, 
+        "postgresql": {
+            "ensure": "9.2.15-1.el7_2"
+        }, 
+        "texlive-hyphenat": {
+            "ensure": "2:svn15878.2.3c-38.el7"
+        }, 
+        "elfutils-libs": {
+            "ensure": "0.163-3.el7"
+        }, 
+        "texlive-fancyhdr-doc": {
+            "ensure": "2:svn15878.3.1-38.el7"
+        }, 
+        "libjpeg-turbo": {
+            "ensure": "1.2.90-5.el7"
+        }, 
+        "texlive-xltxtra-doc": {
+            "ensure": "2:svn19809.0.5e-38.el7"
+        }, 
+        "texlive-float": {
+            "ensure": "2:svn15878.1.3d-38.el7"
+        }, 
+        "texlive-pst-blur-doc": {
+            "ensure": "2:svn15878.2.0-38.el7"
+        }, 
+        "texlive-enctex": {
+            "ensure": "2:svn28602.0-38.el7"
+        }, 
+        "libmount": {
+            "ensure": "2.23.2-26.el7"
+        }, 
+        "texlive-breakurl": {
+            "ensure": "2:svn15878.1.30-38.el7"
+        }, 
+        "texlive-xifthen": {
+            "ensure": "2:svn15878.1.3-38.el7"
+        }, 
+        "apache-commons-daemon": {
+            "ensure": "1.0.13-6.el7"
+        }, 
+        "texlive-fp-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-cmap-doc": {
+            "ensure": "2:svn26568.0-38.el7"
+        }, 
+        "mariadb-libs": {
+            "ensure": "1:5.5.44-2.el7.centos"
+        }, 
+        "texlive-ec-doc": {
+            "ensure": "2:svn25033.1.0-38.el7"
+        }, 
+        "texlive-symbol": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-ctable": {
+            "ensure": "2:svn26694.1.23-38.el7"
+        }, 
+        "libtiff": {
+            "ensure": "4.0.3-25.el7_2"
+        }, 
+        "wpa_supplicant": {
+            "ensure": "1:2.0-17.el7_1"
+        }, 
+        "cpp": {
+            "ensure": "4.8.5-4.el7"
+        }, 
+        "kernel-devel": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "texlive-lastpage": {
+            "ensure": "2:svn28985.1.2l-38.el7"
+        }, 
+        "libstdc++": {
+            "ensure": "4.8.5-4.el7"
+        }, 
+        "texlive-mathpazo-doc": {
+            "ensure": "2:svn15878.1.003-38.el7"
+        }, 
+        "kernel-tools": {
+            "ensure": "3.10.0-327.el7"
+        }, 
+        "ppp": {
+            "ensure": "2.4.5-33.el7"
+        }, 
+        "texlive-wadalab-doc": {
+            "ensure": "2:svn22576.0-38.el7"
+        }, 
+        "texlive-txfonts-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-philokalia-doc": {
+            "ensure": "2:svn18651.1.1-38.el7"
+        }, 
+        "nss": {
+            "ensure": "3.19.1-18.el7"
+        }, 
+        "libXdamage": {
+            "ensure": "1.1.4-4.1.el7"
+        }, 
+        "libXxf86vm": {
+            "ensure": "1.1.3-2.1.el7"
+        }, 
+        "pcre": {
+            "ensure": "8.32-15.el7"
+        }, 
+        "texlive-l3experimental": {
+            "ensure": "2:svn29361.SVN_4467-38.el7"
+        }, 
+        "texlive-rsfs": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "mesa-libEGL": {
+            "ensure": "10.6.5-3.20150824.el7"
+        }, 
+        "texlive-euro-doc": {
+            "ensure": "2:svn22191.1.1-38.el7"
+        }, 
+        "texlive-wrapfig-doc": {
+            "ensure": "2:svn22048.3.6-38.el7"
+        }, 
+        "texlive-carlisle": {
+            "ensure": "2:svn18258.0-38.el7"
+        }, 
+        "texlive-pstricks-add-doc": {
+            "ensure": "2:svn28750.3.59-38.el7"
+        }, 
+        "tcp_wrappers-libs": {
+            "ensure": "7.6-77.el7"
+        }, 
+        "puppet-agent": {
+            "ensure": "1.8.0-1.el7"
+        }, 
+        "texlive-caption-doc": {
+            "ensure": "2:svn29026.3.3__2013_02_03_-38.el7"
+        }, 
+        "texlive-subfigure": {
+            "ensure": "2:svn15878.2.1.5-38.el7"
+        }, 
+        "libselinux-python": {
+            "ensure": "2.2.2-6.el7"
+        }, 
+        "texlive-tex": {
+            "ensure": "2:svn26689.3.1415926-38.el7"
+        }, 
+        "texlive-thailatex": {
+            "ensure": "2:svn29349.0.5.1-38.el7"
+        }, 
+        "texlive-pdftex": {
+            "ensure": "2:svn29585.1.40.11-38.el7"
+        }, 
+        "texlive-epstopdf": {
+            "ensure": "2:svn26577.0-38.el7"
+        }, 
+        "texlive-listings": {
+            "ensure": "2:svn15878.1.4-38.el7"
+        }, 
+        "texlive-fix2col-doc": {
+            "ensure": "2:svn17133.0-38.el7"
+        }, 
+        "perl-Storable": {
+            "ensure": "2.45-3.el7"
+        }, 
+        "texlive-ifmtarg-doc": {
+            "ensure": "2:svn19363.1.2a-38.el7"
+        }, 
+        "pciutils-libs": {
+            "ensure": "3.2.1-4.el7"
+        }, 
+        "perl-Time-Local": {
+            "ensure": "1.2300-2.el7"
+        }, 
+        "libmpc": {
+            "ensure": "1.0.1-3.el7"
+        }, 
+        "openssh-server": {
+            "ensure": "6.6.1p1-23.el7_2"
+        }, 
+        "libXi": {
+            "ensure": "1.7.4-2.el7"
+        }, 
+        "texlive-cjk": {
+            "ensure": "2:svn26296.4.8.3-38.el7"
+        }, 
+        "texlive-datetime-doc": {
+            "ensure": "2:svn19834.2.58-38.el7"
+        }, 
+        "texlive-pst-coil-doc": {
+            "ensure": "2:svn24020.1.06-38.el7"
+        }, 
+        "texlive-mathspec": {
+            "ensure": "2:svn15878.0.2-38.el7"
+        }, 
+        "texlive-algorithms-doc": {
+            "ensure": "2:svn15878.0.1-38.el7"
+        }, 
+        "libXt": {
+            "ensure": "1.1.4-6.1.el7"
+        }, 
+        "texlive-pstricks": {
+            "ensure": "2:svn29678.2.39-38.el7"
+        }, 
+        "texlive-iftex": {
+            "ensure": "2:svn29654.0.2-38.el7"
+        }, 
+        "texlive-subfig": {
+            "ensure": "2:svn15878.1.3-38.el7"
+        }, 
+        "texlive-collection-latexrecommended": {
+            "ensure": "2:svn25795.0-38.20130427_r30134.el7"
+        }, 
+        "libXext": {
+            "ensure": "1.3.3-3.el7"
+        }, 
+        "texlive-enumitem": {
+            "ensure": "2:svn24146.3.5.2-38.el7"
+        }, 
+        "info": {
+            "ensure": "5.1-4.el7"
+        }, 
+        "texlive-section": {
+            "ensure": "2:svn20180.0-38.el7"
+        }, 
+        "texlive-xeindex": {
+            "ensure": "2:svn16760.0.2-38.el7"
+        }, 
+        "libcurl": {
+            "ensure": "7.29.0-25.el7.centos"
+        }, 
+        "tomcat": {
+            "ensure": "7.0.54-8.el7_2"
+        }, 
+        "texlive-csquotes-doc": {
+            "ensure": "2:svn24393.5.1d-38.el7"
+        }, 
+        "texlive-varwidth-doc": {
+            "ensure": "2:svn24104.0.92-38.el7"
+        }, 
+        "texlive-latexconfig": {
+            "ensure": "2:svn28991.0-38.el7"
+        }, 
+        "device-mapper-event-libs": {
+            "ensure": "7:1.02.107-5.el7"
+        }, 
+        "geronimo-jta": {
+            "ensure": "1.1.1-17.el7"
+        }, 
+        "texlive-unicode-math": {
+            "ensure": "2:svn29413.0.7d-38.el7"
+        }, 
+        "initscripts": {
+            "ensure": "9.49.30-1.el7"
+        }, 
+        "texlive-tex-bin": {
+            "ensure": "2:svn26912.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-titling-doc": {
+            "ensure": "2:svn15878.2.1d-38.el7"
+        }, 
+        "device-mapper-event": {
+            "ensure": "7:1.02.107-5.el7"
+        }, 
+        "avahi-autoipd": {
+            "ensure": "0.6.31-15.el7"
+        }, 
+        "texlive-l3kernel": {
+            "ensure": "2:svn29409.SVN_4469-38.el7"
+        }, 
+        "texlive-powerdot-doc": {
+            "ensure": "2:svn25656.1.4i-38.el7"
+        }, 
+        "texlive-palatino": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "libXrender": {
+            "ensure": "0.9.8-2.1.el7"
+        }, 
+        "texlive-float-doc": {
+            "ensure": "2:svn15878.1.3d-38.el7"
+        }, 
+        "libndp": {
+            "ensure": "1.2-4.el7"
+        }, 
+        "texlive-luatexbase": {
+            "ensure": "2:svn22560.0.31-38.el7"
+        }, 
+        "texlive-bigfoot": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "perl-HTTP-Tiny": {
+            "ensure": "0.033-3.el7"
+        }, 
+        "texlive-fixlatvian": {
+            "ensure": "2:svn21631.1a-38.el7"
+        }, 
+        "texlive-bookman": {
+            "ensure": "2:svn28614.0-38.el7"
+        }, 
+        "texlive-subfig-doc": {
+            "ensure": "2:svn15878.1.3-38.el7"
+        }, 
+        "texlive-pst-node": {
+            "ensure": "2:svn27799.1.25-38.el7"
+        }, 
+        "texlive-pdftex-def": {
+            "ensure": "2:svn22653.0.06d-38.el7"
+        }, 
+        "texlive-arabxetex-doc": {
+            "ensure": "2:svn17470.v1.1.4-38.el7"
+        }, 
+        "curl": {
+            "ensure": "7.29.0-25.el7.centos"
+        }, 
+        "plymouth": {
+            "ensure": "0.8.9-0.24.20140113.el7.centos"
+        }, 
+        "lsscsi": {
+            "ensure": "0.27-3.el7"
+        }, 
+        "bzip2": {
+            "ensure": "1.0.6-13.el7"
+        }, 
+        "texlive-adjustbox": {
+            "ensure": "2:svn26555.0-38.el7"
+        }, 
+        "freetype": {
+            "ensure": "2.4.11-11.el7"
+        }, 
+        "texlive-multido": {
+            "ensure": "2:svn18302.1.42-38.el7"
+        }, 
+        "java-1.8.0-openjdk-headless": {
+            "ensure": "1:1.8.0.111-1.b15.el7_2"
+        }, 
+        "libfontenc": {
+            "ensure": "1.1.2-3.el7"
+        }, 
+        "quota": {
+            "ensure": "1:4.01-11.el7"
+        }, 
+        "texlive-tocloft-doc": {
+            "ensure": "2:svn20084.2.3e-38.el7"
+        }, 
+        "texlive-xcolor-doc": {
+            "ensure": "2:svn15878.2.11-38.el7"
+        }, 
+        "gettext": {
+            "ensure": "0.18.2.1-4.el7"
+        }, 
+        "texlive-sansmath-doc": {
+            "ensure": "2:svn17997.1.1-38.el7"
+        }, 
+        "texlive-paralist-doc": {
+            "ensure": "2:svn15878.2.3b-38.el7"
+        }, 
+        "texlive-xecolor-doc": {
+            "ensure": "2:svn29660.0.1-38.el7"
+        }, 
+        "texlive-dvipng-bin": {
+            "ensure": "2:svn26509.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-xetex-doc": {
+            "ensure": "2:svn26330.0.9997.5-38.el7"
+        }, 
+        "nss-softokn-freebl": {
+            "ensure": "3.16.2.3-13.el7_1"
+        }, 
+        "fipscheck-lib": {
+            "ensure": "1.4.1-5.el7"
+        }, 
+        "texlive-ucharclasses": {
+            "ensure": "2:svn27820.2.0-38.el7"
+        }, 
+        "texlive-unicode-math-doc": {
+            "ensure": "2:svn29413.0.7d-38.el7"
+        }, 
+        "pyxattr": {
+            "ensure": "0.5.1-5.el7"
+        }, 
+        "texlive-memoir-doc": {
+            "ensure": "2:svn21638.3.6j_patch_6.0g-38.el7"
+        }, 
+        "texlive-geometry-doc": {
+            "ensure": "2:svn19716.5.6-38.el7"
+        }, 
+        "texlive-url-doc": {
+            "ensure": "2:svn16864.3.2-38.el7"
+        }, 
+        "texlive-fmtcount": {
+            "ensure": "2:svn28068.2.02-38.el7"
+        }, 
+        "libutempter": {
+            "ensure": "1.1.6-4.el7"
+        }, 
+        "device-mapper-libs": {
+            "ensure": "7:1.02.107-5.el7"
+        }, 
+        "texlive-threeparttable": {
+            "ensure": "2:svn17383.0-38.el7"
+        }, 
+        "texlive-booktabs": {
+            "ensure": "2:svn15878.1.61803-38.el7"
+        }, 
+        "xml-commons-apis": {
+            "ensure": "1.4.01-16.el7"
+        }, 
+        "texlive-bibtopic-doc": {
+            "ensure": "2:svn15878.1.1a-38.el7"
+        }, 
+        "libffi": {
+            "ensure": "3.0.13-16.el7"
+        }, 
+        "readline": {
+            "ensure": "6.2-9.el7"
+        }, 
+        "texlive-xesearch": {
+            "ensure": "2:svn16041.0-38.el7"
+        }, 
+        "slang": {
+            "ensure": "2.2.4-11.el7"
+        }, 
+        "texlive-pspicture-doc": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-currfile-doc": {
+            "ensure": "2:svn29012.0.7b-38.el7"
+        }, 
+        "python-slip": {
+            "ensure": "0.4.0-2.el7"
+        }, 
+        "texlive-luaotfload-bin": {
+            "ensure": "2:svn18579.0-38.20130427_r30134.el7"
+        }, 
+        "texlive-ifetex-doc": {
+            "ensure": "2:svn24853.1.2-38.el7"
+        }, 
+        "ustr": {
+            "ensure": "1.0.4-16.el7"
+        }, 
+        "sysvinit-tools": {
+            "ensure": "2.88-14.dsf.el7"
+        }, 
+        "NetworkManager-tui": {
+            "ensure": "1:1.0.6-27.el7"
+        }, 
+        "diffutils": {
+            "ensure": "3.3-4.el7"
+        }, 
+        "e2fsprogs": {
+            "ensure": "1.42.9-7.el7"
+        }, 
+        "texlive-graphics": {
+            "ensure": "2:svn25405.1.0o-38.el7"
+        }, 
+        "texlive-ucharclasses-doc": {
+            "ensure": "2:svn27820.2.0-38.el7"
+        }, 
+        "texlive-qstest": {
+            "ensure": "2:svn15878.0-38.el7"
+        }, 
+        "texlive-tipa-doc": {
+            "ensure": "2:svn29349.1.3-38.el7"
+        }, 
+        "texlive-changebar": {
+            "ensure": "2:svn29349.3.5c-38.el7"
+        }, 
+        "libverto-tevent": {
+            "ensure": "0.2.5-4.el7"
+        }, 
+        "texlive-kpathsea": {
+            "ensure": "2:svn28792.0-38.el7"
+        }, 
+        "mpfr": {
+            "ensure": "3.1.1-4.el7"
+        }, 
+        "texlive-metafont-bin": {
+            "ensure": "2:svn26912.0-38.20130427_r30134.el7"
+        }, 
+        "newt-python": {
+            "ensure": "0.52.15-4.el7"
+        }, 
+        "texlive-pst-fill-doc": {
+            "ensure": "2:svn15878.1.01-38.el7"
+        }, 
+        "texlive-bera-doc": {
+            "ensure": "2:svn20031.0-38.el7"
+        }
+    }
+}

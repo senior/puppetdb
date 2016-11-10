@@ -1166,7 +1166,27 @@
 (defn add-corrective-change-index
   []
   (jdbc/do-commands
-    "CREATE INDEX resource_events_status_for_corrective_change_idx ON resource_events (status) WHERE corrective_change"))
+   "CREATE INDEX resource_events_status_for_corrective_change_idx ON resource_events (status) WHERE corrective_change"))
+
+(defn add-unmanaged-packages []
+  (jdbc/do-commands
+   "create sequence package_id_seq cycle"
+
+   (sql/create-table-ddl
+    :packages
+    ["id" "bigint NOT NULL PRIMARY KEY DEFAULT nextval('package_id_seq')"]
+    ["name" "text"]
+    ["version" "text"]
+    ["provider" "text"])
+
+   (sql/create-table-ddl
+    :package_lifetimes
+    ["package_id" "bigint not null"]
+    ["certname_id" "bigint not null"]
+    ["time_range" "tstzrange not null"])
+
+   "ALTER TABLE PACKAGE_LIFETIMES
+    ADD CONSTRAINT package_certname_time UNIQUE (package_id, certname_id, time_range)"))
 
 (def migrations
   "The available migrations, as a map from migration version to migration function."
@@ -1198,7 +1218,8 @@
    50 remove-historical-catalogs
    51 fact-values-value-to-jsonb
    52 resource-params-cache-parameters-to-jsonb
-   53 add-corrective-change-index})
+   53 add-corrective-change-index
+   54 add-unmanaged-packages})
 
 
 (def desired-schema-version (apply max (keys migrations)))
