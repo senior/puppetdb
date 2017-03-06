@@ -924,11 +924,64 @@
                                pids
                                valuemaps)))))
 
+(defn find-certname-id [certname]
+  (:id (first (jdbc/query-to-vec ["SELECT id FROM certnames WHERE certname=?"
+                                  certname]))))
+
+(defn create-package-map [certname-id]
+  (into {}
+        (jdbc/call-with-query-rows ["SELECT id, name, version FROM package_inventory WHERE certname_id=?"
+                                    certname-id]
+                                   (fn [{id :id package_name :name version :version}]
+                                     [[package_name version] id]))))
+
+(defn provider->int [x]
+  (case x
+    "apt" 0
+    "pip" 1
+    "yum" 2
+    "gem" 3))
+
+(defn update-packages [certname inventory]
+  (let [certname-id (find-certname-id certname)
+        old-packages (create-package-map certname-id)
+        grouped-inv (reduce (fn [acc {:keys [package_name version] :as pkg-data}]
+                              (assoc acc [package_name version] pkg-data))
+                            {} inventory)
+        [to-add to-remove _] (clojure.data/diff (set (keys grouped-inv)) (set (keys old-packages)))
+        to-remove-ids (map old-packages to-remove)]
+    (jdbc/insert-multi! :package_inventory
+                        ["certname_id" "name" "version" "provider"]
+                        (for [pkg-pair to-add
+                              :let [{:keys [package_name version provider]} (get grouped-inv pkg-pair)]]
+                          [certname-id
+                           package_name
+                           version
+                           (provider->int provider)]))
+    (jdbc/delete! :package_inventory
+                  (cons (str "id " (jdbc/in-clause to-remove-ids))
+                        to-remove-ids))))
+
+
+(defn insert-packages [certname inventory]
+  (let [certname-id (find-certname-id certname)]
+    (try
+      (jdbc/insert-multi! :package_inventory
+                          ["certname_id" "name" "version" "provider"]
+                          (map (fn [{:keys [package_name version provider]}]
+                                 [certname-id
+                                  package_name
+                                  version
+                                  (provider->int provider)])
+                               inventory))
+      (catch java.sql.BatchUpdateException e
+        (.printStackTrace (.getNextException e))))))
+
 (pls/defn-validated add-facts!
   "Given a certname and a map of fact names to values, store records for those
   facts associated with the certname."
   ([fact-data] (add-facts! fact-data true))
-  ([{:keys [certname values environment timestamp producer_timestamp producer]
+  ([{:keys [certname values environment timestamp producer_timestamp producer inventory]
      :as fact-data} :- facts-schema
     include-hash? :- s/Bool]
    (jdbc/with-db-transaction []
@@ -947,6 +1000,10 @@
           pathstrs (map (comp facts/factpath-to-string first) paths-and-valuemaps)
           paths->ids (realize-paths! pathstrs)
           valuemaps (map second paths-and-valuemaps)]
+
+      (when (seq inventory)
+        (insert-packages certname inventory))
+
       (insert-facts! (certname-to-factset-id certname)
                      (map paths->ids pathstrs)
                      valuemaps)))))
@@ -988,7 +1045,7 @@
   "Given a certname, querys the DB for existing facts for that
    certname and will update, delete or insert the facts as necessary
    to match the facts argument. (cf. add-facts!)"
-  [{:keys [certname values environment timestamp producer_timestamp producer]
+  [{:keys [certname values environment timestamp producer_timestamp producer inventory]
     :as fact-data} :- facts-schema]
   (jdbc/with-db-transaction []
     (let [factset-id (certname-to-factset-id certname)
@@ -1042,6 +1099,9 @@
                                       existing-status))
 
       (delete-pending-path-id-orphans! factset-id rm-pids)
+
+      (when (seq inventory)
+        (update-packages certname inventory))
 
       (jdbc/update! :factsets
                     {:timestamp (to-timestamp timestamp)

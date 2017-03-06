@@ -32,7 +32,10 @@
    :timestamp pls/Timestamp
    :environment (s/maybe s/Str)
    :producer_timestamp (s/cond-pre s/Str pls/Timestamp)
-   :producer (s/maybe s/Str)})
+   :producer (s/maybe s/Str)
+   (s/optional-key :inventory) [{:package_name s/Str
+                                 :version s/Str
+                                 :provider s/Str}]})
 
 (def valuemap-schema
   {:value_float (s/maybe Double)
