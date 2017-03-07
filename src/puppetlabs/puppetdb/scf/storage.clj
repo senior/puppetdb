@@ -929,11 +929,13 @@
                                   certname]))))
 
 (defn create-package-map [certname-id]
-  (into {}
-        (jdbc/call-with-query-rows ["SELECT id, name, version FROM package_inventory WHERE certname_id=?"
-                                    certname-id]
-                                   (fn [{id :id package_name :name version :version}]
-                                     [[package_name version] id]))))
+  (jdbc/call-with-query-rows ["SELECT id, name, version FROM package_inventory WHERE certname_id=?"
+                              certname-id]
+                             (fn [rows]
+                               (->> rows
+                                    (map (fn [{id :id package_name :name version :version}]
+                                           [[package_name version] id]))
+                                    (into {})))))
 
 (defn provider->int [x]
   (case x
