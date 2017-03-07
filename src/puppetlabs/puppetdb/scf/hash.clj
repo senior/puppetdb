@@ -87,6 +87,19 @@
           target-result))
       source-result)))
 
+(defn package-comparator [lhs rhs]
+  (let [pkg-result (compare (:package_name lhs) (:package_name rhs))]
+    (if (zero? pkg-result)
+      (let [version-result (compare (:version lhs) (:version rhs))]
+        (if (zero? version-result)
+          (compare (:provider lhs) (:provider rhs))
+          version-result))
+      pkg-result)))
+
+(defn package-similarity-hash [packages]
+  (generic-identity-hash
+   (sort package-comparator packages)))
+
 (defn catalog-similarity-format
   "Creates catalog map for the given `certname`, `resources` and `edges` with a
    stable ordering that can be used to create a hash consistently."

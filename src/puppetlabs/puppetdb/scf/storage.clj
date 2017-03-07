@@ -924,9 +924,10 @@
                                pids
                                valuemaps)))))
 
-(defn find-certname-id [certname]
-  (:id (first (jdbc/query-to-vec ["SELECT id FROM certnames WHERE certname=?"
-                                  certname]))))
+(defn find-certname-id-and-hash [certname]
+  (first (jdbc/query-to-vec [(format "SELECT id, %s as package_hash FROM certnames WHERE certname=?"
+                                     (sutils/sql-hash-as-str "package_hash"))
+                             certname])))
 
 (defn create-package-map [certname-id]
   (jdbc/call-with-query-rows ["SELECT id, name, version FROM package_inventory WHERE certname_id=?"
@@ -945,29 +946,41 @@
     "gem" 3))
 
 (defn update-packages [certname inventory]
-  (let [certname-id (find-certname-id certname)
-        old-packages (create-package-map certname-id)
-        grouped-inv (reduce (fn [acc {:keys [package_name version] :as pkg-data}]
-                              (assoc acc [package_name version] pkg-data))
-                            {} inventory)
-        [to-add to-remove _] (clojure.data/diff (set (keys grouped-inv)) (set (keys old-packages)))
-        to-remove-ids (map old-packages to-remove)]
-    (jdbc/insert-multi! :package_inventory
-                        ["certname_id" "name" "version" "provider"]
-                        (for [pkg-pair to-add
-                              :let [{:keys [package_name version provider]} (get grouped-inv pkg-pair)]]
-                          [certname-id
-                           package_name
-                           version
-                           (provider->int provider)]))
-    (jdbc/delete! :package_inventory
-                  (cons (str "id " (jdbc/in-clause to-remove-ids))
-                        to-remove-ids))))
+  (let [{certname-id :id package_hash :package_hash} (find-certname-id-and-hash certname)
+        new-package-hash (shash/package-similarity-hash inventory)]
+
+    (when-not (= new-package-hash package_hash)
+      (let [old-packages (create-package-map certname-id)
+            grouped-inv (reduce (fn [acc {:keys [package_name version] :as pkg-data}]
+                                  (assoc acc [package_name version] pkg-data))
+                                {} inventory)
+            [to-add to-remove _] (clojure.data/diff (set (keys grouped-inv)) (set (keys old-packages)))
+            to-remove-ids (map old-packages to-remove)]
+        (jdbc/update! :certnames
+                      {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
+                      ["id=?" certname-id])
+        (when (seq to-add)
+          (jdbc/insert-multi! :package_inventory
+                              ["certname_id" "name" "version" "provider"]
+                              (for [pkg-pair to-add
+                                    :let [{:keys [package_name version provider]} (get grouped-inv pkg-pair)]]
+                                [certname-id
+                                 package_name
+                                 version
+                                 (provider->int provider)])))
+        (when (seq to-remove)
+          (jdbc/delete! :package_inventory
+                        (cons (str "id " (jdbc/in-clause to-remove-ids))
+                              to-remove-ids)))))))
 
 
 (defn insert-packages [certname inventory]
-  (let [certname-id (find-certname-id certname)]
+  (let [certname-id (:id (find-certname-id-and-hash certname))
+        new-package-hash (shash/package-similarity-hash inventory)]
     (try
+      (jdbc/update! :certnames
+                    {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
+                    ["id=?" certname-id])
       (jdbc/insert-multi! :package_inventory
                           ["certname_id" "name" "version" "provider"]
                           (map (fn [{:keys [package_name version provider]}]

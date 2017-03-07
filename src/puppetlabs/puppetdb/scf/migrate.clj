@@ -1241,6 +1241,10 @@
 
    "create index package_certname_idx on package_inventory using btree (certname_id)"))
 
+(defn add-package-hash []
+  (jdbc/do-commands
+   "ALTER TABLE certnames ADD COLUMN package_hash bytea"))
+
 (def migrations
   "The available migrations, as a map from migration version to migration function."
   {28 init-through-2-3-8
@@ -1275,7 +1279,8 @@
    54 drop-resource-events-resource-type-idx
    55 index-certnames-unique-latest-report-id
    56 merge-fact-values-into-facts
-   57 add-package-inventory})
+   57 add-package-inventory
+   58 add-package-hash})
 
 (def desired-schema-version (apply max (keys migrations)))
 
