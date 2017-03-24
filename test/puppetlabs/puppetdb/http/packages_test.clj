@@ -28,45 +28,66 @@
 
 (def queries->results
   (omap/ordered-map
-    ["=" "certname" "node1"]
-    #{(package-map "node1" "foo" "1.2.3" "apt")
-      (package-map "node1" "bar" "2.3.4" "apt")
-      (package-map "node1" "baz" "3.4.5" "apt")}
+   ["=" "certname" "node1"]
+   #{(package-map "node1" "foo" "1.2.3" "apt")
+     (package-map "node1" "bar" "2.3.4" "apt")
+     (package-map "node1" "baz" "3.4.5" "apt")}
 
 
-    "packages { certname = 'node1' }"
-    #{(package-map "node1" "foo" "1.2.3" "apt")
-      (package-map "node1" "bar" "2.3.4" "apt")
-      (package-map "node1" "baz" "3.4.5" "apt")}
+   "packages { certname = 'node1' }"
+   #{(package-map "node1" "foo" "1.2.3" "apt")
+     (package-map "node1" "bar" "2.3.4" "apt")
+     (package-map "node1" "baz" "3.4.5" "apt")}
 
 
-    ["and" ["=" "package_name" "bar"] ["=" "version" "2.3.4"]]
-    #{(package-map "node1" "bar" "2.3.4" "apt")
-      (package-map "node2" "bar" "2.3.4" "apt")}
+   ["and" ["=" "package_name" "bar"] ["=" "version" "2.3.4"]]
+   #{(package-map "node1" "bar" "2.3.4" "apt")
+     (package-map "node2" "bar" "2.3.4" "apt")}
 
 
-    ["extract" ["certname" "package_name" "version" "provider"]
-     ["and"
-      ["~" "package_name" "ba?"]]]
-    #{(package-map "node1" "bar" "2.3.4" "apt")
-      (package-map "node1" "baz" "3.4.5" "apt")
-      (package-map "node2" "bar" "2.3.4" "apt")}
+   ["extract" ["certname" "package_name" "version" "provider"]
+    ["and"
+     ["~" "package_name" "ba?"]]]
+   #{(package-map "node1" "bar" "2.3.4" "apt")
+     (package-map "node1" "baz" "3.4.5" "apt")
+     (package-map "node2" "bar" "2.3.4" "apt")}
 
-    ["extract" ["package_name" "version" ["function" "count" "certname"]]
-     ["~" "package_name" "ba?"]
-     ["group_by" "package_name" "version"]]
-    #{{:package_name "bar" :version "2.3.4" :count 2}
-      {:package_name "baz" :version "3.4.5" :count 1}}
+   ["extract" ["package_name" "version" ["function" "count" "certname"]]
+    ["~" "package_name" "ba?"]
+    ["group_by" "package_name" "version"]]
+   #{{:package_name "bar" :version "2.3.4" :count 2}
+     {:package_name "baz" :version "3.4.5" :count 1}}
 
+   ;; limited package count aggregate
+   ["extract" ["package_name" "version" ["function" "count"]]
+    ["in" "package_name" ["from" "just_packages"
+                          ["extract" ["package_name"]]
+                          ["order_by" ["package_name"]]
+                          ["limit" 100]]]
+    ["group_by" "package_name" "version" "provider"]]
+   #{{:package_name "foo" :version "1.2.3" :count 2}
+     {:package_name "bar" :version "2.3.4" :count 2}
+     {:package_name "baz" :version "3.4.5" :count 1}}
 
-    ["extract" ["certname" "version"]
-     ["and"
-      ["=" "package_name" "foo"]
-      ["subquery" "fact_contents"
-       ["and"
-        ["~>" "path" ["os" "name"]]
-        ["=" "value" "Ubuntu"]]]]]
-    #{{:certname "node1" :version "1.2.3"}}))
+   ["extract" ["package_name" "version" ["function" "count"]]
+    ["in" "package_name" ["from" "just_packages"
+                          ["extract" ["package_name"]
+                           ["~" "package_name" "ba?"]]
+                          ["order_by" ["package_name"]]
+                          ["limit" 100]]]
+    ["group_by" "package_name" "version" "provider"]]
+   #{{:package_name "bar" :version "2.3.4" :count 2}
+     {:package_name "baz" :version "3.4.5" :count 1}}
+
+   ;; subquery to facts
+   ["extract" ["certname" "version"]
+    ["and"
+     ["=" "package_name" "foo"]
+     ["subquery" "fact_contents"
+      ["and"
+       ["~>" "path" ["os" "name"]]
+       ["=" "value" "Ubuntu"]]]]]
+   #{{:certname "node1" :version "1.2.3"}}))
 
 (deftest-http-app package-query-test
   [method [:get :post]]
@@ -104,4 +125,14 @@
     (testing "querying for a specific node"
       (is-query-result "/v4/packages/node2" nil
                        #{(package-map "node2" "bar" "2.3.4" "apt")
-                         (package-map "node2" "foo" "1.2.3" "apt")}))))
+                         (package-map "node2" "foo" "1.2.3" "apt")}))
+
+    (testing "unique package count"
+      (is-query-result "/v4" ["from" "just_packages"
+                              ["extract" [["function" "count"]]]]
+                       #{{:count 3}})
+
+      (is-query-result "/v4" ["from" "just_packages"
+                              ["extract" [["function" "count"]]
+                               ["~" "package_name" "ba?"]]]
+                       #{{:count 2}}))))
