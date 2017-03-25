@@ -185,6 +185,7 @@
    :gc-catalogs        (timer storage-metrics-registry ["gc-catalogs-time"])
    :gc-params          (timer storage-metrics-registry ["gc-params-time"])
    :gc-environments    (timer storage-metrics-registry ["gc-environments-time"])
+   :gc-packages    (timer storage-metrics-registry ["gc-packages-time"])
    :gc-report-statuses (timer storage-metrics-registry ["gc-report-statuses"])
    :gc-fact-paths  (timer storage-metrics-registry ["gc-fact-paths"])
 
@@ -811,6 +812,14 @@
            UNION SELECT environment_id FROM factsets
                    WHERE environment_id IS NOT NULL)"])))
 
+(defn delete-unassociated-packages!
+  []
+  (time!
+   (:gc-packages performance-metrics)
+   (jdbc/delete!
+    :packages
+    ["id NOT IN (SELECT package_id from certname_packages)"])))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Facts
 
@@ -991,45 +1000,84 @@
                                            [[package_name version provider] id]))
                                     (into {})))))
 
+(defn find-package-hashes [package-hashes]
+  (jdbc/call-with-query-rows [(format "SELECT id, %s as package_hash FROM packages WHERE hash = ANY(?)"
+                                      (sutils/sql-hash-as-str "hash"))
+
+                              (sutils/array-to-param "bytea" PGobject (map sutils/munge-hash-for-storage package-hashes))]
+                             (fn [rows]
+                               (reduce (fn [acc {:keys [id package_hash]}]
+                                         (assoc acc package_hash id))
+                                       {} rows))))
+
+(defn package-ids-for-certname [certname-id]
+  (jdbc/call-with-query-rows ["SELECT package_id FROM certname_packages WHERE certname_id=?"
+                              certname-id]
+                             (fn [rows]
+                               (set (map :package_id rows)))))
+
+(defn insert-missing-packages [existing-hashes-map new-hashed-packages]
+  (let [packages-to-create (remove (fn [hashed-package]
+                                     (get existing-hashes-map (nth hashed-package 3)))
+                                   new-hashed-packages)
+        results (jdbc/insert-multi! :packages
+                                    (map (fn [[package_name version provider package-hash]]
+                                           {:name package_name
+                                            :version version
+                                            :provider provider
+                                            :hash (sutils/munge-hash-for-storage package-hash)})
+                                         packages-to-create))]
+    (merge existing-hashes-map
+           (zipmap (map #(nth % 3) packages-to-create)
+                   (map :id results)))))
+
 (s/defn update-packages
   "Compares `inventory` to the stored package inventory for
   `certname`. Differences will result in updates to the database"
   [certname
    inventory :- [facts/package-tuple]]
   (let [{certname-id :id package_hash :package_hash} (find-certname-id-and-hash certname)
-        new-package-hash (shash/package-similarity-hash inventory)]
+        hashed-packages (map shash/package-identity-hash inventory)
+        new-package-hash (shash/package-similarity-hash hashed-packages)]
 
     (when-not (= new-package-hash package_hash)
-      (let [old-packages (create-package-map certname-id)
-            [to-add to-remove _] (clojure.data/diff (set inventory) (set (keys old-packages)))
-            to-remove-ids (map old-packages to-remove)]
+      (let [just-hashes (map #(nth % 3) hashed-packages)
+            existing-package-hashes (find-package-hashes just-hashes)
+            full-hashes-map (insert-missing-packages existing-package-hashes hashed-packages)
+            new-package-ids (set (map full-hashes-map just-hashes))
+            [new-package-ids old-package-ids _] (clojure.data/diff new-package-ids (package-ids-for-certname certname-id))]
+
         (jdbc/update! :certnames
                       {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
                       ["id=?" certname-id])
-        (when (seq to-add)
-          (jdbc/insert-multi! :package_inventory
-                              ["certname_id" "name" "version" "provider"]
-                              (map #(cons certname-id %) to-add)))
-        (when (seq to-remove)
-          (jdbc/delete! :package_inventory
-                        ["id = ANY(?)"
-                         (sutils/array-to-param "bigint" Long to-remove-ids)]))))))
+        (when (seq new-package-ids)
+          (jdbc/insert-multi! :certname_packages
+                              ["certname_id" "package_id"]
+                              (map #(vector certname-id %) new-package-ids)))
+
+        (when (seq old-package-ids)
+          (jdbc/delete! :certname_packages
+                        ["certname_id = ? and package_id = ANY(?)"
+                         certname-id
+                         (sutils/array-to-param "bigint" Long (map long old-package-ids))]))))))
+
 
 
 (defn insert-packages [certname inventory]
   (let [certname-id (:id (find-certname-id-and-hash certname))
-        new-package-hash (shash/package-similarity-hash inventory)]
+        hashed-packages (map shash/package-identity-hash inventory)
+        new-package-hash (shash/package-similarity-hash hashed-packages)
+        just-hashes (map #(nth % 3) hashed-packages)
+        existing-package-hashes (find-package-hashes just-hashes)
+        full-hashes-map (insert-missing-packages existing-package-hashes hashed-packages)]
+
     (jdbc/update! :certnames
                   {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
                   ["id=?" certname-id])
-    (jdbc/insert-multi! :package_inventory
-                        ["certname_id" "name" "version" "provider"]
-                        (map (fn [[package_name version provider]]
-                               [certname-id
-                                package_name
-                                version
-                                provider])
-                             inventory))))
+    (jdbc/insert-multi! :certname_packages
+                        ["certname_id" "package_id"]
+                        (map (fn [new-package-hash]
+                               [certname-id (get full-hashes-map new-package-hash)])))))
 
 (pls/defn-validated add-facts!
   "Given a certname and a map of fact names to values, store records for those
@@ -1494,7 +1542,8 @@
    (:gc performance-metrics)
    (jdbc/with-transacted-connection db
      (delete-unassociated-params!)
-     (delete-unassociated-environments!))
+     (delete-unassociated-environments!)
+     (delete-unassociated-packages!))
    ;; These require serializable because they make the decision to
    ;; delete based on row counts in another table.
    (jdbc/with-transacted-connection' db :serializable

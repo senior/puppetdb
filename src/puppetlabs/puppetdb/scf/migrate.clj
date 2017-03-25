@@ -1248,6 +1248,40 @@
    ["create index certnames_inactive_idx on certnames using btree (certname)"
     "  where deactivated is not null or expired is not null"]))
 
+(defn switch-to-deduplicated-packages []
+  (jdbc/do-commands
+   ["create table packages "
+    "  (id bigint PRIMARY KEY, "
+    "   hash bytea, "
+    "   name text not null, "
+    "   provider text not null, "
+    "   version text not null)"]
+
+   "CREATE SEQUENCE package_id_seq CYCLE"
+   "ALTER TABLE packages ALTER COLUMN id SET DEFAULT nextval('package_id_seq')"
+
+   ["ALTER TABLE ONLY packages "
+    "ADD CONSTRAINT package_hash_key UNIQUE (hash)"]
+
+   ["insert into packages (name, provider, version) "
+    "select distinct name, provider, version "
+    "from package_inventory"]
+
+   ["create table certname_packages"
+    "  (certname_id bigint not null,"
+    "   package_id integer not null,"
+    "   PRIMARY KEY (certname_id, package_id))"]
+
+   ["insert into certname_packages (certname_id, package_id) "
+    "select pi.certname_id, p.id "
+    "from package_inventory pi "
+    "inner join packages p on p.name = pi.name and p.provider = pi.provider and p.version = pi.version"]
+
+   "create index certname_package_id_idx on certname_packages using btree (package_id)"
+
+   "drop table PACKAGE_INVENTORY"))
+
+
 (def migrations
   "The available migrations, as a map from migration version to migration function."
   {28 init-through-2-3-8
@@ -1283,7 +1317,8 @@
    55 index-certnames-unique-latest-report-id
    56 merge-fact-values-into-facts
    57 add-package-inventory
-   58 add-better-package-inventory-indexing})
+   58 add-better-package-inventory-indexing
+   59 switch-to-deduplicated-packages})
 
 (def desired-schema-version (apply max (keys migrations)))
 
@@ -1416,7 +1451,7 @@
     (jdbc/do-commands
      ["create index facts_value_string_trgm on facts"
       "  using gin (value_string gin_trgm_ops)"]))
-  (when-not (sutils/index-exists? "package_name_trgm")
+  #_(when-not (sutils/index-exists? "package_name_trgm")
     (log/info (trs "Creating additional index `package_name_trgm`"))
     (jdbc/do-commands
      ["create index package_name_trgm on package_inventory"

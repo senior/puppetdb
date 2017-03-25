@@ -30,6 +30,10 @@
    (s/one s/Str "version")
    (s/one s/Str "provider")])
 
+(def hashed-package-tuple
+  (conj package-tuple
+        (s/one s/Str "package_hash")))
+
 (def facts-schema
   {:certname String
    :values fact-set-schema
