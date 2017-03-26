@@ -19,7 +19,6 @@
    likely result in dangling resources and catalogs; to clean these
    up, it's important to run `garbage-collect!`."
   (:require [puppetlabs.puppetdb.catalogs :as cat]
-            [puppetlabs.puppetdb.facts :as facts]
             [puppetlabs.puppetdb.reports :as reports]
             [puppetlabs.puppetdb.facts :as facts :refer [facts-schema]]
             [puppetlabs.kitchensink.core :as kitchensink]
@@ -1003,23 +1002,23 @@
 (defn find-package-hashes [package-hashes]
   (jdbc/call-with-query-rows [(format "SELECT id, %s as package_hash FROM packages WHERE hash = ANY(?)"
                                       (sutils/sql-hash-as-str "hash"))
-
-                              (sutils/array-to-param "bytea" PGobject (map sutils/munge-hash-for-storage package-hashes))]
+                              (sutils/array-to-param "bytea" PGobject
+                                                     (map sutils/munge-hash-for-storage package-hashes))]
                              (fn [rows]
                                (reduce (fn [acc {:keys [id package_hash]}]
                                          (assoc acc package_hash id))
                                        {} rows))))
 
-(defn package-ids-for-certname [certname-id]
+(defn package-id-set-for-certname [certname-id]
   (jdbc/call-with-query-rows ["SELECT package_id FROM certname_packages WHERE certname_id=?"
                               certname-id]
                              (fn [rows]
                                (set (map :package_id rows)))))
 
-(defn insert-missing-packages [existing-hashes-map new-hashed-packages]
-  (let [packages-to-create (remove (fn [hashed-package]
-                                     (get existing-hashes-map (nth hashed-package 3)))
-                                   new-hashed-packages)
+(defn insert-missing-packages [existing-hashes-map new-hashed-package-tuples]
+  (let [packages-to-create (remove (fn [hashed-package-tuple]
+                                     (get existing-hashes-map (facts/package-tuple-hash hashed-package-tuple)))
+                                   new-hashed-package-tuples)
         results (jdbc/insert-multi! :packages
                                     (map (fn [[package_name version provider package-hash]]
                                            {:name package_name
@@ -1028,7 +1027,7 @@
                                             :hash (sutils/munge-hash-for-storage package-hash)})
                                          packages-to-create))]
     (merge existing-hashes-map
-           (zipmap (map #(nth % 3) packages-to-create)
+           (zipmap (map facts/package-tuple-hash packages-to-create)
                    (map :id results)))))
 
 (s/defn update-packages
@@ -1036,20 +1035,21 @@
   `certname`. Differences will result in updates to the database"
   [certname
    inventory :- [facts/package-tuple]]
-  (let [{certname-id :id package_hash :package_hash} (find-certname-id-and-hash certname)
-        hashed-packages (map shash/package-identity-hash inventory)
-        new-package-hash (shash/package-similarity-hash hashed-packages)]
+  (let [{certname-id :id package-hash :package_hash} (find-certname-id-and-hash certname)
+        hashed-package-tuples (map shash/package-identity-hash inventory)
+        new-package-hash (shash/package-similarity-hash hashed-package-tuples)]
 
-    (when-not (= new-package-hash package_hash)
-      (let [just-hashes (map #(nth % 3) hashed-packages)
+    (when-not (= new-package-hash package-hash)
+      (let [just-hashes (map facts/package-tuple-hash hashed-package-tuples)
             existing-package-hashes (find-package-hashes just-hashes)
-            full-hashes-map (insert-missing-packages existing-package-hashes hashed-packages)
-            new-package-ids (set (map full-hashes-map just-hashes))
-            [new-package-ids old-package-ids _] (clojure.data/diff new-package-ids (package-ids-for-certname certname-id))]
-
+            full-hashes-map (insert-missing-packages existing-package-hashes hashed-package-tuples)
+            new-package-id-set (set (vals full-hashes-map)) ;(set (map full-hashes-map just-hashes))
+            [new-package-ids old-package-ids _] (clojure.data/diff new-package-id-set
+                                                                   (package-id-set-for-certname certname-id))]
         (jdbc/update! :certnames
                       {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
                       ["id=?" certname-id])
+
         (when (seq new-package-ids)
           (jdbc/insert-multi! :certname_packages
                               ["certname_id" "package_id"]
@@ -1061,23 +1061,24 @@
                          certname-id
                          (sutils/array-to-param "bigint" Long (map long old-package-ids))]))))))
 
-
-
 (defn insert-packages [certname inventory]
   (let [certname-id (:id (find-certname-id-and-hash certname))
-        hashed-packages (map shash/package-identity-hash inventory)
-        new-package-hash (shash/package-similarity-hash hashed-packages)
-        just-hashes (map #(nth % 3) hashed-packages)
+        hashed-package-tuples (map shash/package-identity-hash inventory)
+        new-packageset-hash (shash/package-similarity-hash hashed-package-tuples)
+        just-hashes (map facts/package-tuple-hash hashed-package-tuples)
         existing-package-hashes (find-package-hashes just-hashes)
-        full-hashes-map (insert-missing-packages existing-package-hashes hashed-packages)]
+        ;; a map of package hash to id in the packages table
+        full-hashes-map (insert-missing-packages existing-package-hashes hashed-package-tuples)
+        new-package-ids (vals full-hashes-map)]
 
     (jdbc/update! :certnames
-                  {:package_hash (sutils/munge-hash-for-storage new-package-hash)}
+                  {:package_hash (sutils/munge-hash-for-storage new-packageset-hash)}
                   ["id=?" certname-id])
+
     (jdbc/insert-multi! :certname_packages
                         ["certname_id" "package_id"]
-                        (map (fn [new-package-hash]
-                               [certname-id (get full-hashes-map new-package-hash)])))))
+                        (map (fn [package-id] [certname-id package-id])
+                             (vals full-hashes-map)))))
 
 (pls/defn-validated add-facts!
   "Given a certname and a map of fact names to values, store records for those

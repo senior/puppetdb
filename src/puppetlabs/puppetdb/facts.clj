@@ -34,6 +34,11 @@
   (conj package-tuple
         (s/one s/Str "package_hash")))
 
+(defn package-tuple-name [package-tuple] (nth package-tuple 0))
+(defn package-tuple-version [package-tuple] (nth package-tuple 1))
+(defn package-tuple-provider [package-tuple] (nth package-tuple 2))
+(defn package-tuple-hash [hashed-package-tuple] (nth hashed-package-tuple 3))
+
 (def facts-schema
   {:certname String
    :values fact-set-schema

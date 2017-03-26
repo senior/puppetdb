@@ -1,7 +1,8 @@
 (ns puppetlabs.puppetdb.scf.hash
   (:require [puppetlabs.puppetdb.cheshire :as json]
             [puppetlabs.kitchensink.core :as kitchensink]
-            [puppetlabs.puppetdb.facts :refer [package-tuple hashed-package-tuple]]
+            [puppetlabs.puppetdb.facts :refer [package-tuple hashed-package-tuple
+                                               package-tuple-hash]]
             [schema.core :as s]))
 
 (defn generic-identity-string
@@ -97,7 +98,7 @@
   that structure"
   [packages :- [hashed-package-tuple]]
   (->> packages
-       (map #(nth % 3))
+       (map package-tuple-hash)
        sort
        json/generate-string
        kitchensink/utf8-string->sha1))
