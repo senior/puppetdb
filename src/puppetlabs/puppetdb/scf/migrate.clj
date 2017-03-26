@@ -1277,9 +1277,10 @@
     "from package_inventory pi "
     "inner join packages p on p.name = pi.name and p.provider = pi.provider and p.version = pi.version"]
 
-   "create index certname_package_id_idx on certname_packages using btree (package_id)"
+   "create index certname_package_reverse_idx on certname_packages using btree (package_id, certname_id)"
+   "create index packages_name_idx on packages using btree (name)"
 
-   "drop table PACKAGE_INVENTORY"))
+   "drop table package_inventory"))
 
 
 (def migrations
@@ -1451,10 +1452,11 @@
     (jdbc/do-commands
      ["create index facts_value_string_trgm on facts"
       "  using gin (value_string gin_trgm_ops)"]))
-  #_(when-not (sutils/index-exists? "package_name_trgm")
-    (log/info (trs "Creating additional index `package_name_trgm`"))
+
+  (when-not (sutils/index-exists? "packages_name_trgm")
+    (log/info (trs "Creating additional index `packages_name_trgm`"))
     (jdbc/do-commands
-     ["create index package_name_trgm on package_inventory"
+     ["create index packages_name_trgm on packages"
       "  using gin (name gin_trgm_ops)"])))
 
 (defn indexes!
