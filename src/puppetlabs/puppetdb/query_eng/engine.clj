@@ -1261,6 +1261,9 @@
   (let [{:keys [node state]} (zip/post-order-visit (zip/tree-zipper plan)
                                                    []
                                                    [extract-params])]
+    (if (seq state)
+      (println "params" state)
+      (println "no params"))
     {:plan node
      :params state}))
 
@@ -1299,153 +1302,185 @@
 (def binary-operators
   #{"=" ">" "<" ">=" "<=" "~"})
 
+(defn agg-function? [x]
+  (and (coll? x) (= "function" (first x))))
+
+(defn has-limit? [x]
+  (some #(and (coll? x) (= "limit" (first x))) x))
+
+(defn has-extract? [x]
+  (some #(and (coll? x) (= "extract" (first x))) x))
+
+(defn extract-expr [pred coll]
+  [(first (filter pred coll))
+   (remove pred coll)])
+
 (defn expand-query-node
   "Expands/normalizes the user provided query to a minimal subset of the
   query language"
-  [node]
-  (cm/match [node]
+  [paging-options]
+  (fn [node]
+    (cm/match [node]
 
-            [[(op :guard #{"=" ">" "<" "<=" ">=" "~"}) (column :guard validate-dotted-field) value]]
-            (when (= :inventory (get-in (meta node) [:query-context :entity]))
-              (let [[head & path] (->> column
-                                       utils/parse-matchfields
-                                       su/dotted-query->path
-                                       (map utils/maybe-strip-escaped-quotes))
-                    path (if (= head "trusted")
-                           (cons head path)
-                           path)
-                    value-column (cond
-                                   (string? value) "value_string"
-                                   (ks/boolean? value) "value_boolean"
-                                   (integer? value) "value_integer"
-                                   (float? value) "value_float"
-                                   :else (throw (IllegalArgumentException.
-                                                 (tru "Value {0} of type {1} unsupported." value (type value)))))]
+              [[(op :guard #{"=" ">" "<" "<=" ">=" "~"}) (column :guard validate-dotted-field) value]]
+              (when (= :inventory (get-in (meta node) [:query-context :entity]))
+                (let [[head & path] (->> column
+                                         utils/parse-matchfields
+                                         su/dotted-query->path
+                                         (map utils/maybe-strip-escaped-quotes))
+                      path (if (= head "trusted")
+                             (cons head path)
+                             path)
+                      value-column (cond
+                                     (string? value) "value_string"
+                                     (ks/boolean? value) "value_boolean"
+                                     (integer? value) "value_integer"
+                                     (float? value) "value_float"
+                                     :else (throw (IllegalArgumentException.
+                                                   (tru "Value {0} of type {1} unsupported." value (type value)))))]
 
-                (if (or (and (or (ks/boolean? value) (number? value)) (= op "~"))
-                        (and (or (ks/boolean? value) (string? value)) (contains? #{"<=" "<" ">" ">="} op)))
-                  (throw (tru "Operator ''{0}'' not allowed on value ''{1}''" op value))
-                  ["in" "certname"
-                   ["extract" "certname"
-                    ["select_fact_contents"
-                     ["and"
-                      ["~>" "path" (utils/split-indexing path)]
-                      [op value-column value]]]]])))
+                  (if (or (and (or (ks/boolean? value) (number? value)) (= op "~"))
+                          (and (or (ks/boolean? value) (string? value)) (contains? #{"<=" "<" ">" ">="} op)))
+                    (throw (tru "Operator ''{0}'' not allowed on value ''{1}''" op value))
+                    ["in" "certname"
+                     ["extract" "certname"
+                      ["select_fact_contents"
+                       ["and"
+                        ["~>" "path" (utils/split-indexing path)]
+                        [op value-column value]]]]])))
 
-            [[(op :guard #{"=" "<" ">" "<=" ">="}) "value" (value :guard #(number? %))]]
-            ["or" [op "value_integer" value] [op "value_float" value]]
+              [[(op :guard #{"=" "<" ">" "<=" ">="}) "value" (value :guard #(number? %))]]
+              ["or" [op "value_integer" value] [op "value_float" value]]
 
-            [[(op :guard #{"="}) "value"
-              (value :guard #(or (string? %) (ks/boolean? %)))]]
-            (let [value-column (if (string? value) "value_string" "value_boolean")]
-            [op value-column value])
+              [[(op :guard #{"="}) "value"
+                (value :guard #(or (string? %) (ks/boolean? %)))]]
+              (let [value-column (if (string? value) "value_string" "value_boolean")]
+                [op value-column value])
 
-            [[(op :guard #{"=" "~" ">" "<" "<=" ">="}) "value" value]]
-            (when (= :facts (get-in (meta node) [:query-context :entity]))
-              ["and" ["=" "depth" 0] [op "value" value]])
+              [[(op :guard #{"=" "~" ">" "<" "<=" ">="}) "value" value]]
+              (when (= :facts (get-in (meta node) [:query-context :entity]))
+                ["and" ["=" "depth" 0] [op "value" value]])
 
-            [["=" ["node" "active"] value]]
-            (if value
-              ["not" ["in" "certname"
-                      ["extract" "certname"
-                       ["select_inactive_nodes"]]]]
-              ["in" "certname"
-               ["extract" "certname"
-                ["select_inactive_nodes"]]])
-
-            [[(op :guard #{"=" "~"}) ["parameter" param-name] param-value]]
-            ["in" "resource"
-             ["extract" "res_param_resource"
-              ["select_params"
-               ["and"
-                [op "res_param_name" param-name]
-                [op "res_param_value" (su/db-serialize param-value)]]]]]
-
-            [[(op :guard #{"=" "~"}) ["fact" fact-name]
-              (fact-value :guard #(or (string? %) (instance? Boolean %)))]]
-            (let [value-column (if (string? fact-value) "value_string" "value_boolean")]
-              ["in" "certname"
-               ["extract" "certname"
-                ["select_facts"
-                 ["and"
-                  ["=" "name" fact-name]
-                  [op value-column fact-value]]]]])
-
-            [["in" ["fact" fact-name] ["array" fact-values]]]
-            (let [clause (cond
-                           (every? string? fact-values)
-                           ["in" "value_string" ["array" fact-values]]
-
-                           (every? ks/boolean? fact-values)
-                           ["in" "value_boolean" ["array" fact-values]]
-
-                           (every? number? fact-values)
-                           ["or"
-                            ["in" "value_float" ["array" fact-values]]
-                            ["in" "value_integer" ["array" fact-values]]]
-
-                           :else (throw (IllegalArgumentException.
-                                         (tru "All values in 'array' must be the same type."))))]
-              ["in" "certname"
-               ["extract" "certname"
-                ["select_facts"
-                 ["and"
-                  ["=" "name" fact-name]
-                  clause]]]])
-
-            [[(op :guard #{"=" ">" "<" "<=" ">="}) ["fact" fact-name] fact-value]]
-            (if-not (number? fact-value)
-              (throw (IllegalArgumentException. (tru "Operator ''{0}'' not allowed on value ''{1}''" op fact-value)))
-              ["in" "certname"
-               ["extract" "certname"
-                ["select_facts"
-                 ["and"
-                  ["=" "name" fact-name]
-                  ["or"
-                   [op "value_float" fact-value]
-                   [op "value_integer" fact-value]]]]]])
-
-            [["subquery" sub-entity expr]]
-            (let [relationships (get-in (meta node) [:query-context :relationships sub-entity])]
-              (if relationships
-                (let [{:keys [columns local-columns foreign-columns]} relationships]
-                  (when-not (or columns (and local-columns foreign-columns))
-                    (throw (IllegalArgumentException. (tru "Column definition for entity relationship ''{0}'' not valid" sub-entity))))
-                  (do
-                    ["in" (or local-columns columns)
-                     ["extract" (or foreign-columns columns)
-                      [(str "select_" sub-entity) expr]]]))
-                (throw (IllegalArgumentException. (tru "No implicit relationship for entity ''{0}''" sub-entity)))))
-
-            [["=" "latest_report?" value]]
-            (let [entity (get-in (meta node) [:query-context :entity])
-                  expanded-latest (case entity
-                                    :reports
-                                    ["in" "hash"
-                                     ["extract" "latest_report_hash"
-                                      ["select_latest_report"]]]
-
-                                    :events
-                                    ["in" "report"
-                                     ["extract" "latest_report_hash"
-                                      ["select_latest_report"]]]
-
-                                    (throw (IllegalArgumentException.
-                                            (tru "Field 'latest_report?' not supported on endpoint ''{0}''" entity))))]
+              [["=" ["node" "active"] value]]
               (if value
-                expanded-latest
-                ["not" expanded-latest]))
+                ["not" ["in" "certname"
+                        ["extract" "certname"
+                         ["select_inactive_nodes"]]]]
+                ["in" "certname"
+                 ["extract" "certname"
+                  ["select_inactive_nodes"]]])
 
-            [[op (field :guard #{"new_value" "old_value"}) value]]
-            [op field (su/db-serialize value)]
+              [[(op :guard #{"=" "~"}) ["parameter" param-name] param-value]]
+              ["in" "resource"
+               ["extract" "res_param_resource"
+                ["select_params"
+                 ["and"
+                  [op "res_param_name" param-name]
+                  [op "res_param_value" (su/db-serialize param-value)]]]]]
 
-            [["=" field nil]]
-            ["null?" (utils/dashes->underscores field) true]
+              [[(op :guard #{"=" "~"}) ["fact" fact-name]
+                (fact-value :guard #(or (string? %) (instance? Boolean %)))]]
+              (let [value-column (if (string? fact-value) "value_string" "value_boolean")]
+                ["in" "certname"
+                 ["extract" "certname"
+                  ["select_facts"
+                   ["and"
+                    ["=" "name" fact-name]
+                    [op value-column fact-value]]]]])
 
-            [[op "tag" array-value]]
-            [op "tags" (str/lower-case array-value)]
+              [["in" ["fact" fact-name] ["array" fact-values]]]
+              (let [clause (cond
+                             (every? string? fact-values)
+                             ["in" "value_string" ["array" fact-values]]
 
-            :else nil))
+                             (every? ks/boolean? fact-values)
+                             ["in" "value_boolean" ["array" fact-values]]
+
+                             (every? number? fact-values)
+                             ["or"
+                              ["in" "value_float" ["array" fact-values]]
+                              ["in" "value_integer" ["array" fact-values]]]
+
+                             :else (throw (IllegalArgumentException.
+                                           (tru "All values in 'array' must be the same type."))))]
+                ["in" "certname"
+                 ["extract" "certname"
+                  ["select_facts"
+                   ["and"
+                    ["=" "name" fact-name]
+                    clause]]]])
+
+              [[(op :guard #{"=" ">" "<" "<=" ">="}) ["fact" fact-name] fact-value]]
+              (if-not (number? fact-value)
+                (throw (IllegalArgumentException. (tru "Operator ''{0}'' not allowed on value ''{1}''" op fact-value)))
+                ["in" "certname"
+                 ["extract" "certname"
+                  ["select_facts"
+                   ["and"
+                    ["=" "name" fact-name]
+                    ["or"
+                     [op "value_float" fact-value]
+                     [op "value_integer" fact-value]]]]]])
+
+              [["subquery" sub-entity expr]]
+              (let [relationships (get-in (meta node) [:query-context :relationships sub-entity])]
+                (if relationships
+                  (let [{:keys [columns local-columns foreign-columns]} relationships]
+                    (when-not (or columns (and local-columns foreign-columns))
+                      (throw (IllegalArgumentException. (tru "Column definition for entity relationship ''{0}'' not valid" sub-entity))))
+                    (do
+                      ["in" (or local-columns columns)
+                       ["extract" (or foreign-columns columns)
+                        [(str "select_" sub-entity) expr]]]))
+                  (throw (IllegalArgumentException. (tru "No implicit relationship for entity ''{0}''" sub-entity)))))
+
+              [["=" "latest_report?" value]]
+              (let [entity (get-in (meta node) [:query-context :entity])
+                    expanded-latest (case entity
+                                      :reports
+                                      ["in" "hash"
+                                       ["extract" "latest_report_hash"
+                                        ["select_latest_report"]]]
+
+                                      :events
+                                      ["in" "report"
+                                       ["extract" "latest_report_hash"
+                                        ["select_latest_report"]]]
+
+                                      (throw (IllegalArgumentException.
+                                              (tru "Field 'latest_report?' not supported on endpoint ''{0}''" entity))))]
+                (if value
+                  expanded-latest
+                  ["not" expanded-latest]))
+
+              [[op (field :guard #{"new_value" "old_value"}) value]]
+              [op field (su/db-serialize value)]
+
+              [["=" field nil]]
+              ["null?" (utils/dashes->underscores field) true]
+
+              [[op "tag" array-value]]
+              [op "tags" (str/lower-case array-value)]
+
+              [["extract" columns ["group_by" & clauses]] :as v]
+              (if (and (= "packages"
+                          (-> v meta :query-context :alias))
+                       (every? (some-fn #{"package_name" "version" "provider"}
+                                        agg-function?)
+                               clauses)
+                       (or (:limit paging-options)
+                           (:offset paging-options)))
+                ["extract" columns
+                 ["in" (vec clauses)
+                  (apply vector "from" "just_packages"
+                         ["extract" (vec clauses)]
+                         (remove nil? [(when (:limit paging-options)
+                                         ["limit" (:limit paging-options)])
+                                       (when (:offset paging-options)
+                                         ["offset" (:offset paging-options)])]))]
+                 (apply vector "group_by" clauses)]
+                v)
+              :else nil)))
 
 (def binary-operator-checker
   "A function that will return nil if the query snippet successfully validates, otherwise
@@ -1524,9 +1559,9 @@
   normalized query that only contains our lower-level operators.
   Things like [node active] will be expanded into a full
   subquery (via the `in` and `extract` operators)"
-  [user-query]
+  [paging-options user-query]
   (:node (zip/post-order-transform (zip/tree-zipper user-query)
-                                   [expand-query-node validate-binary-operators])))
+                                   [(expand-query-node paging-options) validate-binary-operators])))
 
 (declare user-node->plan-node)
 
@@ -2033,6 +2068,8 @@
              :state state}
             :else {:node node :state state}))
 
+(defonce a (atom []))
+
 (defn push-down-context
   "Pushes the top level query context down to each query node, throws IllegalArgumentException
   if any unrecognized fields appear in the query"
@@ -2046,6 +2083,9 @@
     (when (seq errors)
       (throw (IllegalArgumentException. (str/join \newline errors))))
 
+    (clojure.pprint/pprint (meta annotated-query))
+    (clojure.pprint/pprint annotated-query)
+    (swap! a conj annotated-query)
     annotated-query))
 
 ;; Top-level parsing
@@ -2178,18 +2218,21 @@
    user provided query to SQL and extract the parameters, to be used
    in a prepared statement"
   [query-rec user-query & [{:keys [include_total] :as paging-options}]]
+  (clojure.pprint/pprint user-query)
   ;; Call the query-rec so we can evaluate query-rec functions
   ;; which depend on the db connection type
   (let [allowed-fields (map keyword (queryable-fields query-rec))
+        _ (println "paging " paging-options)
         paging-options (some->> paging-options
                                 (paging/validate-order-by! allowed-fields)
                                 (paging/dealias-order-by query-rec))
         {:keys [plan params]} (->> user-query
                                    (push-down-context query-rec)
-                                   expand-user-query
+                                   (expand-user-query paging-options)
                                    (convert-to-plan query-rec paging-options)
                                    extract-all-params)
         sql (-> plan fix-plan-in-expr-multi-comparisons plan->sql)
+        _ (println sql)
         paged-sql (jdbc/paged-sql sql paging-options)]
     (cond-> {:results-query (apply vector paged-sql params)}
       include_total (assoc :count-query (apply vector (jdbc/count-sql sql) params)))))
