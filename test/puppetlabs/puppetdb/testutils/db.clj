@@ -326,7 +326,8 @@ WHERE NOT nspname LIKE 'pg%';")
   (jdbc/with-db-connection db
     (let [indexes (sort-by (juxt :table :index_keys)
                            (map db->index-map (jdbc/query-to-vec indexes-sql)))]
-      (kitchensink/mapvals first
+      (kitchensink/mapvals (fn [maybe-seq]
+                             (and (seq maybe-seq) (set maybe-seq)))
                            (group-by (juxt :table :index_keys) indexes)))))
 
 (def table-column-sql
